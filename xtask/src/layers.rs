@@ -26,6 +26,7 @@ impl Class {
 /// The layering table (AGENTS.md "Layering", plan/architecture.md). Names are package names
 /// without the `gridcraft-` prefix.
 pub const TABLE: &[(&str, Class)] = &[
+    ("brand", Class::Layer(0)),
     ("core", Class::Layer(0)),
     ("numfmt", Class::Layer(0)),
     ("pdf", Class::Layer(0)),
@@ -47,7 +48,8 @@ pub const TABLE: &[(&str, Class)] = &[
 
 /// Explicit orderings *within* a layer (earlier may be used by later). Each chain is separate:
 /// `calc` and `xlsx` both build on `model` but not on each other.
-pub const INTRA_LAYER_ORDER: &[&[&str]] = &[&["core", "numfmt"], &["formula", "functions"], &["model", "calc"], &["model", "xlsx"]];
+pub const INTRA_LAYER_ORDER: &[&[&str]] =
+    &[&["core", "numfmt"], &["brand", "pdf"], &["formula", "functions"], &["model", "calc"], &["model", "xlsx"]];
 
 fn intra_layer_allowed(from: &str, to: &str) -> bool {
     let (from, to) = (short_name(from), short_name(to));
@@ -59,7 +61,7 @@ fn intra_layer_allowed(from: &str, to: &str) -> bool {
 
 /// Format crates may only depend on these workspace crates (on top of the layer rule), so a
 /// file format never pulls in calculation or engine code.
-pub const FORMAT_ALLOWED: &[(&str, &[&str])] = &[("xlsx", &["core", "formula", "model"])];
+pub const FORMAT_ALLOWED: &[(&str, &[&str])] = &[("xlsx", &["brand", "core", "formula", "model"])];
 
 /// External crates that constitute a UI toolkit / windowing dependency.
 /// Entries ending in `*` are prefixes.

@@ -171,12 +171,18 @@ fn tree() -> Vec<(&'static str, Vec<Entry>)> {
         ("Window", vec![("New Window", "view.newWindow", None), ("Next Sheet", "sheet.next", None), ("Previous Sheet", "sheet.previous", None)]),
         (
             "Help",
-            vec![
-                ("Agent Control (MCP)…", "dialog:agents", None),
-                ("Contributors…", "dialog:about:Contributors", None),
-                ("GridCraft on getartcraft.com", "url:https://getartcraft.com/apps/gridcraft", None),
-                ("Join the ArtCraft Discord…", "url:https://discord.gg/artcraft", None),
-            ],
+            vec![("Agent Control (MCP)…", "dialog:agents", None), ("Contributors…", "dialog:about:Contributors", None)]
+                .into_iter()
+                .chain(if gridcraft_engine::brand::REBRANDED {
+                    // The build's own pages (`brand:` ids); the ArtCraft community is only the release's.
+                    vec![("Website", "brand:website", None), ("Get help and support…", "brand:support", None)]
+                } else {
+                    vec![
+                        ("GridCraft on getartcraft.com", "url:https://getartcraft.com/apps/gridcraft", None),
+                        ("Join the ArtCraft Discord…", "url:https://discord.gg/artcraft", None),
+                    ]
+                })
+                .collect(),
         ),
     ]
 }
@@ -201,8 +207,8 @@ fn select_theme(app: &mut SheetApp, id: &str) -> bool {
 impl NativeMenu {
     pub fn install(ctx: &egui::Context) -> NativeMenu {
         let menu = Menu::new();
-        let app_menu = Submenu::new("GridCraft", true);
-        let about = MenuItem::with_id("dialog:about", "About GridCraft", true, None);
+        let app_menu = Submenu::new(gridcraft_engine::brand::NAME, true);
+        let about = MenuItem::with_id("dialog:about", format!("About {}", gridcraft_engine::brand::NAME), true, None);
         let _ = app_menu.append_items(&[
             &about,
             &PredefinedMenuItem::separator(),
@@ -290,7 +296,12 @@ impl NativeMenu {
             if select_theme(app, &id) {
                 continue;
             }
-            if let Some(url) = id.strip_prefix("url:") {
+            let brand_url = match id.as_str() {
+                "brand:website" => Some(gridcraft_engine::brand::APP_PAGE),
+                "brand:support" => Some(gridcraft_engine::brand::SUPPORT),
+                _ => None,
+            };
+            if let Some(url) = brand_url.or_else(|| id.strip_prefix("url:")) {
                 if let Some(open) = &app.services.open_url {
                     open(url);
                 }

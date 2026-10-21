@@ -154,8 +154,8 @@ impl Server {
                 Ok(json!({
                     "protocolVersion": version,
                     "capabilities": {"tools": {"listChanged": false}, "resources": {"listChanged": false, "subscribe": false}, "prompts": {"listChanged": false}},
-                    "serverInfo": {"name": "gridcraft", "title": "GridCraft", "version": env!("CARGO_PKG_VERSION")},
-                    "instructions": format!("{INSTRUCTIONS} Backend: {}.", self.backend.describe()),
+                    "serverInfo": {"name": "gridcraft", "title": gridcraft_engine::brand::NAME, "version": env!("CARGO_PKG_VERSION")},
+                    "instructions": format!("{} Backend: {}.", gridcraft_engine::brand::rebrand(INSTRUCTIONS), self.backend.describe()),
                 }))
             }
             "ping" => Ok(json!({})),

@@ -9,5 +9,6 @@ description = "GridCraft worksheet function library: math, statistics, text, dat
 workspace = true
 
 [dependencies]
+gridcraft-brand = { workspace = true }
 gridcraft-core = { workspace = true }
 regex = { workspace = true }
