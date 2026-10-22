@@ -1,52 +1,44 @@
-# GridCraft app icon (PLACEHOLDER)
+# Iber Calculo app icon
 
-**This icon is temporary.** Every Crafting App's icon is an engraved creature portrait that the
-product owner makes (craftrules `standards/icon-design.md`); GridCraft's hasn't been made yet.
-Until it is, this placeholder stands in: a simple ledger page with a header row, a row-number
-column, a selected cell with its fill handle and a double rule under a total, on a full-bleed
-GridCraft-green tile. It is original geometry written by hand for this repository, deliberately
-not modelled on any vendor's spreadsheet logo (no letters, no "X", no overlapping panels).
+<img src="gridcraft.svg" alt="Iber Calculo app icon: an ivory azulejo tile with green corners and a small spreadsheet grid with a header row" width="128">
 
-When the owner's art arrives, replace `gridcraft.svg`, run `packaging/icons.sh`, update this
-README (provenance, creature) and the rows in `ATTRIBUTION.md`, and drop the word placeholder.
+**Design:** the IberOffice "azulejo" tile. An ivory rounded square with a quarter circle in each
+corner, like a glazed wall tile, and the app's glyph in the middle: for Iber Calculo, a small spreadsheet grid with a header row. The four
+IberOffice apps (Iber PDF, Iber Texto, Iber Calculo, Iber Presenta) share the tile and differ by
+colour and glyph.
 
 ## Palette
 
-Exactly three colours:
-
 | Colour | Hex | Used for |
 |---|---|---|
-| Ink | `#0b0b0c` | Line work and contour |
-| Paper | `#efe9dc` | The page |
-| GridCraft green (app colour, **proposed**) | `#1f9d55` | The full-bleed field and the header cells |
-
-The app colour is a proposal pending the owner's approval: GridCraft green `#1f9d55`, with ink
-(darker) variant `#147a40` for text and accents on light backgrounds. It differs from
-DesignCraft's `#7bb51c`.
+| Ivory | `#F3EDE1` | The tile |
+| Edge | `#D8CBB2` | The tile outline |
+| Iber Calculo (app colour) | `#4F7A28` | The corners and the glyph |
 
 ## Geometry
 
-A 512 × 512 viewBox, clipped to a rounded square with `rx=112`. Windows and Linux use the full
-tile. The macOS icons (`.icns`, `gridcraft-macos-512.png`) sit on Apple's grid: an 824/1024
-body with a transparent margin.
+A 512 × 512 viewBox, a rounded square with `rx=112`, full bleed. Windows and Linux use the full
+tile. The macOS icons (`.icns`, `-macos-512.png`) sit on Apple's grid: an 824/1024 body with a
+transparent margin. At 32 px and below a simplified tile is drawn (smaller corners, bolder glyph)
+so the icon stays legible at 16 px.
 
 ## Files
 
 | File | Use |
 |---|---|
-| `gridcraft.svg` | Canonical artwork; also `hicolor/scalable` |
 | `gridcraft-1024.png` | 1024 px render of the full tile |
-| `gridcraft-macos-512.png` | Runtime Dock icon on macOS (for `apps/gridcraft` to embed) |
-| `gridcraft.icns` | macOS bundle icon (`CFBundleIconFile`) |
+| `gridcraft-macos-512.png` | Runtime Dock icon on macOS (Apple's grid) |
+| `gridcraft.icns` | macOS bundle icon (Apple's grid) |
 | `gridcraft.ico` | Windows exe icon, 16–256 px (embedded by `apps/gridcraft/build.rs`) |
+| `gridcraft.svg` | Master vector, the full-bleed tile; also `hicolor/scalable` |
 | `hicolor/<size>/apps/ai.storyteller.gridcraft.png` | Linux icon theme, 16–512 px; the 256 px one is also the runtime window icon on Windows and Linux |
-| `hicolor/scalable/apps/ai.storyteller.gridcraft.svg` | Linux scalable icon |
 | `LICENSE.txt` | MIT OR Apache-2.0 |
 
-The app ID is `ai.storyteller.gridcraft`. It's used for the hicolor icon names, the Wayland app
-ID and `packaging/linux/ai.storyteller.gridcraft.desktop`.
+The app ID is `ai.storyteller.gridcraft`. It's used for the hicolor icon names, the Wayland app ID and
+`packaging/linux/ai.storyteller.gridcraft.desktop`.
 
-## Regenerate
+## Provenance and regenerating
 
-Edit `gridcraft.svg`, then run `packaging/icons.sh`. It needs `resvg`, and `iconutil` for the
-`.icns` (macOS only). It packs the `.ico` with `cargo xtask ico`.
+Original artwork for IberOffice, drawn in code by
+[`packaging/iberoffice-icons.py`](../../packaging/iberoffice-icons.py); no third-party material.
+Run `packaging/icons.sh` (python3 with cairosvg and Pillow) to rewrite every file here.
