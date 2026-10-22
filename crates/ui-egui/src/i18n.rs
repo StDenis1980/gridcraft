@@ -130,8 +130,20 @@ impl Language {
             Self::Fr => fr::translate(text),
             Self::Sr => sr::translate(text),
         };
-        translated.unwrap_or_else(|| text.rsplit_once('|').map_or(text, |(_, label)| label))
+        branded(translated.unwrap_or_else(|| text.rsplit_once('|').map_or(text, |(_, label)| label)))
     }
+}
+
+/// `s` with the product name of this build ([`gridcraft_engine::brand`]): unchanged in the release,
+/// a cached copy with the new name in a rebranded build (the interface's strings are a fixed set).
+fn branded(s: &str) -> &str {
+    use gridcraft_engine::brand;
+    if !brand::REBRANDED || !s.contains(brand::UPSTREAM_NAME) {
+        return s;
+    }
+    static SEEN: std::sync::OnceLock<std::sync::Mutex<std::collections::HashMap<String, &'static str>>> = std::sync::OnceLock::new();
+    let mut seen = SEEN.get_or_init(Default::default).lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    seen.entry(s.to_owned()).or_insert_with(|| Box::leak(brand::rebrand(s).into_owned().into_boxed_str()))
 }
 
 /// Deserializes a saved language leniently: an unknown or malformed value (a language removed in a
@@ -599,7 +611,7 @@ mod tests {
         for (i, (en, ja)) in JAPANESE.iter().enumerate() {
             assert!(!ja.is_empty());
             assert!(JAPANESE.iter().take(i).all(|(other, _)| en != other));
-            assert_eq!(Language::En.tr(en), en.rsplit_once('|').map_or(*en, |(_, label)| label));
+            assert_eq!(Language::En.tr(en), gridcraft_engine::brand::rebrand(en.rsplit_once('|').map_or(*en, |(_, label)| label)));
         }
         for (english, _) in JAPANESE {
             assert!(zh::translate(english).is_some_and(|text| !text.is_empty()), "missing Simplified Chinese: {english}");

@@ -1517,6 +1517,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "gridcraft-brand"
+version = "0.9.0"
+
+[[package]]
 name = "gridcraft-calc"
 version = "0.9.0"
 dependencies = [
@@ -1565,6 +1569,7 @@ dependencies = [
 name = "gridcraft-engine"
 version = "0.9.0"
 dependencies = [
+ "gridcraft-brand",
  "gridcraft-calc",
  "gridcraft-chart",
  "gridcraft-core",
@@ -1595,6 +1600,7 @@ dependencies = [
 name = "gridcraft-functions"
 version = "0.9.0"
 dependencies = [
+ "gridcraft-brand",
  "gridcraft-core",
  "regex",
 ]
@@ -1630,6 +1636,9 @@ dependencies = [
 [[package]]
 name = "gridcraft-pdf"
 version = "0.9.0"
+dependencies = [
+ "gridcraft-brand",
+]
 
 [[package]]
 name = "gridcraft-ui-egui"
@@ -1675,6 +1684,7 @@ name = "gridcraft-xlsx"
 version = "0.9.0"
 dependencies = [
  "aes",
+ "gridcraft-brand",
  "gridcraft-core",
  "gridcraft-formula",
  "gridcraft-model",

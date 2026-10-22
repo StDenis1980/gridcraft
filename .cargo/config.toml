@@ -1,2 +1,12 @@
 [alias]
 xtask = "run --package xtask --"
+
+# IberOffice: this fork's builds are "Iber Calculo" (see crates/brand). The ArtCraft
+# marks may not be used by redistributed builds (docs/brand/LICENSE-brand.txt).
+[env]
+GRIDCRAFT_BRAND_NAME = "Iber Calculo"
+GRIDCRAFT_BRAND_SLUG = "iber-calculo"
+GRIDCRAFT_BRAND_APP_ID = "io.github.stdenis1980.ibercalculo"
+GRIDCRAFT_BRAND_PUBLISHER = "IberOffice"
+GRIDCRAFT_BRAND_WEBSITE = "https://github.com/StDenis1980/gridcraft"
+GRIDCRAFT_BRAND_GITHUB = "https://github.com/StDenis1980/gridcraft"
