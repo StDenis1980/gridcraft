@@ -1202,7 +1202,7 @@ impl SheetApp {
         }
         // Window title.
         if let Some(d) = self.session.active() {
-            let title = format!("{}{}", d.display_title(), if d.is_dirty() { " — Edited" } else { "" });
+            let title = window_title(&d.display_title(), d.is_dirty());
             if self.grid.last_title.as_deref() != Some(title.as_str()) {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
                 self.grid.last_title = Some(title);
@@ -1279,6 +1279,23 @@ impl SheetApp {
     }
 }
 
+/// The OS window title for the active workbook: "Book1 - Iber Calculo", "Budget.xlsx — Edited -
+/// Iber Calculo", with the product name ([`gridcraft_engine::brand::NAME`]) last the way desktop
+/// office apps on Windows and Linux do (taskbar, Alt+Tab). macOS names only the document, as its
+/// apps do; the app's name is already in the menu bar there.
+pub fn window_title(doc_title: &str, dirty: bool) -> String {
+    let app = if cfg!(target_os = "macos") { None } else { Some(gridcraft_engine::brand::NAME) };
+    format_window_title(doc_title, dirty, app)
+}
+
+fn format_window_title(doc_title: &str, dirty: bool, app: Option<&str>) -> String {
+    let edited = if dirty { " — Edited" } else { "" };
+    match app {
+        Some(app) => format!("{doc_title}{edited} - {app}"),
+        None => format!("{doc_title}{edited}"),
+    }
+}
+
 /// Strips the engine's error prefixes for message boxes.
 pub fn clean_error(e: &str) -> String {
     if let Some(rest) = e.split_once("`: ").map(|(_, r)| r) {
@@ -1302,4 +1319,32 @@ pub fn now_ms() -> f64 {
 
 pub fn cell(r: u32, c: u32) -> CellRef {
     CellRef::new(r, c)
+}
+
+#[cfg(test)]
+mod window_title_tests {
+    use super::{format_window_title, window_title};
+
+    #[test]
+    fn the_product_name_follows_the_document() {
+        assert_eq!(format_window_title("Book1", false, Some("Iber Calculo")), "Book1 - Iber Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", false, Some("Iber Calculo")), "Budget.xlsx - Iber Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", true, Some("Iber Calculo")), "Budget.xlsx — Edited - Iber Calculo");
+    }
+
+    #[test]
+    fn without_a_product_name_only_the_document_is_named() {
+        assert_eq!(format_window_title("Book1", false, None), "Book1");
+        assert_eq!(format_window_title("Book1", true, None), "Book1 — Edited");
+    }
+
+    #[test]
+    fn the_window_title_uses_this_builds_name() {
+        let title = window_title("Book1", false);
+        if cfg!(target_os = "macos") {
+            assert_eq!(title, "Book1");
+        } else {
+            assert_eq!(title, format!("Book1 - {}", gridcraft_engine::brand::NAME));
+        }
+    }
 }
