@@ -1279,8 +1279,8 @@ impl SheetApp {
     }
 }
 
-/// The OS window title for the active workbook: "Book1 - Iber Calculo", "Budget.xlsx — Edited -
-/// Iber Calculo", with the product name ([`gridcraft_engine::brand::NAME`]) last the way desktop
+/// The OS window title for the active workbook: "Book1 - Tinta Calculo", "Budget.xlsx — Edited -
+/// Tinta Calculo", with the product name ([`gridcraft_engine::brand::NAME`]) last the way desktop
 /// office apps on Windows and Linux do (taskbar, Alt+Tab). macOS names only the document, as its
 /// apps do; the app's name is already in the menu bar there.
 pub fn window_title(doc_title: &str, dirty: bool) -> String {
@@ -1327,9 +1327,9 @@ mod window_title_tests {
 
     #[test]
     fn the_product_name_follows_the_document() {
-        assert_eq!(format_window_title("Book1", false, Some("Iber Calculo")), "Book1 - Iber Calculo");
-        assert_eq!(format_window_title("Budget.xlsx", false, Some("Iber Calculo")), "Budget.xlsx - Iber Calculo");
-        assert_eq!(format_window_title("Budget.xlsx", true, Some("Iber Calculo")), "Budget.xlsx — Edited - Iber Calculo");
+        assert_eq!(format_window_title("Book1", false, Some("Tinta Calculo")), "Book1 - Tinta Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", false, Some("Tinta Calculo")), "Budget.xlsx - Tinta Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", true, Some("Tinta Calculo")), "Budget.xlsx — Edited - Tinta Calculo");
     }
 
     #[test]

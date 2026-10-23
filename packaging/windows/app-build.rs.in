@@ -13,7 +13,7 @@
 //
 // apps/gridcraft/build.rs now exists and is what builds use; this copy mirrors it. The product
 // name and publisher come from the brand values (GRIDCRAFT_BRAND_NAME / _PUBLISHER, set for this
-// fork in .cargo/config.toml), so an IberOffice build's exe says "Iber Calculo" / "IberOffice".
+// fork in .cargo/config.toml), so a Tinta Office build's exe says "Tinta Calculo" / "Tinta Office".
 
 //! Windows only: embed the app icon and version info (VERSIONINFO) into `gridcraft.exe`, so it
 //! shows in Explorer, the taskbar, the Start menu and Alt-Tab.

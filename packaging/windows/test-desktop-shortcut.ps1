@@ -3,7 +3,7 @@
   Exercise the actual MSI's desktop-shortcut choices on a disposable GitHub Windows runner.
 .DESCRIPTION
   Compiles original no-op GUI/CLI fixtures instead of Rust, uses the packaged app icon,
-  and builds adjacent MSI versions. Installs the real Iber Calculo package (including its
+  and builds adjacent MSI versions. Installs the real Tinta Calculo package (including its
   registrations), checks default/explicit choices, repair and major upgrades, then uninstalls
   in finally. Run by .github/workflows/windows-msi.yml, never on a developer's Windows installation.
 #>
@@ -14,20 +14,20 @@ Set-StrictMode -Version Latest
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted') {
   throw 'This install test is restricted to disposable GitHub-hosted Windows runners.'
 }
-if (-not $WorkDir) { $WorkDir = Join-Path $env:RUNNER_TEMP 'iber-calculo-shortcut-smoke' }
+if (-not $WorkDir) { $WorkDir = Join-Path $env:RUNNER_TEMP 'tinta-calculo-shortcut-smoke' }
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 # Product identity as gridcraft.wxs installs it.
-$InstallDir = Join-Path $env:ProgramFiles 'IberOffice\Iber Calculo'
-$DesktopLink = Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'Iber Calculo.lnk'
-$StartLink = Join-Path ([Environment]::GetFolderPath('CommonPrograms')) 'Iber Calculo.lnk'
-$ProductKey = 'Software\IberOffice\Iber Calculo'
+$InstallDir = Join-Path $env:ProgramFiles 'Tinta Office\Tinta Calculo'
+$DesktopLink = Join-Path ([Environment]::GetFolderPath('CommonDesktopDirectory')) 'Tinta Calculo.lnk'
+$StartLink = Join-Path ([Environment]::GetFolderPath('CommonPrograms')) 'Tinta Calculo.lnk'
+$ProductKey = 'Software\Tinta Office\Tinta Calculo'
 $ChoiceKey = "HKLM:\$ProductKey\Installer"
 $ComponentKey = "HKLM:\$ProductKey\Installer"
 $UninstallRoot = 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
 $Icon = Join-Path $Root 'assets\app-icon\gridcraft.ico'
 if ((Test-Path $InstallDir) -or (Test-Path $DesktopLink) -or (Test-Path $StartLink) -or
     (Test-Path "HKLM:\$ProductKey") -or (Test-Path "HKCU:\$ProductKey")) {
-  throw 'Refusing to run against an existing Iber Calculo installation or its settings.'
+  throw 'Refusing to run against an existing Tinta Calculo installation or its settings.'
 }
 New-Item -ItemType Directory -Force -Path $WorkDir | Out-Null
 $Bin = Join-Path $WorkDir 'bin'
@@ -110,7 +110,7 @@ function Assert-Desktop([bool] $Enabled) {
     Assert-That ($shortcut.IconLocation -match '^(.*),\s*0$') 'Desktop shortcut must use icon index zero'
     $iconPath = [Environment]::ExpandEnvironmentVariables($Matches[1].Trim('"'))
     Assert-That (Test-Path $iconPath) 'Desktop shortcut icon is missing'
-    Assert-That ((Get-FileHash $iconPath).Hash -eq (Get-FileHash $Icon).Hash) 'Desktop shortcut does not use the packaged Iber Calculo icon'
+    Assert-That ((Get-FileHash $iconPath).Hash -eq (Get-FileHash $Icon).Hash) 'Desktop shortcut does not use the packaged Tinta Calculo icon'
   } finally {
     foreach ($item in $shortcut, $shell) {
       if ($item) { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($item) | Out-Null }
@@ -131,7 +131,7 @@ function Assert-Removed($Package) {
 function Uninstall-AsSystem($Package) {
   # Exercise removal under a different account without creating a user or credentials.
   # This function is covered by the disposable hosted-runner guard at the top of the script.
-  $taskName = 'IberCalculo-shortcut-' + [Guid]::NewGuid().ToString('N')
+  $taskName = 'TintaCalculo-shortcut-' + [Guid]::NewGuid().ToString('N')
   $log = Join-Path $WorkDir 'uninstall-as-system.log'
   $action = New-ScheduledTaskAction -Execute (Join-Path $env:WINDIR 'System32\msiexec.exe') `
     -Argument "/x $($Package.Code) /qn /norestart /l*v `"$log`""
@@ -172,7 +172,7 @@ foreach ($fixture in @(@('gridcraft.exe', 'winexe'), @('gridcraft-cli.exe', 'exe
 }
 $packages = @()
 foreach ($version in '90.0.0', '90.0.1', '90.0.2') {
-  $msi = Join-Path $WorkDir "iber-calculo-$version.msi"
+  $msi = Join-Path $WorkDir "tinta-calculo-$version.msi"
   & wix build (Join-Path $PSScriptRoot 'gridcraft.wxs') -arch x64 `
     -d "Version=$version" -d "BinDir=$Bin" -d "IconPath=$Icon" -o $msi | Write-Host
   if ($LASTEXITCODE -ne 0) { throw "WiX failed to build $version" }

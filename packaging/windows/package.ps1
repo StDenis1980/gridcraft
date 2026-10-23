@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-  Build, sign and package Iber Calculo (IberOffice's build of GridCraft) for Windows.
+  Build, sign and package Tinta Calculo (Tinta Office's build of GridCraft) for Windows.
 
 .DESCRIPTION
   Produces, in $env:DIST (default: dist/release):
-    iber-calculo-<version>-windows-<arch>.msi            per-machine installer (WiX v5)
-    iber-calculo-<version>-windows-<arch>-portable.zip   gridcraft.exe + gridcraft-cli.exe
+    tinta-calculo-<version>-windows-<arch>.msi            per-machine installer (WiX v5)
+    tinta-calculo-<version>-windows-<arch>-portable.zip   gridcraft.exe + gridcraft-cli.exe
 
   The executables keep their upstream names (gridcraft.exe, gridcraft-cli.exe); the product name,
   install folder and file names carry the brand.
@@ -28,10 +28,10 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-# Product identity of this IberOffice build (keep in sync with gridcraft.wxs, sign.ps1 and the brand
+# Product identity of this Tinta Office build (keep in sync with gridcraft.wxs, sign.ps1 and the brand
 # values in .cargo/config.toml).
-$AppTitle = 'Iber Calculo'
-$AppSlug = 'iber-calculo'
+$AppTitle = 'Tinta Calculo'
+$AppSlug = 'tinta-calculo'
 
 function Invoke-Native([string] $What, [scriptblock] $Block) {
   Write-Output "==> $What"
