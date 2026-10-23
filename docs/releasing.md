@@ -14,7 +14,7 @@ This is GridCraft's implementation of the shared [release playbook](release-play
 |---|---|
 | Display name `GridCraft`, binaries `gridcraft` + `gridcraft-cli` | every script and workflow |
 | Bundle / app id `ai.storyteller.gridcraft` | `packaging/macos/Info.plist.in`, `packaging/linux/*`, flatpak manifest |
-| WiX UpgradeCode `5511327B-F305-41BE-92D0-EB84944E7C4D` (fixed forever) | `packaging/windows/gridcraft.wxs` |
+| WiX UpgradeCode `A4DB7C0E-D798-49C7-B32D-B7550BF1AF26` (fixed forever; IberOffice's Iber Calculo, upstream GridCraft's is `5511327B-F305-41BE-92D0-EB84944E7C4D`) | `packaging/windows/gridcraft.wxs` |
 | File types `.xlsx` `.xlsm` `.xlsb` `.ods` `.csv` `.tsv` | Info.plist (`CFBundleDocumentTypes`), WiX (ProgIds/OpenWithProgids), `.desktop` `MimeType=`, `ai.storyteller.gridcraft.mime.xml`, metainfo |
 | Web app dir `apps/gridcraft-web` | `packaging/web/package.sh` |
 | App colour `#1f9d55` (ink `#147a40`), **proposed** | `assets/app-icon/README.md`, metainfo `<branding>` |
@@ -77,9 +77,9 @@ and upload their artifacts, the environment refuses macOS and Windows, and no re
 | Platform | Artifacts | Built on |
 |---|---|---|
 | macOS 11+ (universal: Apple silicon + Intel) | `gridcraft-<v>-macos-universal.dmg`, `gridcraft-cli-<v>-macos-universal.zip` | `macos-15` |
-| Windows 10+ x64 | `gridcraft-<v>-windows-x64.msi`, `gridcraft-<v>-windows-x64-portable.zip` | `windows-latest` |
-| Windows 10+ x86 (32-bit) | `gridcraft-<v>-windows-x86.msi`, `gridcraft-<v>-windows-x86-portable.zip` | `windows-latest` |
-| Windows 11 ARM64 | `gridcraft-<v>-windows-arm64.msi`, `…-portable.zip` (cross-compiled, signed like x64) | `windows-latest`; installed and run on `windows-11-arm` by `windows-arm64.yml` |
+| Windows 10+ x64 | `iber-calculo-<v>-windows-x64.msi`, `iber-calculo-<v>-windows-x64-portable.zip` | `windows-latest`; also `windows-msi.yml` (unsigned, on demand) |
+| Windows 10+ x86 (32-bit) | `iber-calculo-<v>-windows-x86.msi`, `iber-calculo-<v>-windows-x86-portable.zip` | `windows-latest` |
+| Windows 11 ARM64 | `iber-calculo-<v>-windows-arm64.msi`, `…-portable.zip` (cross-compiled, signed like x64) | `windows-latest`; installed and run on `windows-11-arm` by `windows-arm64.yml` |
 | Linux x86_64 | `gridcraft-<v>-linux-x86_64.{AppImage,AppImage.zsync,deb,rpm,tar.gz}` | `ubuntu-22.04` |
 | Linux aarch64 | `gridcraft-<v>-linux-aarch64.{AppImage,AppImage.zsync,deb,rpm,tar.gz}` | `ubuntu-22.04-arm` |
 | Linux riscv64 | `gridcraft-<v>-linux-riscv64.tar.gz` (cross-compiled, glibc >= 2.39; CLI smoke-tested under QEMU) | `ubuntu-24.04` |
@@ -122,14 +122,16 @@ open dist/release/gridcraft-*-macos-*.dmg
 is GUI, `gridcraft-cli.exe` console), signs both executables, builds the MSI with WiX v5, signs
 the MSI, and zips a portable build.
 
-- `gridcraft.wxs`: per-machine install into Program Files, advertised Start Menu shortcut, App
-  Paths (Win+R `gridcraft`). File types: ProgIds `GridCraft.Workbook` (`.xlsx`, `.xlsm`) and
-  `GridCraft.TextData` (`.csv`, `.tsv`), listed under each extension's `OpenWithProgids` and
-  in `Capabilities` + `RegisteredApplications`, so GridCraft appears in *Open with* and
+- `gridcraft.wxs` (product "Iber Calculo" by IberOffice): per-machine install into
+  `Program Files\IberOffice\Iber Calculo`, advertised Start Menu shortcut, App Paths (Win+R
+  `iber-calculo`). File types: ProgIds `IberCalculo.Workbook` (`.xlsx`, `.xlsm`) and
+  `IberCalculo.TextData` (`.csv`, `.tsv`), listed under each extension's `OpenWithProgids` and
+  in `Capabilities` (`HKLM\Software\IberOffice\Iber Calculo`) + `RegisteredApplications`, so
+  Iber Calculo installs beside upstream GridCraft without touching its registrations and appears in *Open with* and
   *Settings › Default apps* but never silently becomes the default. The MSI version is the
   numeric `X.Y.Z`; same-version upgrades let release candidates replace each other.
 - **Desktop shortcut:** full installer UI offers an unchecked checkbox on a new installation.
-  Unattended installs can use `msiexec /i gridcraft.msi /qn DESKTOPSHORTCUT=1` to opt in
+  Unattended installs can use `msiexec /i iber-calculo.msi /qn DESKTOPSHORTCUT=1` to opt in
   (or `DESKTOPSHORTCUT=0` to opt out). The choice is stored per machine and reused on upgrades;
   repair retains the installed component choice, and uninstall removes the managed shortcut.
   The Start Menu shortcut is always installed. Run
@@ -284,6 +286,9 @@ those tools. Every file has a row in `ATTRIBUTION.md` (`cargo xtask assets`).
   `desktop-file-validate`, `appstreamcli validate`, and a Flatpak manifest check.
 - `.github/workflows/windows-arm64.yml` (on `release` pushes): packages ARM64 on x64, then
   installs, runs and uninstalls the MSI on a Windows 11 ARM64 runner.
+- `.github/workflows/windows-msi.yml` (on demand and on PRs touching `packaging/windows/`):
+  builds the unsigned x64 MSI and portable zip, runs `test-desktop-shortcut.ps1` and renders
+  the installer dialogs; artifact `iber-calculo-windows`.
 - `.github/workflows/freebsd.yml`: FreeBSD build + tests (manual run from `release`).
 
 **Only the `release` branch builds.** No build workflow runs on `main` or pull requests; every
