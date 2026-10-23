@@ -3,9 +3,9 @@
 # binaries are ARM64, run the CLI natively, and uninstall. (A native ARM64 `cargo test` job is left
 # out for now: PdfCraft saw an intermittent access violation in egui UI tests there.)
 #
-# IberOffice: these jobs used to call storytold/craft-common-actions' reusable windows-arm64.yml,
-# which looks for the app in "Program Files\<app-dir>" with a single folder name. Iber Calculo
-# installs into "Program Files\IberOffice\Iber Calculo", so the same two jobs are written out here.
+# Tinta Office: these jobs used to call storytold/craft-common-actions' reusable windows-arm64.yml,
+# which looks for the app in "Program Files\<app-dir>" with a single folder name. Tinta Calculo
+# installs into "Program Files\Tinta Office\Tinta Calculo", so the same two jobs are written out here.
 name: Windows ARM64
 
 on:
@@ -51,7 +51,7 @@ jobs:
         run: ./packaging/windows/package.ps1 -Arch arm64
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: iber-calculo-windows-arm64
+          name: tinta-calculo-windows-arm64
           path: dist/arm64/*
           if-no-files-found: error
           retention-days: 7
@@ -64,16 +64,16 @@ jobs:
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: iber-calculo-windows-arm64
+          name: tinta-calculo-windows-arm64
           path: dist
       - name: Install the MSI, check it, run it, uninstall it
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           # Where packaging/windows/gridcraft.wxs installs the app.
-          $dir = Join-Path $env:ProgramFiles 'IberOffice\Iber Calculo'
-          $msi = (Get-ChildItem dist/iber-calculo-*-windows-arm64.msi | Select-Object -First 1).FullName
-          if (-not $msi) { throw 'no iber-calculo-*-windows-arm64.msi in the artifact' }
+          $dir = Join-Path $env:ProgramFiles 'Tinta Office\Tinta Calculo'
+          $msi = (Get-ChildItem dist/tinta-calculo-*-windows-arm64.msi | Select-Object -First 1).FullName
+          if (-not $msi) { throw 'no tinta-calculo-*-windows-arm64.msi in the artifact' }
           $p = Start-Process msiexec.exe -ArgumentList '/i', "`"$msi`"", '/qn', '/l*v', 'install.log' -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content install.log -Tail 60; throw "msiexec /i exited $($p.ExitCode)" }
           foreach ($exe in 'gridcraft.exe', 'gridcraft-cli.exe') {
