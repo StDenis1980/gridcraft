@@ -464,6 +464,18 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Next sheet" => "Folla seguinte",
         "All sheets" => "Todas as follas",
         "New sheet (⇧F11)" => "Nova folla (⇧F11)",
+        "Name Box" => "Caixa de nome",
+        "Cell Editor" => "Editor de celas",
+        "Font Size" => "Tamaño do tipo de letra",
+        "Text Box" => "Caixa de texto",
+        "Circular References" => "Referencias circulares",
+        "Scale with Document" => "Escalar co documento",
+        "Align with Page Margins" => "Aliñar coas marxes da páxina",
+        "Maximum Iterations:" => "Iteracións máximas:",
+        "Maximum Change:" => "Cambio máximo:",
+        "Maximum Iterations must be a whole number from 1 to 32767." => "As iteracións máximas deben ser un número enteiro de 1 a 32767.",
+        "Maximum Change must be a number of 0 or more." => "O cambio máximo debe ser un número igual ou maior ca 0.",
+        "Print What" => "Que imprimir",
         _ => return None,
     })
 }
