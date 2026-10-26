@@ -465,6 +465,18 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Next sheet" => "Full següent",
         "All sheets" => "Tots els fulls",
         "New sheet (⇧F11)" => "Full nou (⇧F11)",
+        "Name Box" => "Quadre de noms",
+        "Cell Editor" => "Editor de cel·les",
+        "Font Size" => "Mida del tipus de lletra",
+        "Text Box" => "Quadre de text",
+        "Circular References" => "Referències circulars",
+        "Scale with Document" => "Ajusta a escala amb el document",
+        "Align with Page Margins" => "Alinea amb els marges de la pàgina",
+        "Maximum Iterations:" => "Iteracions màximes:",
+        "Maximum Change:" => "Canvi màxim:",
+        "Maximum Iterations must be a whole number from 1 to 32767." => "Les iteracions màximes han de ser un nombre enter de l'1 al 32767.",
+        "Maximum Change must be a number of 0 or more." => "El canvi màxim ha de ser un nombre igual o superior a 0.",
+        "Print What" => "Què s'ha d'imprimir",
         _ => return None,
     })
 }

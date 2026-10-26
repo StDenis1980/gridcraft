@@ -464,6 +464,18 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Next sheet" => "Hurrengo orria",
         "All sheets" => "Orri guztiak",
         "New sheet (⇧F11)" => "Orri berria (⇧F11)",
+        "Name Box" => "Izen-koadroa",
+        "Cell Editor" => "Gelaxka-editorea",
+        "Font Size" => "Letra-tamaina",
+        "Text Box" => "Testu-koadroa",
+        "Circular References" => "Erreferentzia zirkularrak",
+        "Scale with Document" => "Eskalatu dokumentuarekin",
+        "Align with Page Margins" => "Lerrokatu orriaren marjinekin",
+        "Maximum Iterations:" => "Gehienezko iterazioak:",
+        "Maximum Change:" => "Gehienezko aldaketa:",
+        "Maximum Iterations must be a whole number from 1 to 32767." => "Gehienezko iterazioek 1 eta 32767 arteko zenbaki osoa izan behar dute.",
+        "Maximum Change must be a number of 0 or more." => "Gehienezko aldaketak 0 edo handiagoa izan behar du.",
+        "Print What" => "Zer inprimatu",
         _ => return None,
     })
 }
