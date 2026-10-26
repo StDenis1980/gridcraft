@@ -330,9 +330,9 @@ fn main() -> eframe::Result<()> {
         .with_title(gridcraft_engine::brand::NAME)
         .with_inner_size([1440.0, 900.0])
         .with_min_inner_size([640.0, 420.0])
-        // The Linux packages (packaging/linux) still install the release's desktop entry and icons
-        // under the release's id; the window class has to match them until they follow the brand.
-        .with_app_id(gridcraft_engine::brand::UPSTREAM_APP_ID)
+        // The Linux packages install the desktop entry and icons under brand::APP_ID
+        // (packaging/linux/tinta-brand.sh), so the window class follows the brand too.
+        .with_app_id(gridcraft_engine::brand::APP_ID)
         .with_drag_and_drop(true);
     if cfg!(target_os = "macos") {
         viewport = viewport.with_fullsize_content_view(true).with_titlebar_shown(false).with_title_shown(false);
