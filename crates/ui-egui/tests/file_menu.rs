@@ -138,6 +138,7 @@ fn translated_options_headings_show_no_context_prefix() {
         ("fr", ["Général", "Enregistrer"], ["Options|Général", "Options|Enregistrer"], ("Affichage", "Options de la feuille|Affichage")),
         ("sr", ["Opšte", "Sačuvaj"], ["Opcije|Opšte", "Opcije|Sačuvaj"], ("Prikaz", "Opcije lista|Prikaz")),
         ("nl", ["Algemeen", "Opslaan"], ["Opties|Algemeen", "Opties|Opslaan"], ("Weergeven", "Bladopties|Weergeven")),
+        ("ca", ["General", "Desa"], ["Options|General", "Options|Save"], ("Visualitza", "Sheet Options|Visualitza")),
         ("ro", ["General", "Salvare"], ["Opțiuni|General", "Opțiuni|Salvare"], ("Vizualizare", "Opțiuni foaie|Vizualizare")),
     ] {
         let mut h = harness(Services::default());

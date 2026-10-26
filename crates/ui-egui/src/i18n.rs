@@ -9,6 +9,7 @@
 
 use serde::{Deserialize, Serialize};
 
+mod ca;
 mod cs;
 mod de;
 mod el;
@@ -35,6 +36,7 @@ pub enum Language {
     #[default]
     En,
     Es,
+    Ca,
     El,
     Zh,
     Ja,
@@ -56,9 +58,10 @@ pub enum Language {
 }
 
 impl Language {
-    pub const ALL: [Self; 19] = [
+    pub const ALL: [Self; 20] = [
         Self::En,
         Self::Es,
+        Self::Ca,
         Self::El,
         Self::Zh,
         Self::Ja,
@@ -92,6 +95,7 @@ impl Language {
         match self {
             Self::En => "English",
             Self::Es => "Español",
+            Self::Ca => "Català",
             Self::El => "Ελληνικά",
             Self::Zh => "简体中文",
             Self::Ja => "日本語",
@@ -117,6 +121,7 @@ impl Language {
         match self {
             Self::En => "en",
             Self::Es => "es",
+            Self::Ca => "ca",
             Self::El => "el",
             Self::Zh => "zh",
             Self::Ja => "ja",
@@ -151,6 +156,7 @@ impl Language {
         match tag.trim().split(['-', '_']).next()?.to_ascii_lowercase().as_str() {
             "en" => Some(Self::En),
             "es" => Some(Self::Es),
+            "ca" => Some(Self::Ca),
             "el" => Some(Self::El),
             "zh" => Some(Self::Zh),
             "ja" => Some(Self::Ja),
@@ -197,6 +203,7 @@ impl Language {
         let translated = match self {
             Self::En => None,
             Self::Es => es::translate(text),
+            Self::Ca => ca::translate(text),
             Self::El => el::translate(text),
             Self::Ja => ja::translate(text),
             Self::Zh => zh::translate(text),
@@ -367,6 +374,7 @@ mod tests {
             assert!(ru::translate(english).is_some_and(|text| !text.is_empty()), "missing Russian: {english}");
             assert!(pt::translate(english).is_some_and(|text| !text.is_empty()), "missing Portuguese: {english}");
             assert!(es::translate(english).is_some_and(|text| !text.is_empty()), "missing Spanish: {english}");
+            assert!(ca::translate(english).is_some_and(|text| !text.is_empty()), "missing Catalan: {english}");
             assert!(el::translate(english).is_some_and(|text| !text.is_empty()), "missing Greek: {english}");
             assert!(de::translate(english).is_some_and(|text| !text.is_empty()), "missing German: {english}");
             assert!(cs::translate(english).is_some_and(|text| !text.is_empty()), "missing Czech: {english}");
@@ -390,6 +398,9 @@ mod tests {
         assert_eq!(Language::PtBr.tr_error("command `chart`: Select a chart first."), "Selecione um gráfico primeiro.");
         assert_eq!(Language::PtBr.tr_error("Printer Office: permission denied"), "Printer Office: permission denied");
         assert_eq!(Language::Es.tr("Data"), "Datos");
+        assert_eq!(Language::Ca.tr("Data"), "Dades");
+        assert_eq!(Language::Ca.tr("Freeze Panes"), "Immobilitza les subfinestres");
+        assert_eq!(Language::Ca.tr("Page {page} of {pages}"), "Pàgina {page} de {pages}");
         assert_eq!(Language::El.tr("Data"), "Δεδομένα");
         assert_eq!(Language::El.tr("Page Layout|Orientation"), "Προσανατολισμός σελίδας");
         assert_eq!(Language::El.tr("Sheet1!A1"), "Sheet1!A1");
@@ -631,6 +642,8 @@ mod tests {
         assert_eq!(Language::from_tag("ro-RO"), Some(Language::Ro));
         assert_eq!(Language::from_tag("ro_MD.UTF-8"), Some(Language::Ro));
         assert_eq!(Language::parse("ro"), Some(Language::Ro));
+        assert_eq!(Language::from_tag("ca-ES-valencia"), Some(Language::Ca));
+        assert_eq!(Language::parse("ca"), Some(Language::Ca));
     }
 
     #[test]
