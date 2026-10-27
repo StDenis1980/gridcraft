@@ -13,6 +13,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Paste Link" => "Επικόλληση σύνδεσης",
         "Paste Special…" => "Ειδική επικόλληση…",
         "Format Painter (double-click to keep it on)" => "Αντιγραφή μορφοποίησης (διπλό κλικ για συνεχή χρήση)",
+        "Format Painter" => "Αντιγραφή μορφοποίησης",
         "Double Underline" => "Διπλή υπογράμμιση",
         "Strikethrough" => "Διαγραφή με γραμμή",
         "Underline" => "Υπογράμμιση",

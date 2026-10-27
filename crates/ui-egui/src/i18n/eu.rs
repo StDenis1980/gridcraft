@@ -13,6 +13,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Ebaki",
         "Copy" => "Kopiatu",
         "Format Painter (double-click to keep it on)" => "Kopiatu formatua (klik bikoitza aktibo mantentzeko)",
+        "Format Painter" => "Kopiatu formatua",
         "Bold" => "Lodia",
         "Italic" => "Etzana",
         "Double Underline" => "Azpimarra bikoitza",

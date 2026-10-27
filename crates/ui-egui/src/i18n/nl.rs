@@ -15,6 +15,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Geknipte cellen invoegen",
         "Insert Paste" => "Invoegen en plakken",
         "Format Painter (double-click to keep it on)" => "Opmaak kopiëren (dubbelklik om vast te zetten)",
+        "Format Painter" => "Opmaak kopiëren",
         "Bold" => "Vet",
         "Italic" => "Cursief",
         "Double Underline" => "Dubbel onderstrepen",

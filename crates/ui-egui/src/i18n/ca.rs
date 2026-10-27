@@ -14,6 +14,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Retalla",
         "Copy" => "Copia",
         "Format Painter (double-click to keep it on)" => "Copia el format (doble clic per mantenir-ho actiu)",
+        "Format Painter" => "Copia el format",
         "Bold" => "Negreta",
         "Italic" => "Cursiva",
         "Double Underline" => "Subratllat doble",

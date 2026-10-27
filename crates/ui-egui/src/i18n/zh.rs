@@ -17,6 +17,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "剪切",
         "Copy" => "复制",
         "Format Painter (double-click to keep it on)" => "格式刷（双击可持续使用）",
+        "Format Painter" => "格式刷",
         "Bold" => "粗体",
         "Italic" => "斜体",
         "Double Underline" => "双下划线",

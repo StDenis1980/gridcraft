@@ -11,6 +11,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Paste Link" => "Vložit propojení",
         "Paste Special…" => "Vložit jinak…",
         "Format Painter (double-click to keep it on)" => "Štětec formátu (dvojklikem zůstane zapnutý)",
+        "Format Painter" => "Štětec formátu",
         "Bold" => "Tučné",
         "Italic" => "Kurzíva",
         "Double Underline" => "Dvojité podtržení",

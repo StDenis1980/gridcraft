@@ -17,6 +17,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Iseci",
         "Copy" => "Kopiraj",
         "Format Painter (double-click to keep it on)" => "Kopiraj oblikovanje (dupli klik da ostane uključeno)",
+        "Format Painter" => "Kopiraj oblikovanje",
         "Bold" => "Podebljano",
         "Italic" => "Kurziv",
         "Double Underline" => "Dvostruko podvlačenje",

@@ -14,6 +14,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Kes",
         "Copy" => "Kopyala",
         "Format Painter (double-click to keep it on)" => "Biçim Boyacısı (açık tutmak için çift tıklayın)",
+        "Format Painter" => "Biçim Boyacısı",
         "Bold" => "Kalın",
         "Italic" => "İtalik",
         "Double Underline" => "Çift Alt Çizgi",

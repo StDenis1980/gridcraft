@@ -12,6 +12,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Paste Link" => "Verknüpfung einfügen",
         "Paste Special…" => "Inhalte einfügen…",
         "Format Painter (double-click to keep it on)" => "Format übertragen (Doppelklick zum Beibehalten)",
+        "Format Painter" => "Format übertragen",
         "Bold" => "Fett",
         "Italic" => "Kursiv",
         "Double Underline" => "Doppelt unterstrichen",
