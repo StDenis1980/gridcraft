@@ -459,6 +459,21 @@ fn language_switch_renders_the_ribbon_and_persists() {
 }
 
 #[test]
+fn font_size_box_and_its_arrow_follow_the_interface_language() {
+    // The Font Size box was translated but the drop-down arrow beside it still read "Font Size"
+    // to screen readers in Spanish and Ukrainian.
+    let mut h = harness(blank());
+    for language in [Language::Es, Language::Uk] {
+        h.state_mut().run("app.language.set", json!({"language": language.code()})).unwrap();
+        h.run_steps(2);
+        let name = language.tr("Font Size");
+        assert_ne!(name, "Font Size", "{language:?} translates Font Size");
+        assert!(h.query_all_by_label(name).count() >= 2, "{language:?}: the box and its arrow read `{name}`");
+        assert!(h.query_by_label("Font Size").is_none(), "{language:?}: nothing still reads `Font Size`");
+    }
+}
+
+#[test]
 /// The PivotTable Fields pane and its field menus switch to Spanish.
 fn pivot_fields_pane_follows_the_interface_language() {
     // #858: the PivotTable Fields pane and its field menus stayed in English after switching to Spanish.
