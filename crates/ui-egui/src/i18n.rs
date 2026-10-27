@@ -209,8 +209,18 @@ impl Language {
         gridcraft_engine::core::Region::from_tag(self.code()).unwrap_or_default()
     }
 
+    /// Formula entry: Spanish names for Spanish; English names with `;` and the decimal comma
+    /// wherever the region writes numbers with a comma (Catalan, Galician, Basque, Ukrainian),
+    /// so a constant reads the same in a cell and in a formula.
     pub fn formula_locale(self) -> gridcraft_engine::formula::FormulaLocale {
-        if self == Self::Es { gridcraft_engine::formula::FormulaLocale::Es } else { gridcraft_engine::formula::FormulaLocale::En }
+        use gridcraft_engine::formula::FormulaLocale;
+        if self == Self::Es {
+            FormulaLocale::Es
+        } else if self.region().decimal() == ',' {
+            FormulaLocale::Semicolon
+        } else {
+            FormulaLocale::En
+        }
     }
 
     /// Translates an interface label; untranslated labels fall back to English.
