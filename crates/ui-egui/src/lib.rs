@@ -829,6 +829,7 @@ impl SheetApp {
                 match i18n::Language::parse(code) {
                     Some(l) => {
                         self.ui.language = l;
+                        gridcraft_engine::display::set_region(l.region());
                         Ok(json!({"language": l}))
                     }
                     None => Err(format!("unknown language {code:?} (use one of {})", i18n::Language::code_list(", "))),
@@ -1215,7 +1216,8 @@ impl SheetApp {
             }
             return true;
         }
-        let text = match self.session.active().map(|d| formula_locale::canonical(&text, ed.locale, &d.wb, ed.sheet, ed.cell)) {
+        let region = self.ui.language.region();
+        let text = match self.session.active().map(|d| formula_locale::canonical(&text, ed.locale, region, &d.wb, ed.sheet, ed.cell)) {
             Some(Ok(text)) => text,
             Some(Err(error)) => {
                 self.message = Some((gridcraft_engine::brand::NAME.into(), error.to_string()));
@@ -1439,6 +1441,8 @@ impl SheetApp {
 
     /// Per-frame logic (control channel, screenshots). Call before `ui`.
     pub fn logic(&mut self, ctx: &egui::Context) {
+        // Values show in the interface language's region (`1.234,5` and `31/12/2026` in Spanish).
+        gridcraft_engine::display::set_region(self.ui.language.region());
         self.ensure_text_width(ctx);
         // A keytip control request lives one frame: the ribbon consumes it during `ui`, and
         // anything that never reached a control (collapsed ribbon, tab switch) is dropped.
