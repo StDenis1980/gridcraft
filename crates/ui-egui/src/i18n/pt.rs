@@ -16,6 +16,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Inserir Células Recortadas",
         "Insert Paste" => "Inserir Colagem",
         "Format Painter (double-click to keep it on)" => "Pincel de Formatação (clique duas vezes para mantê-lo ativo)",
+        "Format Painter" => "Pincel de Formatação",
         "Double Underline" => "Sublinhado Duplo",
         "Strikethrough" => "Riscado",
         "Underline" => "Sublinhado",

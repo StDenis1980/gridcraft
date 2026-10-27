@@ -15,6 +15,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Вставити вирізані комірки",
         "Insert Paste" => "Вставка зі зсувом",
         "Format Painter (double-click to keep it on)" => "Формат за зразком (двічі клацніть, щоб закріпити)",
+        "Format Painter" => "Формат за зразком",
         "Double Underline" => "Подвійне підкреслення",
         "Strikethrough" => "Перекреслення",
         "Underline" => "Підкреслення",

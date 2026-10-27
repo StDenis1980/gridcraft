@@ -13,6 +13,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Wstaw wycięte komórki",
         "Insert Paste" => "Wklej ze wstawieniem",
         "Format Painter (double-click to keep it on)" => "Malarz formatów (kliknij dwukrotnie, aby pozostał włączony)",
+        "Format Painter" => "Malarz formatów",
         "Double Underline" => "Podwójne podkreślenie",
         "Strikethrough" => "Przekreślenie",
         "Underline" => "Podkreślenie",

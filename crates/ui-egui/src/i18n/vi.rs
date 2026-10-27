@@ -18,6 +18,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Cắt",
         "Copy" => "Sao chép",
         "Format Painter (double-click to keep it on)" => "Sao định dạng (bấm đúp để giữ)",
+        "Format Painter" => "Sao định dạng",
         "Bold" => "Đậm",
         "Italic" => "Nghiêng",
         "Double Underline" => "Gạch chân đôi",

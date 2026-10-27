@@ -20,6 +20,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Inserare celule decupate",
         "Insert Paste" => "Inserare prin lipire",
         "Format Painter (double-click to keep it on)" => "Pensulă de formatare (dublu clic pentru a o menține activă)",
+        "Format Painter" => "Pensulă de formatare",
         "Double Underline" => "Subliniere dublă",
         "Strikethrough" => "Tăiere cu o linie",
         "Underline" => "Subliniere",

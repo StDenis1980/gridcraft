@@ -413,6 +413,18 @@ mod tests {
         }
     }
 
+    /// The ribbon buttons whose screen-reader names are set apart from their tooltips (Paste,
+    /// Format Painter, Undo, Redo) are named in the interface language, not English.
+    #[test]
+    fn ribbon_button_names_are_translated() {
+        for language in [Language::Es, Language::Ca, Language::Gl, Language::Eu, Language::Uk, Language::It, Language::Fr, Language::De, Language::Pl]
+        {
+            for key in ["Paste", "Format Painter", "Undo", "Redo"] {
+                assert_ne!(language.tr(key), key, "{} falls back to English for {key:?}", language.code());
+            }
+        }
+    }
+
     /// The screen-reader names for the formula-bar controls must be translated in every catalog
     /// (no silent English fallback) and stay single-line labels.
     #[test]

@@ -17,6 +17,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "Вырезать",
         "Copy" => "Копировать",
         "Format Painter (double-click to keep it on)" => "Формат по образцу (дважды щёлкните, чтобы закрепить)",
+        "Format Painter" => "Формат по образцу",
         "Bold" => "Полужирный",
         "Italic" => "Курсив",
         "Double Underline" => "Двойное подчёркивание",

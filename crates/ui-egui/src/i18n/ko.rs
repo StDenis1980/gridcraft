@@ -17,6 +17,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Cut" => "잘라내기",
         "Copy" => "복사",
         "Format Painter (double-click to keep it on)" => "서식 복사 (두 번 클릭하여 유지)",
+        "Format Painter" => "서식 복사",
         "Bold" => "굵게",
         "Italic" => "기울임꼴",
         "Double Underline" => "이중 밑줄",
