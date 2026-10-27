@@ -420,3 +420,29 @@ fn arrange_all_lays_out_the_native_windows_active_first() {
     let r = |x, y, w, h| craft_window::Rect::new(x, y, w, h);
     assert_eq!(tiled, [r(0.0, 0.0, 500.0, 400.0), r(500.0, 0.0, 500.0, 400.0), r(0.0, 400.0, 1000.0, 400.0)]);
 }
+
+#[test]
+fn native_window_titles_name_the_product() {
+    let mut desk = Desk::new(true);
+    let (w1, w2) = two_windows_on_one_workbook(&mut desk);
+    let sent = desk.frames(2);
+    let mut sent_titles = desk.frame_with(|app, _| {
+        app.run("cell.set", json!({"cell": "A1", "input": "1"})).unwrap();
+    });
+    sent_titles.extend(sent);
+    sent_titles.extend(desk.frames(2));
+    let titles: Vec<String> =
+        sent_titles.iter().filter_map(|(_, c)| if let ViewportCommand::Title(t) = c { Some(t.clone()) } else { None }).collect();
+    assert!(!titles.is_empty(), "no window title was set");
+    let app = gridcraft_engine::brand::NAME;
+    if !cfg!(target_os = "macos") {
+        for t in &titles {
+            assert!(t.ends_with(&format!(" - {app}")), "{t:?} doesn't name {app}");
+        }
+    }
+    // The edit retitles the root window ("Book.xlsx:1 — Edited - Tinta Calculo"); the second
+    // window's title travels in its viewport builder, which this harness doesn't record.
+    let root = desk.app.session.window_title(w1).unwrap();
+    assert!(titles.iter().any(|t| t.starts_with(&format!("{root} — Edited"))), "{root} has no edited title in {titles:?}");
+    assert_ne!(w1, w2);
+}
