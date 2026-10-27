@@ -1,5 +1,9 @@
 //! Localized aliases accepted at user-entry boundaries; file syntax stays English.
 
+use std::collections::HashMap;
+use std::sync::OnceLock;
+
+use crate::spanish::SPANISH;
 use crate::{Expr, ParseError, parser};
 
 /// Formula-entry syntax selected by the interface language. Other interface languages
@@ -11,24 +15,22 @@ pub enum FormulaLocale {
     Es,
 }
 
-const SPANISH: &[(&str, &str)] = &[
-    ("SUM", "SUMA"),
-    ("AVERAGE", "PROMEDIO"),
-    ("IF", "SI"),
-    ("COUNT", "CONTAR"),
-    ("SUMIF", "SUMAR.SI"),
-    ("COUNTIF", "CONTAR.SI"),
-    ("VLOOKUP", "BUSCARV"),
-    ("TODAY", "HOY"),
-    // Financial block (#1986): the loan-schedule and investment staples.
-    ("NPV", "VNA"),
-    ("IRR", "TIR"),
-    ("PMT", "PAGO"),
-    ("PV", "VA"),
-    ("FV", "VF"),
-    ("TRUE", "VERDADERO"),
-    ("FALSE", "FALSO"),
-];
+/// Upper-case English name -> Spanish name, and upper-case Spanish name -> English name.
+/// Keys are upper-cased in full Unicode, so `año` finds `AÑO`.
+fn spanish_maps() -> &'static (HashMap<String, &'static str>, HashMap<String, &'static str>) {
+    static MAPS: OnceLock<(HashMap<String, &'static str>, HashMap<String, &'static str>)> = OnceLock::new();
+    MAPS.get_or_init(|| {
+        let to_es = SPANISH.iter().map(|&(en, es)| (en.to_uppercase(), es)).collect();
+        let to_en = SPANISH.iter().map(|&(en, es)| (es.to_uppercase(), en)).collect();
+        (to_es, to_en)
+    })
+}
+
+/// Every (English, Spanish) function-name pair. Names Spanish Excel keeps in English are listed
+/// with themselves.
+pub fn spanish_function_names() -> &'static [(&'static str, &'static str)] {
+    SPANISH
+}
 
 impl FormulaLocale {
     pub fn list_separator(self) -> char {
@@ -41,18 +43,10 @@ impl FormulaLocale {
         if self == Self::Es { '\\' } else { ',' }
     }
     pub fn function_name(self, canonical: &str) -> &str {
-        if self == Self::Es {
-            SPANISH.iter().find(|(en, _)| en.eq_ignore_ascii_case(canonical)).map(|(_, es)| *es).unwrap_or(canonical)
-        } else {
-            canonical
-        }
+        if self == Self::Es { spanish_maps().0.get(&canonical.to_uppercase()).copied().unwrap_or(canonical) } else { canonical }
     }
     pub fn canonical_name(self, localized: &str) -> &str {
-        if self == Self::Es {
-            SPANISH.iter().find(|(_, es)| es.eq_ignore_ascii_case(localized)).map(|(en, _)| *en).unwrap_or(localized)
-        } else {
-            localized
-        }
+        if self == Self::Es { spanish_maps().1.get(&localized.to_uppercase()).copied().unwrap_or(localized) } else { localized }
     }
 }
 

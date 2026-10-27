@@ -1,6 +1,6 @@
 # Tinta Calculo — Tinta Office roadmap
 
-> **Status:** 2026-10-27 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created.
+> **Status:** 2026-10-27 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function.
 
 Tinta Calculo is the Tinta Office build of GridCraft and replaces Microsoft Excel. Upstream keeps the
 feature-parity roadmap ([ROADMAP.md](../ROADMAP.md), [roadmap.md](roadmap.md),
@@ -10,15 +10,15 @@ for users in Spain and Ukraine. It is a fork-only file, so upstream syncs never 
 ## Where it stands (2026-10-27)
 
 Ready for real work ≈ 50% (essentials user ≈ 63%, upstream estimate); 62 commits behind upstream.
-504 of 523 Excel functions work, but formulas are still English for Spanish users: `FormulaLocale::Es`
-exists with only 15 Spanish names (SUMA, SI, PROMEDIO…), and number and date formats are en-US.
+504 of 523 Excel functions work. Spanish formula entry (`FormulaLocale::Es`) knows the Spanish name of every built-in function (514, `crates/formula/src/spanish.rs`), but number
+and date formats are still en-US.
 PDF export uses the 14 standard fonts without embedding, so **Ukrainian text does not reach the PDF**.
 
 ## Priorities
 
 | # | Task | Where | Stage |
 |---|---|---|---|
-| 1 | Spanish names for every function (BUSCARV, SUMAR.SI.CONJUNTO…), `;` separator, decimal comma, dd/mm/yyyy and € formats; the same for uk-UA (English names, comma and hryvnia) | upstream (extend the existing table) | 1 |
+| 1 | Spanish names for every function (BUSCARV, SUMAR.SI.CONJUNTO…) **done 2026-10-27**; still to do: dd/mm/yyyy and € formats, and uk-UA (English names, decimal comma, hryvnia) | upstream (extend the existing table) | 1 |
 | 2 | Embedded fonts in PDF export, so Cyrillic prints | upstream | 1 |
 | 3 | Test workbooks written from scratch: self-employed income and expenses, IVA and IRPF, a family budget; an .xlsx save and recalc test | fork (tests) | 1 |
 | 4 | Those workbooks as templates in New (our text and colours), also course material | fork | 2 |
