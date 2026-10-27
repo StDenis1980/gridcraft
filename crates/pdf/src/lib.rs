@@ -134,7 +134,7 @@ impl Font {
 
     /// Advance width of a character in 1/1000 em.
     pub fn char_width(self, c: char) -> u16 {
-        self.char_width_with(c, &embed::installed())
+        embed::with_installed(|fonts| self.char_width_with(c, fonts))
     }
 
     fn char_width_with(self, c: char, fonts: &embed::Installed) -> u16 {
@@ -172,8 +172,7 @@ impl Font {
 /// Width of `text` in points when set in `font` at `size` points.
 pub fn text_width(font: Font, size: f32, text: &str) -> f32 {
     // u64: a u32 sum overflows for ~8 million characters.
-    let fonts = embed::installed();
-    let units: u64 = text.chars().map(|c| u64::from(font.char_width_with(c, &fonts))).sum();
+    let units: u64 = embed::with_installed(|fonts| text.chars().map(|c| u64::from(font.char_width_with(c, fonts))).sum());
     units as f32 * size / 1000.0
 }
 

@@ -290,8 +290,13 @@ static INSTALLED: RwLock<[Option<Arc<EmbeddedFont>>; Font::ALL.len()]> = RwLock:
 pub(crate) type Installed = [Option<Arc<EmbeddedFont>>; Font::ALL.len()];
 
 pub(crate) fn installed() -> Installed {
+    with_installed(Installed::clone)
+}
+
+/// Runs `f` on the installed fonts without copying them (measuring runs for every cell).
+pub(crate) fn with_installed<R>(f: impl FnOnce(&Installed) -> R) -> R {
     // A poisoned lock still holds a consistent array of `Arc`s: use it.
-    INSTALLED.read().unwrap_or_else(std::sync::PoisonError::into_inner).clone()
+    f(&INSTALLED.read().unwrap_or_else(std::sync::PoisonError::into_inner))
 }
 
 /// Uses `font` for the characters `face` cannot encode. Applies to every document from now on.
@@ -310,7 +315,7 @@ pub fn clear_fonts() {
 
 /// Whether any font is installed for `face`'s family or the sans regular face.
 pub fn has_font(face: Font) -> bool {
-    resolve(&installed(), face, None).is_some()
+    with_installed(|fonts| resolve(fonts, face, None).is_some())
 }
 
 /// The installed font that draws `c` for `face`: the face itself, then the family's regular
