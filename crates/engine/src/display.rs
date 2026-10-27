@@ -3,9 +3,27 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+use gridcraft_core::Region;
 use gridcraft_core::{CellRef, RangeRef, Value};
 use gridcraft_model::{Sheet, Workbook};
-use gridcraft_numfmt::{Formatted, NumberFormat, format_value};
+use gridcraft_numfmt::{Formatted, NumberFormat, format_value_in};
+
+thread_local! {
+    // The region values are shown in (the interface sets it from its language). Files, formulas,
+    // CSV and the engine API stay en-US; only display text follows it. Per thread: the interface
+    // thread sets it for itself, and every other thread (tests, scripts, servers) stays en-US.
+    static REGION: std::cell::Cell<Region> = const { std::cell::Cell::new(Region::EnUs) };
+}
+
+/// Shows values in `region` from now on, on this thread.
+pub fn set_region(region: Region) {
+    let _ = REGION.try_with(|r| r.set(region));
+}
+
+/// The region values are shown in on this thread.
+pub fn region() -> Region {
+    REGION.try_with(std::cell::Cell::get).unwrap_or_default()
+}
 
 /// Parsed number formats are cached by code.
 fn parsed(code: &str) -> NumberFormat {
@@ -28,9 +46,14 @@ pub fn number_format(code: &str) -> NumberFormat {
     parsed(code)
 }
 
-/// Formats a value with a format code.
+/// Formats a value with a format code, in the display [`region`].
 pub fn format(v: &Value, code: &str, wb: &Workbook) -> Formatted {
-    format_value(v, &parsed(code), wb.date_system)
+    format_in(v, code, wb, region())
+}
+
+/// Formats a value with a format code in `region`.
+pub fn format_in(v: &Value, code: &str, wb: &Workbook, region: Region) -> Formatted {
+    format_value_in(v, &parsed(code), wb.date_system, region)
 }
 
 /// Whether typing `t` back into a General cell would not give the text `t` again (it would parse
@@ -47,6 +70,12 @@ fn text_needs_quote_prefix(t: &str, sys: gridcraft_core::date::DateSystem) -> bo
         return true;
     }
     if matches!(first, Some('+' | '-')) && second.is_some_and(|c| c.is_ascii_alphabetic() || c == '(') {
+        return true;
+    }
+    // Text that the display region reads as a number or date (`1,5` in Spain) needs one too.
+    if let Some(en) = gridcraft_core::parse::delocalize_input(t, region())
+        && !matches!(gridcraft_core::parse::parse_input(&en, sys).value, Value::Text(_))
+    {
         return true;
     }
     !matches!(gridcraft_core::parse::parse_input(t, sys).value, Value::Text(ref x) if x.as_ref() == t)
@@ -69,10 +98,15 @@ pub fn edit_text(wb: &Workbook, sheet: &Sheet, c: CellRef) -> String {
     }
     let Value::Number(n) = &cell.value else { return raw };
     let code = wb.styles.get(cell.style).num_fmt.as_str();
+    let region = region();
     if cell.formula.is_some() || !parsed(code).is_date() {
-        return raw;
+        // A constant number is typed with the region's decimal separator.
+        return if cell.formula.is_none() { gridcraft_core::parse::localize_number(&raw, region) } else { raw };
     }
-    let reads_back = |s: &str| matches!(gridcraft_core::parse::parse_input(s, wb.date_system).value, Value::Number(m) if (m - n).abs() < 1e-9);
+    let reads_back = |s: &str| {
+        let en = gridcraft_core::parse::delocalize_input(s, region);
+        matches!(gridcraft_core::parse::parse_input(en.as_deref().unwrap_or(s), wb.date_system).value, Value::Number(m) if (m - n).abs() < 1e-9)
+    };
     let shown = format(&cell.value, code, wb).text;
     if reads_back(&shown) {
         return shown;
@@ -127,7 +161,12 @@ pub fn value_text(wb: &Workbook, sheet: &Sheet, c: CellRef) -> String {
 /// [`value_text`] for a value and a format code given apart from a cell (print takes the code
 /// from the cell's effective look, which a conditional format can override).
 pub fn value_text_as(wb: &Workbook, v: &Value, code: &str) -> String {
-    let f = format(v, code, wb);
+    value_text_as_in(wb, v, code, region())
+}
+
+/// [`value_text_as`] in `region` (delimited files are always written en-US).
+pub fn value_text_as_in(wb: &Workbook, v: &Value, code: &str, region: Region) -> String {
+    let f = format_in(v, code, wb, region);
     match f.fill {
         Some((_, pos)) => {
             let mut t = f.text;
