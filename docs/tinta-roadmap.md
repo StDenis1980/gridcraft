@@ -1,6 +1,6 @@
 # Tinta Calculo — Tinta Office roadmap
 
-> **Status:** 2026-10-27 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry.
+> **Status:** 2026-10-27 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry; 2026-10-27 self-employed and family budget test workbooks.
 
 Tinta Calculo is the Tinta Office build of GridCraft and replaces Microsoft Excel. Upstream keeps the
 feature-parity roadmap ([ROADMAP.md](../ROADMAP.md), [roadmap.md](roadmap.md),
@@ -27,7 +27,7 @@ and Arabic or Devanagari would need text shaping first.
 |---|---|---|---|
 | 1 | Spanish names for every function (BUSCARV, SUMAR.SI.CONJUNTO…) **done 2026-10-27**; dd/mm/yyyy, decimal comma, € and грн in display and entry **done 2026-10-27**; uk-UA formula entry (English names, `;` separators, decimal comma) **done 2026-10-27** | upstream (extend the existing table) | 1 |
 | 2 | Embedded fonts in PDF export, so Cyrillic prints **done 2026-10-27** (system fonts, `crates/engine/src/pdf_fonts.rs`) | upstream | 1 |
-| 3 | Test workbooks written from scratch: self-employed income and expenses, IVA and IRPF, a family budget; an .xlsx save and recalc test | fork (tests) | 1 |
+| 3 | Test workbooks written from scratch: self-employed income and expenses, IVA and IRPF, a family budget; an .xlsx save and recalc test **done 2026-10-27** (`crates/engine/tests/it/tinta_workbooks.rs`) | fork (tests) | 1 |
 | 4 | Those workbooks as templates in New (our text and colours), also course material | fork | 2 |
 | 5 | Old .xls and password-protected workbooks; .xlsx fidelity on real files without Excel's repair prompt | upstream | 2 |
 | 6 | Charts: kinds and options survive a save (≈ 30% today) | upstream | 2 |
