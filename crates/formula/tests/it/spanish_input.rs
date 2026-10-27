@@ -138,3 +138,33 @@ fn local_names_match_aliases_in_any_case_like_the_evaluator() {
     assert!(!gridcraft_formula::same_name("ı", "I"));
     assert!(!gridcraft_formula::same_name("a", "b"));
 }
+
+#[test]
+fn every_spanish_function_name_round_trips() {
+    let es = FormulaLocale::Es;
+    let pairs = gridcraft_formula::spanish_function_names();
+    for &(en, name) in pairs {
+        // Typed in Spanish (any case) it is stored in English, and it is shown in Spanish again.
+        for typed in [name.to_string(), name.to_lowercase()] {
+            let expr = parse_input(&format!("={typed}(1;2,5)"), es, |_| false).unwrap_or_else(|e| panic!("{typed}: {e:?}"));
+            assert_eq!(print(&expr), format!("{en}(1,2.5)"), "{typed}");
+            assert_eq!(print_input(&expr, es, |_| false).unwrap(), format!("{name}(1;2,5)"), "{typed}");
+        }
+        assert_eq!(es.function_name(en), name);
+        assert_eq!(es.canonical_name(name), en);
+    }
+    // One row per function, and no Spanish name stands for two functions.
+    let mut english: Vec<&str> = pairs.iter().map(|p| p.0).collect();
+    let mut spanish: Vec<String> = pairs.iter().map(|p| p.1.to_uppercase()).collect();
+    english.sort_unstable();
+    spanish.sort_unstable();
+    let count = pairs.len();
+    english.dedup();
+    spanish.dedup();
+    assert_eq!((english.len(), spanish.len()), (count, count));
+    // A Spanish name that is also an English one stands for the function Spanish Excel means.
+    assert_eq!(input("DECIMAL(1,5;1)"), "FIXED(1.5,1)");
+    assert_eq!(input("CONV.DECIMAL(\"FF\";16)"), "DECIMAL(\"FF\",16)");
+    // English names still work when they are not Spanish names of something else.
+    assert_eq!(input("SUM(1;2)+BUSCARX(1;A:A;B:B)+año(HOY())"), "SUM(1,2)+XLOOKUP(1,A:A,B:B)+YEAR(TODAY())");
+}
