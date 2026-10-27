@@ -188,6 +188,7 @@ impl SheetApp {
                 match i18n::Language::parse(code) {
                     Some(l) => {
                         self.ui.language = l;
+                        gridcraft_engine::display::set_region(l.region());
                         Ok(json!({"language": l}))
                     }
                     None => Err(format!("unknown language {code:?} (use one of {})", i18n::Language::code_list(", "))),
