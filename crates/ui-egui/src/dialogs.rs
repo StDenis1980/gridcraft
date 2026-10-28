@@ -1478,6 +1478,12 @@ pub fn show(app: &mut SheetApp, ctx: &egui::Context) {
                                 open = false;
                             }
                         }
+                        for (n, t) in gridcraft_engine::tinta_templates::for_language(app.ui.language.code()) {
+                            if ui.button(t).clicked() {
+                                app.run_or_alert("file.new", json!({"sample": n}));
+                                open = false;
+                            }
+                        }
                     });
                     ui.separator();
                     ui.label(egui::RichText::new("Recent").strong());

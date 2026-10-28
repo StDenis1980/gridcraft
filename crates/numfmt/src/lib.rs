@@ -329,6 +329,23 @@ pub fn format_value(v: &Value, fmt: &NumberFormat, sys: DateSystem) -> Formatted
     format_value_in(v, fmt, sys, Region::EnUs)
 }
 
+thread_local! {
+    // The region display text is shown in (the interface sets it from its language). Files,
+    // formulas, CSV and `TEXT()` stay en-US. Per thread: the interface thread sets it for itself,
+    // and every other thread (tests, scripts, servers) stays en-US.
+    static DISPLAY_REGION: std::cell::Cell<Region> = const { std::cell::Cell::new(Region::EnUs) };
+}
+
+/// Shows display text (cells, print, charts) in `region` from now on, on this thread.
+pub fn set_display_region(region: Region) {
+    let _ = DISPLAY_REGION.try_with(|r| r.set(region));
+}
+
+/// The region display text is shown in on this thread.
+pub fn display_region() -> Region {
+    DISPLAY_REGION.try_with(std::cell::Cell::get).unwrap_or_default()
+}
+
 /// Formats a cell value for display in `region`: its decimal and thousands separators, and its
 /// short date for the built-in short date formats (`m/d/yyyy`, `m/d/yyyy h:mm`).
 pub fn format_value_in(v: &Value, fmt: &NumberFormat, sys: DateSystem, region: Region) -> Formatted {
