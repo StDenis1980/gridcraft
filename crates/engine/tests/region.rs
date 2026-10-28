@@ -88,3 +88,16 @@ fn the_api_and_html_export_stay_en_us() {
     assert_eq!(shown(&s, "A1").0, "1.234,50");
     set_region(Region::EnUs);
 }
+
+#[test]
+fn a_numeric_table_header_names_its_column_in_en_us() {
+    let mut s = session();
+    s.execute("range.setValues", json!({"range": "A1", "values": [["Item", 2026.5], ["a", 1]]})).unwrap();
+    s.execute("insert.table", json!({"range": "A1:B2", "header": true})).unwrap();
+    set_region(Region::UkUa);
+    s.execute("cell.set", json!({"cell": "B1", "input": "2027.5"})).unwrap();
+    let d = s.doc().unwrap();
+    let t = &d.wb.active().unwrap().tables[0];
+    assert_eq!(t.columns[1].name, "2027.5");
+    set_region(Region::EnUs);
+}
