@@ -124,3 +124,34 @@ fn exercise(data: Vec<u8>) {
     let _ = doc.finish();
     clear_fonts();
 }
+
+/// `data` with its OS/2 `fsType` replaced (table checksums are not checked by the reader).
+fn with_fs_type(mut data: Vec<u8>, fs_type: u16) -> Option<Vec<u8>> {
+    let tables = usize::from(u16::from_be_bytes([*data.get(4)?, *data.get(5)?]));
+    for i in 0..tables {
+        let at = 12 + i * 16;
+        if data.get(at..at + 4)? == b"OS/2" {
+            let offset = u32::from_be_bytes(data.get(at + 8..at + 12)?.try_into().ok()?) as usize;
+            data.get_mut(offset + 8..offset + 10)?.copy_from_slice(&fs_type.to_be_bytes());
+            return Some(data);
+        }
+    }
+    None
+}
+
+#[test]
+fn licence_bits_that_forbid_subsetting_or_outlines_refuse_the_font() {
+    let Some(data) = system_font() else {
+        eprintln!("no system TrueType font with Cyrillic; skipped");
+        return;
+    };
+    for (fs_type, allowed) in [(0x0000, true), (0x0004, true), (0x0008, true), (0x0002, false), (0x0100, false), (0x0200, false), (0x0108, false)] {
+        let patched = with_fs_type(data.clone(), fs_type).expect("the font has an OS/2 table");
+        let result = EmbeddedFont::from_bytes(patched, 0);
+        if allowed {
+            assert!(result.is_ok(), "fsType {fs_type:#06x} may be embedded");
+        } else {
+            assert!(matches!(result, Err(FontError::EmbeddingRestricted)), "fsType {fs_type:#06x} is refused");
+        }
+    }
+}

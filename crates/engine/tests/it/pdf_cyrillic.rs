@@ -17,8 +17,9 @@ fn exported_pdf_embeds_a_font_for_cyrillic() {
     let out = s.execute("file.exportPdf", json!({})).unwrap();
     let pdf = gridcraft_engine::io::base64_decode(out["base64"].as_str().unwrap()).unwrap();
     // The export installed the system fonts itself; asking afterwards only reports them.
-    if gridcraft_engine::pdf_fonts::ensure_installed() == 0 {
-        eprintln!("no system TrueType fonts; skipped");
+    gridcraft_engine::pdf_fonts::ensure_installed();
+    if !gridcraft_pdf::can_draw(gridcraft_pdf::Font::Helvetica, 'С') {
+        eprintln!("no system TrueType font with Cyrillic; skipped");
         return;
     }
     assert!(find(&pdf, b"/FontFile2") && find(&pdf, b"/ToUnicode"), "Cyrillic is embedded");

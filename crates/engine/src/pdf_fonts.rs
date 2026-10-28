@@ -177,6 +177,11 @@ fn load(face: Font, files: &[(String, PathBuf)]) -> Option<EmbeddedFont> {
 }
 
 fn read_font(path: &Path) -> Option<EmbeddedFont> {
+    // Check before reading: a huge file, a device or a FIFO named `*.ttf` is never read.
+    let meta = std::fs::metadata(path).ok()?;
+    if !meta.is_file() || meta.len() > gridcraft_pdf::MAX_FONT_BYTES as u64 {
+        return None;
+    }
     let data = std::fs::read(path).ok()?;
     EmbeddedFont::from_bytes(data, 0).ok()
 }

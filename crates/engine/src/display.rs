@@ -19,6 +19,20 @@ pub fn region() -> Region {
     gridcraft_numfmt::display_region()
 }
 
+/// Runs `f` with values shown in `region` on this thread, then puts the region back (also when
+/// `f` unwinds). Files and the engine API run in en-US whatever the interface shows.
+pub fn in_region<R>(region: Region, f: impl FnOnce() -> R) -> R {
+    struct Restore(Region);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            set_region(self.0);
+        }
+    }
+    let _restore = Restore(self::region());
+    set_region(region);
+    f()
+}
+
 /// Parsed number formats are cached by code.
 fn parsed(code: &str) -> NumberFormat {
     static CACHE: std::sync::LazyLock<Mutex<HashMap<String, NumberFormat>>> = std::sync::LazyLock::new(|| Mutex::new(HashMap::new()));
