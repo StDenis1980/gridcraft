@@ -13,7 +13,7 @@ use std::sync::{Arc, RwLock};
 use crate::Font;
 
 /// Largest font file accepted.
-const MAX_FONT_BYTES: usize = 64 * 1024 * 1024;
+pub const MAX_FONT_BYTES: usize = 64 * 1024 * 1024;
 
 /// Why a font cannot be embedded.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,8 +87,9 @@ impl EmbeddedFont {
         }
         let os2 = font.os2().ok();
         // fsType bit 1 alone is "restricted licence embedding": the font must not be embedded.
-        // Bits 2 and 3 (preview/print, editable) override it.
-        if os2.as_ref().is_some_and(|t| t.fs_type() & 0x000E == 0x0002) {
+        // Bits 2 and 3 (preview/print, editable) override it. Bit 8 forbids subsetting, which
+        // this writer always does, and bit 9 allows embedding bitmaps only, which it never writes.
+        if os2.as_ref().is_some_and(|t| t.fs_type() & 0x000E == 0x0002 || t.fs_type() & 0x0300 != 0) {
             return Err(FontError::EmbeddingRestricted);
         }
         let scale = |v: f32| -> i32 {
@@ -316,6 +317,12 @@ pub fn clear_fonts() {
 /// Whether any font is installed for `face`'s family or the sans regular face.
 pub fn has_font(face: Font) -> bool {
     with_installed(|fonts| resolve(fonts, face, None).is_some())
+}
+
+/// Whether an installed font draws `c` for `face` (the face, its family's regular face or the
+/// sans regular face).
+pub fn can_draw(face: Font, c: char) -> bool {
+    with_installed(|fonts| resolve(fonts, face, Some(c)).is_some())
 }
 
 /// The installed font that draws `c` for `face`: the face itself, then the family's regular

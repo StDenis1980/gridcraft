@@ -18,7 +18,7 @@
 mod embed;
 mod metrics;
 
-pub use embed::{EmbeddedFont, FontError, clear_fonts, has_font, install_font};
+pub use embed::{EmbeddedFont, FontError, MAX_FONT_BYTES, can_draw, clear_fonts, has_font, install_font};
 
 use std::fmt::Write as _;
 
