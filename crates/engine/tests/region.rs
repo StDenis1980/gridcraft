@@ -72,3 +72,19 @@ fn the_region_belongs_to_the_thread_that_set_it() {
     assert_eq!(gridcraft_engine::display::region(), Region::EsEs);
     set_region(Region::EnUs);
 }
+
+#[test]
+fn the_api_and_html_export_stay_en_us() {
+    let mut s = session();
+    s.execute("cell.set", json!({"cell": "A1", "input": "1234.5"})).unwrap();
+    s.execute("home.numberFormat", json!({"range": "A1", "code": "#,##0.00"})).unwrap();
+    set_region(Region::EsEs);
+    assert_eq!(shown(&s, "A1").0, "1.234,50");
+    let got = s.execute("cell.get", json!({"cell": "A1"})).unwrap();
+    assert_eq!(got["text"], "1,234.50", "{got}");
+    let html = gridcraft_engine::io::to_html(&s.doc().unwrap().wb, 0).unwrap();
+    assert!(html.contains("1,234.50") && !html.contains("1.234,50"), "{html}");
+    // The display region is back afterwards.
+    assert_eq!(shown(&s, "A1").0, "1.234,50");
+    set_region(Region::EnUs);
+}

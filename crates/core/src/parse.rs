@@ -34,7 +34,7 @@ pub fn parse_input(s: &str, sys: DateSystem) -> Parsed {
     if let Some(e) = CellError::parse(t) {
         return Parsed { value: Value::Error(e), format: None };
     }
-    if let Some((n, f)) = parse_numeric(t, sys) {
+    if let Some((n, f)) = parse_numeric(t, sys, true) {
         return Parsed { value: Value::number(n), format: f };
     }
     Parsed { value: Value::text(s), format: None }
@@ -47,7 +47,8 @@ pub fn parse_number_text(s: &str) -> Option<f64> {
 
 /// Like [`parse_number_text`], with date text read in the given workbook date system.
 pub fn parse_number_text_in(s: &str, sys: DateSystem) -> Option<f64> {
-    parse_numeric(s.trim(), sys).map(|(n, _)| n)
+    // Arithmetic reads only the `$` Excel en-US reads; `12 €` and `250 грн` are typed-entry forms.
+    parse_numeric(s.trim(), sys, false).map(|(n, _)| n)
 }
 
 /// Text that Excel's "Number Stored as Text" check flags: it would be a number if typed (signs,
@@ -58,29 +59,30 @@ pub fn number_stored_as_text(s: &str) -> Option<f64> {
     // The same parentheses typed entry reads, accounting forms included: `$(5)`, `(5)%`.
     match parenthesized(t) {
         Some(inner) if inner.strip_prefix('$').map_or(inner.as_str(), str::trim_start).starts_with(['-', '+', '(']) => None,
-        Some(inner) => parse_plain(&inner).map(|(n, _)| -n),
-        None => parse_plain(t).map(|(n, _)| n),
+        Some(inner) => parse_plain(&inner, true).map(|(n, _)| -n),
+        None => parse_plain(t, true).map(|(n, _)| n),
     }
 }
 
-fn parse_numeric(t: &str, sys: DateSystem) -> Option<(f64, Option<&'static str>)> {
+/// `entry`: typed cell input, which also reads the euro and hryvnia forms (`€5`, `12,50 €`, `250 грн`).
+fn parse_numeric(t: &str, sys: DateSystem, entry: bool) -> Option<(f64, Option<&'static str>)> {
     // Parenthesised negatives: (100) = -100, and the accounting forms `$(100)` and `(5)%`.
     if let Some(inner) = parenthesized(t) {
         // Excel reads no sign and no nested parentheses inside: `(-5)`, `($-5)`, `((5))`.
         if inner.strip_prefix('$').map_or(inner.as_str(), str::trim_start).starts_with(['-', '+', '(']) {
             return None;
         }
-        let r = parse_plain(&inner).or_else(|| parse_fraction(&inner).map(|n| (n, Some("# ?/?"))));
+        let r = parse_plain(&inner, entry).or_else(|| parse_fraction(&inner).map(|n| (n, Some("# ?/?"))));
         return r.map(|(n, f)| (-n, f));
     }
-    parse_unparenthesised(t, sys)
+    parse_unparenthesised(t, sys, entry)
 }
 
-fn parse_unparenthesised(t: &str, sys: DateSystem) -> Option<(f64, Option<&'static str>)> {
+fn parse_unparenthesised(t: &str, sys: DateSystem, entry: bool) -> Option<(f64, Option<&'static str>)> {
     if t.is_empty() {
         return None;
     }
-    if let Some(r) = parse_plain(t) {
+    if let Some(r) = parse_plain(t, entry) {
         return Some(r);
     }
     if let Some(r) = parse_fraction(t) {
@@ -117,7 +119,7 @@ const SUFFIX_CURRENCIES: [(&str, &str, &str); 4] = [
 ];
 
 /// Signs, currency, thousands separators, percent, exponent.
-fn parse_plain(t: &str) -> Option<(f64, Option<&'static str>)> {
+fn parse_plain(t: &str, entry: bool) -> Option<(f64, Option<&'static str>)> {
     let mut s = t;
     let mut neg = false;
     // The formats for an amount with and without decimals, when a currency symbol was typed.
@@ -129,7 +131,12 @@ fn parse_plain(t: &str) -> Option<(f64, Option<&'static str>)> {
     } else if let Some(r) = s.strip_prefix('+') {
         s = r.trim_start();
     }
-    for (symbol, decimals, whole) in [("$", "\"$\"#,##0.00", "\"$\"#,##0"), ("€", "\"€\"#,##0.00", "\"€\"#,##0")] {
+    let prefixes: &[(&str, &str, &str)] = if entry {
+        &[("$", "\"$\"#,##0.00", "\"$\"#,##0"), ("€", "\"€\"#,##0.00", "\"€\"#,##0")]
+    } else {
+        &[("$", "\"$\"#,##0.00", "\"$\"#,##0")]
+    };
+    for &(symbol, decimals, whole) in prefixes {
         if let Some(r) = s.strip_prefix(symbol) {
             currency = Some((decimals, whole));
             s = r.trim_start();
@@ -140,7 +147,7 @@ fn parse_plain(t: &str) -> Option<(f64, Option<&'static str>)> {
             break;
         }
     }
-    if currency.is_none() {
+    if entry && currency.is_none() {
         for (symbol, decimals, whole) in SUFFIX_CURRENCIES {
             if let Some(r) = s.strip_suffix(symbol) {
                 currency = Some((decimals, whole));
@@ -493,7 +500,7 @@ fn delocalize_number(t: &str, region: Region) -> Option<String> {
     if !grouped && frac.is_none() {
         return None;
     }
-    parse_numeric(en.trim(), DateSystem::D1900).map(|_| en)
+    parse_numeric(en.trim(), DateSystem::D1900, true).map(|_| en)
 }
 
 /// `d/m/y`, `d.m.y`, `d-m-y` and `d/m` (with a time after a space) as en-US `m/d/y`.
