@@ -8,21 +8,15 @@ use gridcraft_core::{CellRef, RangeRef, Value};
 use gridcraft_model::{Sheet, Workbook};
 use gridcraft_numfmt::{Formatted, NumberFormat, format_value_in};
 
-thread_local! {
-    // The region values are shown in (the interface sets it from its language). Files, formulas,
-    // CSV and the engine API stay en-US; only display text follows it. Per thread: the interface
-    // thread sets it for itself, and every other thread (tests, scripts, servers) stays en-US.
-    static REGION: std::cell::Cell<Region> = const { std::cell::Cell::new(Region::EnUs) };
-}
-
-/// Shows values in `region` from now on, on this thread.
+/// Shows values in `region` from now on, on this thread (cells, print and charts). Files,
+/// formulas, CSV and the engine API stay en-US.
 pub fn set_region(region: Region) {
-    let _ = REGION.try_with(|r| r.set(region));
+    gridcraft_numfmt::set_display_region(region);
 }
 
 /// The region values are shown in on this thread.
 pub fn region() -> Region {
-    REGION.try_with(std::cell::Cell::get).unwrap_or_default()
+    gridcraft_numfmt::display_region()
 }
 
 /// Parsed number formats are cached by code.

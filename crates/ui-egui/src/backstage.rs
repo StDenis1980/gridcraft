@@ -347,6 +347,13 @@ fn new_tiles(app: &mut SheetApp, ui: &mut Ui, out: &mut Outcome) {
                 out.close = true;
             }
         }
+        let offset = gridcraft_engine::sample::SAMPLES.len();
+        for (i, (name, title)) in gridcraft_engine::tinta_templates::for_language(lang.code()).enumerate() {
+            if tile(ui, title, Some(offset + i)).clicked() {
+                app.run_or_alert("file.new", json!({"sample": name}));
+                out.close = true;
+            }
+        }
     });
 }
 

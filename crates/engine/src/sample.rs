@@ -11,11 +11,17 @@ use crate::{DocState, Session};
 pub const SAMPLES: &[(&str, &str)] = &[("budget", "Household Budget"), ("sales", "Quarterly Sales Dashboard"), ("grades", "Gradebook")];
 
 pub fn title(name: &str) -> String {
+    if let Some(t) = crate::tinta_templates::title(name) {
+        return t.to_string();
+    }
     SAMPLES.iter().find(|(n, _)| *n == name).map(|(_, t)| t.to_string()).unwrap_or_else(|| "Sample".into())
 }
 
 /// Builds a sample by replaying commands (so samples also exercise the command layer).
 pub fn build(name: &str) -> Option<Workbook> {
+    if crate::tinta_templates::title(name).is_some() {
+        return crate::tinta_templates::build(name);
+    }
     let mut s = Session::new();
     let mut wb = Workbook::new();
     if let Some(sh) = wb.sheet_mut(0) {
