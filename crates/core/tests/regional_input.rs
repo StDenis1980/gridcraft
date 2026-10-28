@@ -96,3 +96,15 @@ fn hostile_input_never_panics() {
         }
     }
 }
+
+#[test]
+fn arithmetic_reads_only_the_en_us_currency() {
+    use gridcraft_core::parse::{number_stored_as_text, parse_number_text};
+    // Excel en-US coerces "$3" in a formula but not "250 грн" ("250 грн"+1 is #VALUE!).
+    assert_eq!(parse_number_text("$3"), Some(3.0));
+    for text in ["250 грн", "12.50 €", "€5", "100 ₴", "7 грн."] {
+        assert_eq!(parse_number_text(text), None, "{text}");
+    }
+    // Typed entry and the stored-as-text check still read them.
+    assert_eq!(number_stored_as_text("12.50 €"), Some(12.5));
+}

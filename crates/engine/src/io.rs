@@ -458,6 +458,11 @@ const HTML_EXPORT_MAX_CELLS: u64 = 4_000_000;
 /// A sheet as a standalone HTML table (Save as Web Page). A sheet with pictures gets the sheet's
 /// own column widths and row heights so each picture and chart (inline SVG) can sit at its anchor.
 pub fn to_html(wb: &Workbook, sheet: usize) -> Result<String> {
+    // A file: en-US like CSV and XLSX, whatever region the interface shows.
+    crate::display::in_region(gridcraft_core::Region::EnUs, || html_document(wb, sheet))
+}
+
+fn html_document(wb: &Workbook, sheet: usize) -> Result<String> {
     let Some(sh) = wb.sheet(sheet) else { return Ok(String::new()) };
     let fixed = !(sh.images.is_empty() && sh.charts.is_empty());
     let used = sh.used_range();

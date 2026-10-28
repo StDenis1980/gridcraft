@@ -3,7 +3,7 @@
 use gridcraft_calc::evaluate;
 use gridcraft_core::{CellRef, RangeRef, Value, category_levels, number_to_text};
 use gridcraft_model::{Chart, ChartKind, Theme, Workbook, style::apply_tint};
-use gridcraft_numfmt::{NumberFormat, display_region, format_value_in};
+use gridcraft_numfmt::{NumberFormat, display_region, format_value_in, localize_general};
 
 use crate::{ChartData, Rgba, SeriesData, TrendlineData};
 
@@ -155,7 +155,11 @@ fn category_table(wb: &Workbook, sheet: usize, formula: &str, values: &str) -> (
                     }
                 }
             }
-            value_text(v)
+            // General numbers (years, codes) take the region's decimal separator like the cells.
+            match v {
+                Value::Number(n) => localize_general(number_to_text(*n), display_region()),
+                _ => value_text(v),
+            }
         })
         .collect();
     let Some((_, r)) = src else { return (texts, vec![]) };
