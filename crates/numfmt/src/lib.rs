@@ -352,7 +352,7 @@ pub fn format_value_in(v: &Value, fmt: &NumberFormat, sys: DateSystem, region: R
     match v {
         Value::Empty => Formatted::default(),
         Value::Number(n) if !n.is_finite() => Formatted { text: CellError::Num.as_str().into(), ..Formatted::default() },
-        Value::Number(n) if region != Region::EnUs => match builtin_id(fmt.code()) {
+        Value::Number(n) if region != Region::EnUs && fmt.is_date() => match builtin_id(fmt.code()) {
             Some(14) => NumberFormat::parse_cached(region.short_date()).format_number(*n, sys, region).0,
             Some(22) => NumberFormat::parse_cached(region.short_date_time()).format_number(*n, sys, region).0,
             _ => fmt.format_number(*n, sys, region).0,
