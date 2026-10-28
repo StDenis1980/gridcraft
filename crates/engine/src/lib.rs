@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 pub use gridcraft_brand as brand;
+pub mod automation;
 pub mod catalog;
 pub mod cf;
 mod chart_svg;
