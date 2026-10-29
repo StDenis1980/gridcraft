@@ -108,3 +108,26 @@ fn arithmetic_reads_only_the_en_us_currency() {
     // Typed entry and the stored-as-text check still read them.
     assert_eq!(number_stored_as_text("12.50 €"), Some(12.5));
 }
+
+#[test]
+fn ukrainian_booleans_read_in_any_case() {
+    let uk = Region::UkUa;
+    for (typed, value) in [("ІСТИНА", true), ("істина", true), ("Хибність", false), ("хибність", false)] {
+        assert_eq!(read(typed, uk).0, Value::Bool(value), "{typed}");
+    }
+    // Each region reads its own words only.
+    assert!(matches!(read("істина", Region::EsEs).0, Value::Text(_)));
+    assert!(matches!(read("verdadero", uk).0, Value::Text(_)));
+}
+
+#[test]
+fn a_sign_after_the_euro_inside_parentheses_is_not_a_number() {
+    use gridcraft_core::parse::number_stored_as_text;
+    // Excel reads no sign inside accounting parentheses, after a currency symbol either.
+    for text in ["(€-5)", "(€ -5)", "(€+5)", "($-5)"] {
+        assert_eq!(parse_input(text, DateSystem::D1900).value, Value::text(text), "{text}");
+        assert_eq!(number_stored_as_text(text), None, "{text}");
+    }
+    assert_eq!(parse_input("(€5)", DateSystem::D1900).value, Value::Number(-5.0));
+    assert_eq!(number_stored_as_text("(€5)"), Some(-5.0));
+}
