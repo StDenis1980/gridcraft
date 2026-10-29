@@ -133,6 +133,41 @@ pub(crate) fn boolean_alias(name: &str) -> Option<bool> {
     }
 }
 
+/// The Spanish (`display`) or English spelling of a function name that no binding or defined
+/// name shadows. Shown in Spanish, a function whose Spanish name a binding shadows keeps its
+/// English name; when that English name is the Spanish name of another function (`DECIMAL`,
+/// which is FIXED in Spanish), no spelling would read back as the same function, so the
+/// formula cannot be shown in Spanish.
+fn translate_function(name: &str, display: bool, bound: &impl Fn(&str) -> bool) -> Result<String, ParseError> {
+    let es = FormulaLocale::Es;
+    if !display {
+        return Ok(es.canonical_name(name).to_string());
+    }
+    let alias = es.function_name(name);
+    if !bound(alias) {
+        return Ok(alias.to_string());
+    }
+    if !crate::same_name(es.canonical_name(name), name) {
+        return Err(ParseError { msg: format!("{name} cannot be shown in Spanish while {alias} names a local value"), pos: 0 });
+    }
+    Ok(name.to_string())
+}
+
+/// A function given by name as an argument, as in `MAP({1;4};RAIZ)`, is translated like a call.
+/// Booleans, bound names and names that are no function's are left alone.
+fn function_argument(arg: &mut Expr, display: bool, bound: &impl Fn(&str) -> bool) -> Result<(), ParseError> {
+    let Expr::Name(name) = arg else { return Ok(()) };
+    if bound(name) || boolean_alias(name).is_some() {
+        return Ok(());
+    }
+    let es = FormulaLocale::Es;
+    let other = if display { es.function_name(name) } else { es.canonical_name(name) };
+    if !crate::same_name(other, name) {
+        *name = translate_function(name, display, bound)?;
+    }
+    Ok(())
+}
+
 fn normalize(expr: &mut Expr, known_name: &impl Fn(&str) -> bool, bindings: &mut Vec<String>, depth: usize, display: bool) -> Result<(), ParseError> {
     if depth > parser::MAX_DEPTH {
         return Err(ParseError { msg: "formula is nested too deeply".into(), pos: 0 });
@@ -179,17 +214,18 @@ fn normalize(expr: &mut Expr, known_name: &impl Fn(&str) -> bool, bindings: &mut
             bindings.truncate(saved);
         }
         Expr::Call(name, args) => {
-            let alias = if display { FormulaLocale::Es.function_name(name) } else { FormulaLocale::Es.canonical_name(name) };
-            if !bound(name, bindings) && (!display || !bound(alias, bindings)) {
-                *name = alias.to_string();
+            if !bound(name, bindings) {
+                *name = translate_function(name, display, &|n| bound(n, bindings))?;
             }
             for arg in args {
+                function_argument(arg, display, &|n| bound(n, bindings))?;
                 normalize(arg, known_name, bindings, depth + 1, display)?;
             }
         }
         Expr::Invoke(callee, args) => {
             normalize(callee, known_name, bindings, depth + 1, display)?;
             for arg in args {
+                function_argument(arg, display, &|n| bound(n, bindings))?;
                 normalize(arg, known_name, bindings, depth + 1, display)?;
             }
         }

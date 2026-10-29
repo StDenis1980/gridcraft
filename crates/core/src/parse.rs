@@ -58,7 +58,7 @@ pub fn number_stored_as_text(s: &str) -> Option<f64> {
     let t = s.trim();
     // The same parentheses typed entry reads, accounting forms included: `$(5)`, `(5)%`.
     match parenthesized(t) {
-        Some(inner) if inner.strip_prefix('$').map_or(inner.as_str(), str::trim_start).starts_with(['-', '+', '(']) => None,
+        Some(inner) if signed_inside(&inner, true) => None,
         Some(inner) => parse_plain(&inner, true).map(|(n, _)| -n),
         None => parse_plain(t, true).map(|(n, _)| n),
     }
@@ -69,7 +69,7 @@ fn parse_numeric(t: &str, sys: DateSystem, entry: bool) -> Option<(f64, Option<&
     // Parenthesised negatives: (100) = -100, and the accounting forms `$(100)` and `(5)%`.
     if let Some(inner) = parenthesized(t) {
         // Excel reads no sign and no nested parentheses inside: `(-5)`, `($-5)`, `((5))`.
-        if inner.strip_prefix('$').map_or(inner.as_str(), str::trim_start).starts_with(['-', '+', '(']) {
+        if signed_inside(&inner, entry) {
             return None;
         }
         let r = parse_plain(&inner, entry).or_else(|| parse_fraction(&inner).map(|n| (n, Some("# ?/?"))));
@@ -92,6 +92,13 @@ fn parse_unparenthesised(t: &str, sys: DateSystem, entry: bool) -> Option<(f64, 
         return Some(r);
     }
     None
+}
+
+/// Whether the text inside accounting parentheses carries a sign or more parentheses, after a
+/// leading currency symbol: `-5`, `$-5`, `(5)`, and for typed entry `€-5`. Excel reads none of them.
+fn signed_inside(inner: &str, entry: bool) -> bool {
+    let symbols: &[char] = if entry { &['$', '€'] } else { &['$'] };
+    inner.strip_prefix(symbols).map_or(inner, str::trim_start).starts_with(['-', '+', '('])
 }
 
 /// The number inside accounting parentheses, as plain text: `(5)` gives `5`. A dollar sign may
@@ -443,12 +450,18 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
     if t.is_empty() || t.starts_with(['=', '\'']) {
         return None;
     }
-    // Booleans as the Spanish interface writes them.
-    if region == Region::EsEs {
-        if t.eq_ignore_ascii_case("VERDADERO") {
+    // Booleans as the Spanish and Ukrainian interfaces write them, in any case (`істина`).
+    let booleans = match region {
+        Region::EsEs => Some(("VERDADERO", "FALSO")),
+        Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
+        Region::EnUs => None,
+    };
+    if let Some((yes, no)) = booleans {
+        let upper = t.to_uppercase();
+        if upper == yes {
             return Some("TRUE".into());
         }
-        if t.eq_ignore_ascii_case("FALSO") {
+        if upper == no {
             return Some("FALSE".into());
         }
     }

@@ -99,7 +99,7 @@ pub(crate) const SPANISH: &[(&str, &str)] = &[
     ("COUPNUM", "CUPON.NUM"),
     ("COUPPCD", "CUPON.FECHA.L1"),
     ("COVAR", "COVAR"),
-    ("COVARIANCE.P", "COVARIANCE.P"),
+    ("COVARIANCE.P", "COVARIANZA.P"),
     ("COVARIANCE.S", "COVARIANZA.M"),
     ("CRITBINOM", "BINOM.CRIT"),
     ("CSC", "CSC"),
