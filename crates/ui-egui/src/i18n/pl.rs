@@ -359,6 +359,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Jeszcze niezapisany",
         "Location" => "Lokalizacja",
         "Sheets" => "Arkusze",
+        "Encrypt with Password" => "Szyfruj przy użyciu hasła",
+        "Require a password to open this workbook." => "Wymagaj hasła do otwarcia tego skoroszytu.",
+        "A password is required to open this workbook." => "Do otwarcia tego skoroszytu potrzebne jest hasło.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Szyfruje zawartość tego pliku. Jeśli zgubisz lub zapomnisz hasło, nie da się go odzyskać. Zostaw puste, aby usunąć hasło."
+        }
+        "Reenter password:" => "Wprowadź ponownie hasło:",
         "Protect Workbook" => "Chroń skoroszyt",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "Struktura arkuszy jest zablokowana: nie można dodawać, przenosić, usuwać arkuszy ani zmieniać ich nazw."

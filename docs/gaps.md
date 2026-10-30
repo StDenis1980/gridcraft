@@ -1,6 +1,6 @@
 # Gaps
 
-> **Last reviewed:** 2026-10-11 · **Last updated:** 2026-10-24 · **Change:** minor (§8: PivotTable Enable show details; earlier: PivotTable Show Details) · **Target:** Microsoft Excel (Microsoft 365)
+> **Last reviewed:** 2026-10-11 · **Last updated:** 2026-10-30 · **Change:** minor (§7: encrypted workbooks save with their password; Excel-encrypted files no longer fail the integrity check) · **Target:** Microsoft Excel (Microsoft 365)
 
 Every known shortfall against Excel, one entry each, ranked by user impact (what blocks someone
 using GridCraft for real work first). This is the work list: pick from the top, check the open
@@ -70,16 +70,17 @@ No alpha blockers: every core workflow passes the [alpha gate](roadmap.md#alpha-
   oracle suite of §15 can say the category is clear rather than only these five reports being so.
 - **Estimate:** — [function-parity.md](function-parity.md#formula-language)
 
-### 7. Legacy `.xls` only partly read; encrypted workbooks can't be saved with a password (FF)
+### 7. Legacy `.xls` only partly read (FF)
 - **Evidence:** #121: Excel 97-2003 (BIFF8) `.xls` files now open (values, formulas, number
   formats, merges, sizes, names); fonts, fills, borders, charts, pictures, comments, conditional
   formats, validation and BIFF5 files are not read, and `.xls` is never written. Password-encrypted
-  `.xlsx` workbooks (Agile and Standard encryption) open with their password since #11, but are
-  saved without it: GridCraft can't write an encrypted file yet. Encrypted `.xls` (FILEPASS) and
-  RC4-encrypted files are still refused with a message.
+  `.xlsx` workbooks (Agile and Standard encryption) open with their password since #11 and save
+  back with it (Agile, AES-256, as Excel writes by default); File › Info › Encrypt with Password
+  sets, changes or removes it. Encrypted `.xls` (FILEPASS) and RC4-encrypted files are still
+  refused with a message. Our encrypted output is verified by msoffcrypto-tool, not yet by Excel.
 - **Impact:** common in finance, government and anything older than 2007; encrypted files are
   routine in business.
-- **Estimate:** 14–21 h (`.xls` styles and objects 10–15, encryption 4–6). [file-format-parity.md](file-format-parity.md)
+- **Estimate:** 10–15 h (`.xls` styles and objects). [file-format-parity.md](file-format-parity.md)
 
 ### 8. PivotTables: no slicers, calculated items, PivotCharts; unverified in Excel (F)
 - **Evidence:** `parity-checklist.md` missing `insert.slicer`, `insert.timeline`,
@@ -192,6 +193,7 @@ No alpha blockers: every core workflow passes the [alpha gate](roadmap.md#alpha-
 | 2026-10-15 | minor | §13: Solver prepares reports before committing the solution, model and report sheets together; report refusal preserves the workbook and Undo/Redo (#1050) |
 | 2026-10-13 | trivial | §4: multi-level category axes landed |
 | 2026-10-12 | minor | §9: next/previous sheet commands retain the current visible sheet and selection when there is no visible destination |
+| 2026-10-30 | minor | §7: encrypted workbooks save with their password (Agile AES-256 writer with DataSpaces, File › Info › Encrypt with Password, `file.encrypt`, `file.saveAs {password}`); the dataIntegrity key is read at hash size, so Excel-encrypted files no longer fail as damaged |
 | 2026-10-12 | minor | rows auto-fit oversized fonts on open and whole-row/column formatting (#833) |
 | 2026-10-12 | minor | Page Layout view: dragging margins on the rulers (#792) removed from the §14 remainder |
 | 2026-10-12 | minor | §13: Forecast Sheet Forecast Start (hindcast) landed (#785) |

@@ -364,6 +364,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Ще не збережено",
         "Location" => "Розташування",
         "Sheets" => "Аркуші",
+        "Encrypt with Password" => "Зашифрувати паролем",
+        "Require a password to open this workbook." => "Вимагати пароль для відкриття цієї книги.",
+        "A password is required to open this workbook." => "Для відкриття цієї книги потрібен пароль.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Шифрує вміст цього файлу. Якщо ви втратите або забудете пароль, його не можна буде відновити. Залиште поле порожнім, щоб зняти пароль."
+        }
+        "Reenter password:" => "Введіть пароль ще раз:",
         "Protect Workbook" => "Захистити книгу",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "Структура аркушів заблокована: аркуші не можна додавати, переміщувати, перейменовувати чи видаляти."

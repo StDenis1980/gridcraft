@@ -64,13 +64,14 @@ fn opening_an_encrypted_file_asks_for_its_password() {
     assert_eq!(h.state().dialog.as_ref().and_then(|d| d.values.get("path")), Some(&json!(p)));
     h.state_mut().message = None;
 
-    // The right one opens the workbook: no save path, in Recent, with the notice.
+    // The right one opens the workbook: its own file (Save encrypts it again), in Recent, with the notice.
     h.state_mut().dialog.as_mut().unwrap().values.insert("password".into(), json!(PW));
     h.get_by_label("   OK   ").click();
     h.run_steps(3);
     assert_eq!(dialog(&h), None);
     assert_eq!(a1(&h), Value::Number(42.0));
-    assert_eq!(h.state().session.active().unwrap().path, None);
+    assert_eq!(h.state().session.active().unwrap().path.as_deref(), Some(p.as_str()));
+    assert!(h.state().session.active().unwrap().password.is_some());
     assert_eq!(h.state().ui.recent.first(), Some(&p));
     assert!(h.state().notice.as_ref().is_some_and(|n| n.text.contains("password-protected")));
     std::fs::remove_dir_all(path.parent().unwrap()).unwrap();
@@ -158,4 +159,44 @@ fn app_open_over_the_control_channel_never_opens_a_dialog() {
     assert_eq!(a1(&h), Value::Number(42.0));
     assert_eq!(h.state().ui.recent.first(), Some(&p));
     std::fs::remove_dir_all(path.parent().unwrap()).unwrap();
+}
+
+#[test]
+fn file_info_encrypts_the_workbook_with_a_confirmed_password() {
+    let mut h = harness(Services::default());
+    h.get_by_label("File").click();
+    h.run_steps(3);
+    h.get_by_role_and_label(Role::Button, "Info").click();
+    h.run_steps(3);
+    assert!(h.query_by_label("Require a password to open this workbook.").is_some());
+    h.get_by_role_and_label(Role::Button, "Encrypt with Password").click();
+    h.run_steps(3);
+    assert_eq!(dialog(&h).as_deref(), Some("encryptPassword"));
+    assert_eq!(h.query_all_by_role(Role::PasswordInput).count(), 2, "asked twice, masked");
+
+    // Two different entries are refused and leave the workbook as it was.
+    let set = |h: &mut egui_kittest::Harness<'static, SheetApp>, a: &str, b: &str| {
+        let d = h.state_mut().dialog.as_mut().unwrap();
+        d.values.insert("password".into(), json!(a));
+        d.values.insert("confirmPassword".into(), json!(b));
+    };
+    set(&mut h, PW, "typo");
+    h.get_by_label("   OK   ").click();
+    h.run_steps(3);
+    assert!(h.state().message.as_ref().is_some_and(|(_, m)| m.contains("match")));
+    assert!(h.state().session.active().unwrap().password.is_none());
+    h.state_mut().message = None;
+    if dialog(&h).is_none() {
+        h.state_mut().run("file.encrypt", json!({})).unwrap();
+        h.run_steps(3);
+    }
+    set(&mut h, PW, PW);
+    h.get_by_label("   OK   ").click();
+    h.run_steps(3);
+    assert_eq!(dialog(&h), None);
+    let doc = h.state().session.active().unwrap();
+    assert!(doc.password.is_some() && doc.is_dirty(), "set, and a change to save");
+    assert!(h.query_by_label("A password is required to open this workbook.").is_some());
+    let journal = serde_json::to_string(&h.state().session.journal).unwrap();
+    assert!(!journal.contains(PW), "the password never reaches the journal");
 }
