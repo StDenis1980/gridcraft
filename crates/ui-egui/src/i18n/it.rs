@@ -366,6 +366,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Non ancora salvato",
         "Location" => "Percorso",
         "Sheets" => "Fogli",
+        "Encrypt with Password" => "Crittografa con password",
+        "Require a password to open this workbook." => "Richiedi una password per aprire questa cartella di lavoro.",
+        "A password is required to open this workbook." => "Serve una password per aprire questa cartella di lavoro.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Crittografa il contenuto di questo file. Se perdi o dimentichi la password, non è possibile recuperarla. Lasciala vuota per rimuovere la password."
+        }
+        "Reenter password:" => "Reinserisci la password:",
         "Protect Workbook" => "Proteggi cartella di lavoro",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "La struttura dei fogli è bloccata: non è possibile aggiungere, spostare, rinominare o eliminare fogli."

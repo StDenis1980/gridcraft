@@ -210,6 +210,30 @@ pub struct DocState {
     /// The references `edit.goTo` with `record: true` went to in this document, newest first,
     /// without names, each area written with its sheet (`Sheet1!B14:C22,Sheet1!F19:G30`).
     pub go_to_recent: Vec<String>,
+    /// The password the workbook is encrypted with: the one it was opened with, or the one
+    /// `file.encrypt` set. An `.xlsx` save encrypts with it. Kept in memory only.
+    pub password: Option<Secret>,
+    /// Whether `password` changed since the last save (a change Save must write).
+    pub password_changed: bool,
+}
+
+/// A password held in memory. Its `Debug` never shows it.
+#[derive(Clone, PartialEq, Eq)]
+pub struct Secret(String);
+
+impl Secret {
+    pub fn new(s: impl Into<String>) -> Secret {
+        Secret(s.into())
+    }
+    pub fn expose(&self) -> &str {
+        &self.0
+    }
+}
+
+impl std::fmt::Debug for Secret {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Secret(…)")
+    }
 }
 
 static NEXT_UID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
@@ -308,10 +332,12 @@ impl DocState {
             scripts_trusted,
             trust,
             go_to_recent: vec![],
+            password: None,
+            password_changed: false,
         }
     }
     pub fn is_dirty(&self) -> bool {
-        !Arc::ptr_eq(&self.wb, &self.saved)
+        !Arc::ptr_eq(&self.wb, &self.saved) || self.password_changed
     }
     pub fn sheet_index(&self) -> usize {
         self.wb.active_sheet()

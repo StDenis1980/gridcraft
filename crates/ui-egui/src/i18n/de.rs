@@ -292,6 +292,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Noch nicht gespeichert",
         "Location" => "Speicherort",
         "Sheets" => "Blätter",
+        "Encrypt with Password" => "Mit Kennwort verschlüsseln",
+        "Require a password to open this workbook." => "Zum Öffnen dieser Arbeitsmappe ein Kennwort verlangen.",
+        "A password is required to open this workbook." => "Zum Öffnen dieser Arbeitsmappe ist ein Kennwort erforderlich.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Verschlüsselt den Inhalt dieser Datei. Wenn Sie das Kennwort verlieren oder vergessen, kann es nicht wiederhergestellt werden. Leer lassen, um das Kennwort zu entfernen."
+        }
+        "Reenter password:" => "Kennwort erneut eingeben:",
         "Protect Workbook" => "Arbeitsmappe schützen",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "Die Blattstruktur ist gesperrt: Blätter können nicht hinzugefügt, verschoben, umbenannt oder gelöscht werden."

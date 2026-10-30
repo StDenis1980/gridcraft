@@ -283,6 +283,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Aínda non se gardou",
         "Location" => "Localización",
         "Sheets" => "Follas",
+        "Encrypt with Password" => "Cifrar con contrasinal",
+        "Require a password to open this workbook." => "Pedir un contrasinal para abrir este libro.",
+        "A password is required to open this workbook." => "Precísase un contrasinal para abrir este libro.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Cifra o contido deste ficheiro. Se perde ou esquece o contrasinal, non se pode recuperar. Déixeo baleiro para quitar o contrasinal."
+        }
+        "Reenter password:" => "Volva escribir o contrasinal:",
         "Protect Workbook" => "Protexer libro",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "A estrutura de follas está bloqueada: non se poden engadir, mover, cambiar de nome nin eliminar follas."
