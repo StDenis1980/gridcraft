@@ -48,6 +48,10 @@ fn ukrainian_numbers_group_with_spaces_and_take_the_hryvnia() {
     assert_eq!(read("99,90 ₴", uk), (Value::Number(99.9), Some("#,##0.00 \"₴\"")));
     assert_eq!(read("1 500 грн", uk), (Value::Number(1500.0), Some("#,##0 \"грн\"")));
     assert_eq!(number("0,5", uk), Some(0.5));
+    // A dot decimal after grouped digits mixes two conventions: text, not 1234.5.
+    for text in ["1 234.5", "1\u{a0}234.50", "-1 234.5 ₴"] {
+        assert!(matches!(read(text, uk).0, Value::Text(_)), "{text}");
+    }
 }
 
 #[test]
