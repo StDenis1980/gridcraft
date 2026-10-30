@@ -145,8 +145,23 @@ fn translate_function(name: &str, display: bool, bound: &impl Fn(&str) -> bool) 
     Ok(name.to_string())
 }
 
-/// A function given by name as an argument, as in `MAP({1;4};RAIZ)`, is translated like a call.
-/// Booleans, bound names and names that are no function's are left alone.
+/// Whether argument `index` of `count` passed to the built-in `function` (English name) is a
+/// function, which may be given by name: the LAMBDA of the helpers and the aggregation of
+/// GROUPBY and PIVOTBY, as the evaluator reads them. Every other argument is a value, so a
+/// name there stays a name (`SUMA(RAIZ;1)` keeps the name `RAIZ`).
+fn takes_function(function: &str, index: usize, count: usize) -> bool {
+    let position = match function.to_ascii_uppercase().as_str() {
+        "MAP" => count.checked_sub(1),
+        "BYROW" | "BYCOL" => Some(1),
+        "REDUCE" | "SCAN" | "MAKEARRAY" | "GROUPBY" => Some(2),
+        "PIVOTBY" => Some(3),
+        _ => None,
+    };
+    position == Some(index)
+}
+
+/// A function given by name where a function is expected, as in `MAP({1;4};RAIZ)`, is
+/// translated like a call. Booleans, bound names and names that are no function's are left alone.
 fn function_argument(arg: &mut Expr, display: bool, bound: &impl Fn(&str) -> bool) -> Result<(), ParseError> {
     let Expr::Name(name) = arg else { return Ok(()) };
     if bound(name) || boolean_alias(name).is_some() {
@@ -206,18 +221,24 @@ fn normalize(expr: &mut Expr, known_name: &impl Fn(&str) -> bool, bindings: &mut
             bindings.truncate(saved);
         }
         Expr::Call(name, args) => {
+            let mut canonical = name.clone();
             if !bound(name, bindings) {
                 *name = translate_function(name, display, &|n| bound(n, bindings))?;
+                if !display {
+                    canonical.clone_from(name);
+                }
             }
-            for arg in args {
-                function_argument(arg, display, &|n| bound(n, bindings))?;
+            let count = args.len();
+            for (i, arg) in args.iter_mut().enumerate() {
+                if takes_function(&canonical, i, count) {
+                    function_argument(arg, display, &|n| bound(n, bindings))?;
+                }
                 normalize(arg, known_name, bindings, depth + 1, display)?;
             }
         }
         Expr::Invoke(callee, args) => {
             normalize(callee, known_name, bindings, depth + 1, display)?;
             for arg in args {
-                function_argument(arg, display, &|n| bound(n, bindings))?;
                 normalize(arg, known_name, bindings, depth + 1, display)?;
             }
         }
