@@ -1,5 +1,6 @@
 //! GridCraft file formats: XLSX (transitional and strict) and CSV import/export, plus XLSB and ODS data import
-//! and legacy Excel 97-2003 `.xls` (BIFF8) import, and password-encrypted workbooks (Agile and Standard encryption).
+//! and legacy Excel 97-2003 `.xls` (BIFF8) import, and password-encrypted workbooks (Agile and Standard encryption read,
+//! Agile written).
 //!
 //! Clean-room implementation from ECMA-376 / ISO/IEC 29500 and observed behaviour. All entry
 //! points work on byte slices (no file system access), so the crate builds for WebAssembly.
@@ -13,6 +14,7 @@
 
 mod array_formula;
 mod cfb;
+mod cfb_write;
 mod chart;
 mod chartex;
 mod crypto;
@@ -44,7 +46,7 @@ mod tests;
 use gridcraft_core::DateSystem;
 use gridcraft_model::Workbook;
 
-pub use crypto::{DecryptError, check_encryption, decrypt};
+pub use crypto::{DecryptError, EncryptError, check_encryption, decrypt, encrypt};
 pub use csv::{MAX_CSV_BYTES, read_csv, write_csv, write_csv_limited};
 pub use ods::read_ods;
 pub use package::MAX_PART;

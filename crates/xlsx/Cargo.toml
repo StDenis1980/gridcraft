@@ -23,6 +23,11 @@ zip = { workspace = true }
 aes = { workspace = true }
 sha1 = { workspace = true }
 sha2 = { workspace = true }
+# Fresh salts and keys for every encrypted save.
+getrandom = "0.4"
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.4", features = ["wasm_js"] }
 
 [dev-dependencies]
 # Every registered function name, for the formula file-spelling test.

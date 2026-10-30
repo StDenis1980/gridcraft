@@ -43,7 +43,7 @@ fn contains_utf16(hay: &[u8], needle: &str) -> bool {
 }
 
 /// Names of every directory entry, or `None` when the directory can't be read.
-fn directory_names(b: &[u8]) -> Option<Vec<String>> {
+pub(crate) fn directory_names(b: &[u8]) -> Option<Vec<String>> {
     if !b.starts_with(&SIGNATURE) {
         return None;
     }

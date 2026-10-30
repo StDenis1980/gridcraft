@@ -231,3 +231,91 @@ fn integrity_matches_the_stream_not_the_plaintext() {
     assert!(matches!(decrypt_streams(&info, &ours, PASSWORD), Err(DecryptError::Malformed(m)) if m.contains("integrity")));
     assert_eq!(decrypt_streams(&info, &package, PASSWORD).unwrap(), plain);
 }
+
+fn secrets() -> super::Secrets {
+    let mut hmac_key = [0u8; 64];
+    hmac_key[..16].fill(5);
+    super::Secrets { password_salt: [1; 16], key_data_salt: [2; 16], package_key: [3; 32], verifier: [4; 16], hmac_key }
+}
+
+#[test]
+fn a_hash_size_integrity_key_verifies() {
+    // Excel and msoffcrypto-tool draw all 64 bytes of the HMAC key at random ([MS-OFFCRYPTO]
+    // 2.3.4.14); reading only the first 16 failed every such file as damaged.
+    let mut s = secrets();
+    s.hmac_key = std::array::from_fn(|i| i as u8 + 1);
+    let plain = payload(5000);
+    let file = super::encrypt_with(&plain, PASSWORD, 1000, &s).unwrap();
+    assert_eq!(decrypt(&file, PASSWORD).unwrap(), plain);
+}
+
+#[test]
+fn written_workbooks_decrypt_with_their_password_only() {
+    for len in [0usize, 1, 4095, 4096, 4097, 70_000] {
+        let plain = payload(len);
+        let file = super::encrypt_with(&plain, "Contraseña ✓", 1000, &secrets()).unwrap();
+        assert_eq!(decrypt(&file, "Contraseña ✓").unwrap(), plain, "{len}");
+        assert_eq!(decrypt(&file, "contraseña ✓"), Err(DecryptError::WrongPassword));
+        assert_eq!(check_encryption(&file), Ok(()));
+    }
+}
+
+#[test]
+fn every_save_has_fresh_salts_and_keys() {
+    let plain = payload(5000);
+    let (a, b) = (super::encrypt(&plain, "pw").unwrap(), super::encrypt(&plain, "pw").unwrap());
+    assert_ne!(a, b);
+    assert_eq!(decrypt(&a, "pw").unwrap(), plain);
+    assert_eq!(decrypt(&b, "pw").unwrap(), plain);
+}
+
+#[test]
+fn written_files_carry_excels_parameters_and_data_spaces() {
+    let file = super::encrypt_with(&payload(10), "pw", super::WRITE_SPIN_COUNT, &secrets()).unwrap();
+    let cf = crate::cfb::Compound::open(&file).unwrap();
+    let info = cf.root_stream("EncryptionInfo").unwrap().unwrap();
+    assert_eq!(&info[..8], &[4, 0, 4, 0, 0x40, 0, 0, 0]);
+    let xml = String::from_utf8(info[8..].to_vec()).unwrap();
+    for needle in ["spinCount=\"100000\"", "keyBits=\"256\"", "hashAlgorithm=\"SHA512\"", "dataIntegrity", "saltSize=\"16\""] {
+        assert!(xml.contains(needle), "{needle}");
+    }
+    let names = crate::cfb::directory_names(&file).unwrap();
+    for n in [
+        "\u{6}DataSpaces",
+        "Version",
+        "DataSpaceMap",
+        "DataSpaceInfo",
+        "StrongEncryptionDataSpace",
+        "TransformInfo",
+        "StrongEncryptionTransform",
+        "\u{6}Primary",
+    ] {
+        assert!(names.iter().any(|x| x == n), "{n:?} in {names:?}");
+    }
+}
+
+#[test]
+fn the_hmac_key_reads_the_same_at_salt_or_hash_size() {
+    // HMAC zero-pads short keys, so the 16 random bytes and the 64-byte field give one MAC.
+    let stream = payload(300);
+    let mut long = [5u8; 16].to_vec();
+    long.resize(64, 0);
+    assert_eq!(hmac(Hash::Sha512, &[5u8; 16], &stream), hmac(Hash::Sha512, &long, &stream));
+}
+
+#[test]
+fn empty_and_overlong_passwords_are_refused() {
+    assert_eq!(super::encrypt(b"x", ""), Err(super::EncryptError::EmptyPassword));
+    assert_eq!(super::encrypt(b"x", &"a".repeat(256)), Err(super::EncryptError::LongPassword));
+    assert!(super::encrypt(b"x", &"a".repeat(255)).is_ok());
+}
+
+#[test]
+fn base64_round_trips() {
+    for len in 0..20 {
+        let b: Vec<u8> = (0..len as u8).map(|i| i.wrapping_mul(37)).collect();
+        assert_eq!(base64(&super::base64_encode(&b)).unwrap(), b);
+    }
+    assert_eq!(super::base64_encode(b"Man"), "TWFu");
+    assert_eq!(super::base64_encode(b"Ma"), "TWE=");
+}
