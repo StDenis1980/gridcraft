@@ -182,8 +182,21 @@ fn a_function_given_by_name_as_an_argument_is_translated() {
     let shown = print_input(&parse("LET(RAIZ,1,MAP(A1:A2,SQRT))").unwrap(), es, |_| false).unwrap();
     assert_eq!(shown, "LET(RAIZ;1;MAP(A1:A2;SQRT))");
     assert_eq!(print(&parse_input(&shown, es, |_| false).unwrap()), "LET(RAIZ,1,MAP(A1:A2,SQRT))");
-    // A bare name outside an argument list stays a name.
+    // Only where a function is expected: an ordinary argument or a bare name stays a name.
     assert_eq!(input("RAIZ+1"), "RAIZ+1");
+    assert_eq!(input("SUMA(RAIZ;1)"), "SUM(RAIZ,1)");
+    assert_eq!(input("MAP(RAIZ;RAIZ)"), "MAP(RAIZ,SQRT)");
+    assert_eq!(input("LAMBDA(x;x)(RAIZ)"), "LAMBDA(x,x)(RAIZ)");
+    for (src, expected) in [
+        ("REDUCE(0;A1:A3;SUMA)", "REDUCE(0,A1:A3,SUM)"),
+        ("SCAN(0;A1:A3;SUMA)", "SCAN(0,A1:A3,SUM)"),
+        ("BYCOL(A1:B2;MAX)", "BYCOL(A1:B2,MAX)"),
+        ("MAKEARRAY(2;2;PRODUCTO)", "MAKEARRAY(2,2,PRODUCT)"),
+        ("AGRUPARPOR(A1:A9;B1:B9;PROMEDIO)", "GROUPBY(A1:A9,B1:B9,AVERAGE)"),
+    ] {
+        assert_eq!(input(src), expected, "{src}");
+    }
+    assert_eq!(print_input(&parse("SUM(SQRT,1)").unwrap(), es, |_| false).unwrap(), "SUMA(SQRT;1)");
 }
 
 #[test]
