@@ -375,6 +375,12 @@ fn builtins() {
             assert_eq!(builtin_id(code), Some(id));
         }
     }
+    // The non-allocating check agrees with `builtin_id` on the short dates.
+    for code in ["m/d/yyyy", "M/D/YYYY", "m\\/d\\/yyyy", "m/d/yyyy h:mm", "M/D/YYYY H:MM", "m/d/yy", "m/d/yyyy;@", ""] {
+        assert_eq!(crate::builtin::is_builtin(code, 14), builtin_id(code) == Some(14), "{code:?}");
+        assert_eq!(crate::builtin::is_builtin(code, 22), builtin_id(code) == Some(22), "{code:?}");
+    }
+    assert!(!crate::builtin::is_builtin("m/d/yyyy", 30));
     assert_eq!(f(builtin_format(5).unwrap(), -1234.0), "($1,234)");
     assert_eq!(f(builtin_format(12).unwrap(), 0.5), " 1/2");
     assert_eq!(f(builtin_format(47).unwrap(), 61.2 / 86400.0), "0101.2");

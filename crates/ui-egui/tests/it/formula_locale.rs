@@ -267,3 +267,22 @@ fn apps_sharing_a_thread_show_values_in_their_own_region() {
     assert_eq!(region(), Region::UkUa);
     set_region(Region::EnUs);
 }
+
+/// Starting an edit outside a frame (the control channel, tests) still fills the editor in
+/// the app's region, so committing the untouched draft keeps the same date.
+#[test]
+fn an_edit_begun_outside_a_frame_reads_back_as_the_same_date() {
+    use gridcraft_engine::core::Region;
+    use gridcraft_engine::display::set_region;
+    let mut a = app();
+    a.run("cell.set", json!({"cell":"A1","input":"3/4/2026"})).unwrap();
+    a.run("app.language.set", json!({"language": "es"})).unwrap();
+    let cell = |a: &SheetApp| a.session.active().unwrap().wb.active().unwrap().cell(CellRef::new(0, 0)).unwrap().value.clone();
+    let before = cell(&a);
+    set_region(Region::EnUs);
+    a.begin_edit(None, false);
+    assert_eq!(a.editor.as_ref().unwrap().text, "04/03/2026");
+    assert!(a.commit_edit(0, 0, false, false));
+    assert_eq!(cell(&a), before);
+    set_region(Region::EnUs);
+}

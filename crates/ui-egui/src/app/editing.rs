@@ -2,7 +2,14 @@ use super::*;
 
 impl SheetApp {
     /// Starts editing the active cell. `text` replaces the content (typing) or pre-fills it.
+    ///
+    /// The editor text is shown in this app's region even when called outside its frame
+    /// (tests, the control channel), so the draft reads back as the same value.
     pub fn begin_edit(&mut self, text: Option<String>, from_formula_bar: bool) {
+        gridcraft_engine::display::in_region(self.ui.language.region(), || self.begin_edit_in_region(text, from_formula_bar));
+    }
+
+    fn begin_edit_in_region(&mut self, text: Option<String>, from_formula_bar: bool) {
         // The source formula is display-only on spill children. Grid replacement keeps its
         // existing behavior, but no formula-bar entry path may edit that displayed formula.
         if from_formula_bar && formula_bar::active_spill_anchor(self).is_some() {
