@@ -25,6 +25,7 @@ pub mod record;
 pub mod sample;
 pub mod selection;
 pub mod tables;
+pub mod tinta_reports;
 pub mod tinta_templates;
 pub mod windows;
 
@@ -371,6 +372,9 @@ pub struct Prefs {
     pub formula_bar: bool,
     /// The statistics the status bar shows for a selection (right-click the status bar).
     pub status_bar: StatusBarStats,
+    /// Tinta Office: whether error reports may be sent (`file.errorReports`).
+    #[serde(deserialize_with = "tinta_reports::lenient")]
+    pub tinta_reports: tinta_reports::ReportsPrefs,
 }
 
 /// The selection statistics shown on the status bar, set with `view.statusBar`. Excel turns on
@@ -405,6 +409,7 @@ impl Default for Prefs {
             user_dictionary: vec![],
             formula_bar: true,
             status_bar: StatusBarStats::default(),
+            tinta_reports: tinta_reports::ReportsPrefs::default(),
         }
     }
 }
