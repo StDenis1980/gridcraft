@@ -54,3 +54,19 @@ pub fn builtin_id(code: &str) -> Option<u32> {
     let n = norm(code);
     BUILTINS.iter().find(|(_, c)| norm(c) == n).map(|(id, _)| *id)
 }
+
+/// Whether `code` is the built-in format `id`, matched as `builtin_id` does (ignoring case and
+/// backslash escapes) but without allocating, for per-cell checks against one or two ids.
+pub(crate) fn is_builtin(code: &str, id: u32) -> bool {
+    let Some(builtin) = builtin_format(id) else { return false };
+    let fold = |s: &'static str| s.chars().filter(|&c| c != '\\').flat_map(char::to_lowercase);
+    let mut want = fold(builtin);
+    let mut got = code.chars().filter(|&c| c != '\\').flat_map(char::to_lowercase);
+    loop {
+        match (want.next(), got.next()) {
+            (None, None) => return true,
+            (a, b) if a == b => {}
+            _ => return false,
+        }
+    }
+}
