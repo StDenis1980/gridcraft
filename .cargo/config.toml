@@ -10,3 +10,5 @@ GRIDCRAFT_BRAND_APP_ID = "io.github.stdenis1980.tintacalculo"
 GRIDCRAFT_BRAND_PUBLISHER = "Tinta Office"
 GRIDCRAFT_BRAND_WEBSITE = "https://github.com/StDenis1980/gridcraft"
 GRIDCRAFT_BRAND_GITHUB = "https://github.com/StDenis1980/gridcraft"
+# Tinta Office error reports (apps/gridcraft/src/tinta_report.rs); unset, the app never asks or sends.
+TINTA_REPORT_URL = "https://report.tintaoffice.com"

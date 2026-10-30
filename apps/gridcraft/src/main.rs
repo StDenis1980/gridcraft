@@ -18,6 +18,7 @@ mod logging;
 #[cfg(target_os = "macos")]
 mod native_menu;
 mod print;
+mod tinta_report;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -42,11 +43,14 @@ impl eframe::App for App {
             }
             apple_events::poll(&self.3, &mut self.0, ctx);
         }
+        tinta_report::busy();
         self.0.logic(ctx);
+        tinta_report::tick(&mut self.0);
         self.1.logic(&mut self.0, ctx);
         if ctx.input(|input| input.viewport().close_requested()) && self.0.printing.busy() {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
         }
+        tinta_report::idle();
     }
     /// Forwards raw input to the shared app, then opens every non-empty dropped file path as a workbook.
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
@@ -59,7 +63,9 @@ impl eframe::App for App {
         }
     }
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        tinta_report::busy();
         self.1.show(&mut self.0, ui);
+        tinta_report::idle();
     }
     fn on_exit(&mut self) {
         print::finish_pending_jobs();
@@ -197,6 +203,8 @@ fn services() -> Services {
             dialog.save_file().and_then(|p| p.to_str().map(str::to_string))
         })),
         open_url: Some(Box::new(|url: &str| open_with_system(url))),
+        open_folder: Some(Box::new(open_folder)),
+        error_reports_dir: tinta_report::dir(config_dir(), prefs_enabled()),
         printers: Some(print::discover()),
         print_native: Some(print::submit()),
         ..Default::default()
@@ -221,6 +229,20 @@ fn open_with_system(target: &str) {
     };
     if let Err(e) = std::process::Command::new(cmd).arg(target).spawn() {
         log::warn!("{cmd} {target}: {e}");
+    }
+}
+
+/// Shows a folder of the app's own (the error reports) in the system's file manager.
+fn open_folder(dir: &std::path::Path) {
+    let cmd = if cfg!(target_os = "macos") {
+        "open"
+    } else if cfg!(windows) {
+        "explorer"
+    } else {
+        "xdg-open"
+    };
+    if let Err(e) = std::process::Command::new(cmd).arg(dir).spawn() {
+        log::warn!("{cmd}: {e}");
     }
 }
 
@@ -304,6 +326,10 @@ fn main() -> eframe::Result<()> {
             },
             None => logger.no_file(),
         }
+    }
+    // Tinta Office: error reports, sent only with consent (asked at the first start).
+    if let Some(dir) = tinta_report::dir(config_dir(), prefs_enabled()) {
+        tinta_report::install(dir, log_dir().map(|d| d.join(logging::LOG_FILE)), "release");
     }
     let mut session = Session::new();
     if let Some(s) = &sample

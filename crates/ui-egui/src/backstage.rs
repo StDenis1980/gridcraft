@@ -1005,6 +1005,7 @@ fn options(app: &mut SheetApp, ui: &mut Ui) {
     if ui.checkbox(&mut formula_bar, lang.tr("Show formula bar")).changed() {
         app.run_or_alert("view.formulaBar", json!({"on": formula_bar}));
     }
+    crate::tinta_reports_ui::options(app, ui);
     ui.add_space(18.0);
     section(ui, lang, "Options|Editing");
     let mut autocomplete = app.ui.autocomplete;

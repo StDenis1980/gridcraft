@@ -37,6 +37,7 @@ pub mod selection_glide;
 pub mod tabs;
 pub mod text_box;
 pub mod theme;
+mod tinta_reports_ui;
 #[cfg(not(target_arch = "wasm32"))]
 mod updates_ui;
 #[cfg(not(target_arch = "wasm32"))]
@@ -228,6 +229,11 @@ pub struct Services {
     /// insert into a subsequent dialog or open the image as a workbook.
     pub pick_picture_async: Option<Box<dyn Fn(Inbox)>>,
     pub open_url: Option<Box<dyn Fn(&str)>>,
+    /// Desktop: show a folder in the system's file manager.
+    pub open_folder: Option<Box<dyn Fn(&std::path::Path)>>,
+    /// Tinta Office: where the desktop app keeps error reports, set only by builds that can send
+    /// them (`tinta_reports_ui`).
+    pub error_reports_dir: Option<std::path::PathBuf>,
     /// Publish HTML and its plain-text alternative together. `Ok` means the host owns the
     /// write (including any asynchronous fallback); an immediate error uses egui's text path.
     pub copy_html: Option<Box<dyn FnMut(&str, &str) -> Result<(), String>>>,
@@ -1754,6 +1760,7 @@ impl SheetApp {
         i18n::set_current(&ctx, self.ui.language);
         #[cfg(not(target_arch = "wasm32"))]
         updates_ui::show(self, &ctx);
+        tinta_reports_ui::first_start(self, &ctx);
         let t = theme::Tokens::get(&ctx);
         // A host can turn the File tab off while Backstage is already open: close it.
         if !self.chrome.file_tab {
