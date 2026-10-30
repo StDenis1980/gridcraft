@@ -10,7 +10,7 @@ use aes::cipher::{BlockCipherEncrypt, KeyInit};
 
 use crate::crypto::{
     BLOCK_HMAC_KEY, BLOCK_HMAC_VALUE, BLOCK_KEY, BLOCK_VERIFIER_HASH, BLOCK_VERIFIER_INPUT, F_AES, F_CRYPTOAPI, Hash, PASSWORD_ENCRYPTOR, Params,
-    SEGMENT, derive, hmac, iterated_hash, standard_key,
+    SEGMENT, base64_encode, derive, hmac, iterated_hash, standard_key,
 };
 
 /// The spin count `encrypt_workbook` uses: Excel's default.
@@ -183,18 +183,6 @@ fn encrypt_cbc(key: &[u8], iv: &[u8], data: &[u8]) -> Vec<u8> {
         prev = *b;
     }
     v
-}
-
-fn base64_encode(b: &[u8]) -> String {
-    const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut s = String::new();
-    for c in b.chunks(3) {
-        let n = (u32::from(c[0]) << 16) | (u32::from(*c.get(1).unwrap_or(&0)) << 8) | u32::from(*c.get(2).unwrap_or(&0));
-        for i in 0..4 {
-            s.push(if i <= c.len() { T[(n >> (18 - 6 * i)) as usize & 63] as char } else { '=' });
-        }
-    }
-    s
 }
 
 fn package(size: usize, body: Vec<u8>) -> Vec<u8> {

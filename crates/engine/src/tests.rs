@@ -4394,7 +4394,7 @@ fn encrypted_workbooks_open_with_their_password() {
     }
     assert!(s.documents().is_empty());
 
-    // The right password opens it: no save path, the file name as title, the notice first.
+    // The right password opens it: the file name as title, the notice first.
     let r = open(&mut s, Some(PW)).unwrap();
     assert_eq!(r["warnings"][0], crate::io::DECRYPTED_NOTICE);
     assert_eq!(r["title"], "Secret.xlsx");
@@ -4406,27 +4406,109 @@ fn encrypted_workbooks_open_with_their_password() {
     assert!(!journal.contains(PW), "the password never reaches the journal");
 }
 
-#[test]
+/// A fresh temp folder for a native-only file test.
 #[cfg(not(target_arch = "wasm32"))]
-fn a_decrypted_workbook_never_overwrites_its_encrypted_original() {
-    const PW: &str = "synthetic-pw-5522";
+fn encrypted_temp_dir(tag: &str) -> std::path::PathBuf {
     #[allow(clippy::disallowed_methods)] // native-only test: a unique temp dir name
     let nonce = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
-    let dir = std::env::temp_dir().join(format!("gridcraft-encrypted-{}-{nonce}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("gridcraft-{tag}-{}-{nonce}", std::process::id()));
     std::fs::create_dir(&dir).unwrap();
+    dir
+}
+
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+fn a_decrypted_workbook_saves_back_with_its_password() {
+    const PW: &str = "synthetic-pw-5522";
+    let dir = encrypted_temp_dir("encrypted");
     let path = dir.join("Secret.xlsx");
-    let bytes = encrypted_book(PW);
-    std::fs::write(&path, &bytes).unwrap();
+    std::fs::write(&path, encrypted_book(PW)).unwrap();
 
     let mut s = s();
     s.execute("file.open", json!({"path": path, "password": PW})).unwrap();
-    assert_eq!(s.doc().unwrap().path, None);
+    assert_eq!(s.doc().unwrap().path.as_deref(), path.to_str(), "Save goes back to the encrypted file");
+    assert!(!s.doc().unwrap().is_dirty());
     s.take_ui_requests();
     s.execute("cell.set", json!({"cell": "A1", "input": "43"})).unwrap();
-    s.execute("file.save", json!({})).unwrap();
-    assert!(s.take_ui_requests().iter().any(|r| matches!(r, crate::UiRequest::Dialog(name, _) if name == "saveAs")));
-    assert_eq!(std::fs::read(&path).unwrap(), bytes, "the encrypted original is untouched");
+    let r = s.execute("file.save", json!({})).unwrap();
+    assert_eq!(r["encrypted"], true);
+    assert!(s.take_ui_requests().is_empty(), "no Save As dialog");
+    let saved = std::fs::read(&path).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&saved), gridcraft_xlsx::Format::Encrypted, "never an unprotected copy");
+    let (wb, _) = crate::io::open_bytes_with_password("Secret.xlsx", &saved, Some(PW)).unwrap();
+    assert_eq!(wb.active().unwrap().value(CellRef::parse("A1").unwrap()), Value::Number(43.0));
+    assert!(crate::io::open_bytes_with_password("Secret.xlsx", &saved, Some("other")).is_err());
+    assert!(!format!("{:?}", s.doc().unwrap()).contains(PW), "Debug never shows the password");
     std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+fn encrypt_with_password_sets_changes_and_removes_it() {
+    let dir = encrypted_temp_dir("encrypt-cmd");
+    let path = dir.join("Book.xlsx");
+    let mut s = s();
+    s.execute("cell.set", json!({"cell": "B2", "input": "7"})).unwrap();
+    s.execute("file.saveAs", json!({"path": path})).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&std::fs::read(&path).unwrap()), gridcraft_xlsx::Format::Xlsx);
+
+    // Menu-style call without a password asks for one; a programmatic one sets it.
+    s.execute("file.encrypt", json!({})).unwrap();
+    assert!(s.take_ui_requests().iter().any(|r| matches!(r, crate::UiRequest::Dialog(n, p) if n == "encryptPassword" && p["encrypted"] == false)));
+    assert_eq!(s.execute("file.encrypt", json!({"password": "Ñandú-2026"})).unwrap()["encrypted"], true);
+    assert!(s.doc().unwrap().is_dirty(), "a new password is a change to save");
+    s.execute("file.save", json!({})).unwrap();
+    assert!(!s.doc().unwrap().is_dirty());
+    let bytes = std::fs::read(&path).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&bytes), gridcraft_xlsx::Format::Encrypted);
+    assert!(crate::io::open_bytes_with_password("Book.xlsx", &bytes, Some("Ñandú-2026")).is_ok());
+
+    // The same password again changes nothing; an empty one removes it.
+    s.execute("file.encrypt", json!({"password": "Ñandú-2026"})).unwrap();
+    assert!(!s.doc().unwrap().is_dirty());
+    assert_eq!(s.execute("file.encrypt", json!({"password": ""})).unwrap()["encrypted"], false);
+    s.execute("file.save", json!({})).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&std::fs::read(&path).unwrap()), gridcraft_xlsx::Format::Xlsx);
+    assert!(s.execute("file.encrypt", json!({"password": "x".repeat(256)})).is_err());
+    assert!(s.execute("file.encrypt", json!({"password": "a", "confirmPassword": "b"})).is_err());
+    assert!(s.doc().unwrap().password.is_none(), "a mismatch changes nothing");
+    let journal = serde_json::to_string(&s.journal).unwrap();
+    assert!(!journal.contains("Ñandú"), "the password never reaches the journal");
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+#[cfg(not(target_arch = "wasm32"))]
+fn save_as_takes_a_password_for_xlsx_only() {
+    let dir = encrypted_temp_dir("save-as-pw");
+    let mut s = s();
+    s.execute("cell.set", json!({"cell": "A1", "input": "1"})).unwrap();
+    let xlsx = dir.join("a.xlsx");
+    s.execute("file.saveAs", json!({"path": xlsx, "password": "pw"})).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&std::fs::read(&xlsx).unwrap()), gridcraft_xlsx::Format::Encrypted);
+    assert!(s.doc().unwrap().password.is_some(), "the new file's password is the workbook's");
+    // A CSV can't carry one: asked for, it's an error; the workbook's own is simply not applied.
+    assert!(s.execute("file.saveAs", json!({"path": dir.join("a.csv"), "password": "pw"})).is_err());
+    s.execute("file.saveAs", json!({"path": dir.join("b.csv")})).unwrap();
+    assert_eq!(std::fs::read_to_string(dir.join("b.csv")).unwrap().trim(), "1");
+    // Save As with an empty password writes an ordinary copy and drops it.
+    let plain = dir.join("c.xlsx");
+    s.execute("file.saveAs", json!({"path": plain, "password": ""})).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&std::fs::read(&plain).unwrap()), gridcraft_xlsx::Format::Xlsx);
+    assert!(s.doc().unwrap().password.is_none());
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn encoded_bytes_are_encrypted_when_the_workbook_has_a_password() {
+    let mut s = s();
+    s.execute("cell.set", json!({"cell": "A1", "input": "5"})).unwrap();
+    s.execute("file.encrypt", json!({"password": "pw"})).unwrap();
+    let r = s.execute("file.saveBytes", json!({})).unwrap();
+    let bytes = crate::io::base64_decode(r["base64"].as_str().unwrap()).unwrap();
+    assert_eq!(gridcraft_xlsx::sniff(&bytes), gridcraft_xlsx::Format::Encrypted);
+    let csv = s.execute("file.saveBytes", json!({"format": "csv"})).unwrap();
+    assert_eq!(crate::io::base64_decode(csv["base64"].as_str().unwrap()).unwrap(), b"5\r\n".to_vec());
 }
 
 #[test]

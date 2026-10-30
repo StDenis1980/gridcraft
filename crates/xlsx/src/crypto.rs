@@ -2,12 +2,13 @@
 //! two streams: `EncryptionInfo` (how the key comes from the password, and a verifier that tells
 //! a wrong password) and `EncryptedPackage` (the package, encrypted with AES). Agile encryption
 //! (Excel 2010 onward) and Standard encryption (Excel 2007) are read; RC4, Extensible and
-//! certificate-only encryption are reported as unsupported.
+//! certificate-only encryption are reported as unsupported. Workbooks are written with Agile
+//! encryption the way Excel writes it by default (AES-256, SHA-512, 100,000 spins).
 //!
 //! Clean-room from Microsoft's public [MS-OFFCRYPTO] specification. Every read is
 //! bounds-checked, and the costly inputs (spin count, stated sizes) are capped.
 
-use aes::cipher::{BlockCipherDecrypt, KeyInit};
+use aes::cipher::{BlockCipherDecrypt, BlockCipherEncrypt, KeyInit};
 use sha2::Digest;
 
 use crate::cfb::Compound;
@@ -169,6 +170,16 @@ impl Hash {
         }
     }
 
+    /// The digest size in bytes.
+    pub(crate) fn output_size(self) -> usize {
+        match self {
+            Hash::Sha1 => 20,
+            Hash::Sha256 => 32,
+            Hash::Sha384 => 48,
+            Hash::Sha512 => 64,
+        }
+    }
+
     /// The bytes the algorithm's compression function takes: 128 for SHA-384/512, else 64.
     fn block_size(self) -> usize {
         match self {
@@ -243,6 +254,28 @@ impl Aes {
             32 => Aes::A256(aes::Aes256::new_from_slice(key).map_err(bad)?),
             n => return Err(malformed(format!("a {n}-byte AES key"))),
         })
+    }
+
+    fn encrypt_block(&self, block: &mut [u8; BLOCK]) {
+        let b = aes::Block::cast_from_core_mut(block);
+        match self {
+            Aes::A128(c) => c.encrypt_block(b),
+            Aes::A192(c) => c.encrypt_block(b),
+            Aes::A256(c) => c.encrypt_block(b),
+        }
+    }
+
+    /// CBC encryption of `data` padded with zeros to whole blocks, as Agile pads every value.
+    fn encrypt_cbc(&self, iv: &[u8], data: &[u8]) -> Result<Vec<u8>, DecryptError> {
+        let mut prev: [u8; BLOCK] = iv.try_into().map_err(|_| malformed("an IV that isn't one AES block"))?;
+        let mut out = data.to_vec();
+        out.resize(data.len().div_ceil(BLOCK) * BLOCK, 0);
+        for b in out.as_chunks_mut::<BLOCK>().0 {
+            b.iter_mut().zip(prev).for_each(|(x, p)| *x ^= p);
+            self.encrypt_block(b);
+            prev = *b;
+        }
+        Ok(out)
     }
 
     fn decrypt_block(&self, block: &mut [u8; BLOCK]) {
@@ -465,10 +498,11 @@ fn agile(xml: &[u8], package: &[u8], password: &str) -> Result<Vec<u8>, DecryptE
     let aes = Aes::new(secret.get(..key_data.key_len).ok_or_else(|| malformed("a short encryptedKeyValue"))?)?;
     // Package integrity, [MS-OFFCRYPTO] 2.3.4.14: both HMAC fields are encrypted with the
     // package key (the verifier above only authenticates the password), keyed by a random
-    // salt-size array, computed over the whole EncryptedPackage stream, StreamSize field included.
+    // hash-size array, computed over the whole EncryptedPackage stream, StreamSize field included.
+    // The key is the decrypted field cut to the hash size (only its block padding is dropped).
     let mut mac_field = hmac_key;
     aes.decrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_KEY)), &mut mac_field)?;
-    mac_field.truncate(key_data.salt.len());
+    mac_field.truncate(key_data.hash.output_size());
     let mut declared = hmac_value;
     aes.decrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_VALUE)), &mut declared)?;
     let mac = hmac(key_data.hash, &mac_field, package);
@@ -489,6 +523,213 @@ fn agile(xml: &[u8], package: &[u8], password: &str) -> Result<Vec<u8>, DecryptE
     }
     out.truncate(size);
     Ok(out)
+}
+
+// ---- Agile encryption (writing) ------------------------------------------------------------
+
+/// The spin count Excel writes by default.
+pub(crate) const WRITE_SPIN_COUNT: u32 = 100_000;
+/// Salt and verifier size, as Excel writes them.
+const SALT: usize = 16;
+/// SHA-512's output size.
+const SHA512_SIZE: usize = 64;
+
+/// Why a workbook couldn't be encrypted.
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
+pub enum EncryptError {
+    #[error("a password can't be empty")]
+    EmptyPassword,
+    #[error("a password can't be longer than 255 characters")]
+    LongPassword,
+    #[error("no secure random numbers are available on this system ({0})")]
+    NoRandom(String),
+    #[error("the workbook couldn't be encrypted ({0})")]
+    Failed(String),
+}
+
+/// The random values one encryption needs. Fresh for every save, so two saves of the same
+/// workbook with the same password share no key or salt.
+pub(crate) struct Secrets {
+    pub(crate) password_salt: [u8; SALT],
+    pub(crate) key_data_salt: [u8; SALT],
+    pub(crate) package_key: [u8; 32],
+    pub(crate) verifier: [u8; SALT],
+    /// The dataIntegrity HMAC key, hash-size as [MS-OFFCRYPTO] has it. Only its first 16 bytes
+    /// are random and the rest zero: HMAC pads short keys with zeros, so readers that keep the
+    /// whole field and older ones that cut it to the 16-byte salt size compute the same MAC.
+    pub(crate) hmac_key: [u8; SHA512_SIZE],
+}
+
+impl Secrets {
+    fn random() -> Result<Secrets, EncryptError> {
+        let mut b = [0u8; SALT * 4 + 32];
+        getrandom::fill(&mut b).map_err(|e| EncryptError::NoRandom(e.to_string()))?;
+        let take = |from: usize| -> [u8; SALT] {
+            let mut out = [0u8; SALT];
+            out.iter_mut().zip(b.iter().skip(from)).for_each(|(o, x)| *o = *x);
+            out
+        };
+        let mut package_key = [0u8; 32];
+        package_key.iter_mut().zip(b.iter().skip(SALT * 4)).for_each(|(o, x)| *o = *x);
+        let mut hmac_key = [0u8; SHA512_SIZE];
+        hmac_key.iter_mut().zip(take(SALT * 3)).for_each(|(o, x)| *o = x);
+        Ok(Secrets { password_salt: take(0), key_data_salt: take(SALT), verifier: take(SALT * 2), hmac_key, package_key })
+    }
+}
+
+/// `package` (an `.xlsx` zip) as Excel stores it with a password: Agile encryption inside a
+/// compound file, with the `\x06DataSpaces` storage that names the transform.
+pub fn encrypt(package: &[u8], password: &str) -> Result<Vec<u8>, EncryptError> {
+    encrypt_with(package, password, WRITE_SPIN_COUNT, &Secrets::random()?)
+}
+
+pub(crate) fn encrypt_with(package: &[u8], password: &str, spin: u32, secrets: &Secrets) -> Result<Vec<u8>, EncryptError> {
+    if password.is_empty() {
+        return Err(EncryptError::EmptyPassword);
+    }
+    if password.chars().count() > 255 {
+        return Err(EncryptError::LongPassword);
+    }
+    let failed = |e: DecryptError| EncryptError::Failed(e.to_string());
+    let hash = Hash::Sha512;
+    let key_data = Params { hash, salt: secrets.key_data_salt.to_vec(), key_len: 32 };
+    let key = Params { hash, salt: secrets.password_salt.to_vec(), key_len: 32 };
+    let package_aes = Aes::new(&secrets.package_key).map_err(failed)?;
+
+    // EncryptedPackage: the plaintext size, then 4096-byte segments, each CBC with its own IV.
+    let mut stream = u64::try_from(package.len()).map_err(|_| EncryptError::Failed("too large".into()))?.to_le_bytes().to_vec();
+    for (i, segment) in package.chunks(SEGMENT).enumerate() {
+        let index = u32::try_from(i).map_err(|_| EncryptError::Failed("too many segments".into()))?;
+        stream.extend(package_aes.encrypt_cbc(&key_data.iv(Some(&index.to_le_bytes())), segment).map_err(failed)?);
+    }
+
+    // dataIntegrity ([MS-OFFCRYPTO] 2.3.4.14): an HMAC of the whole stream, key and value each
+    // encrypted with the package key.
+    let mac = hmac(hash, &secrets.hmac_key, &stream);
+    let encrypted_hmac_key = package_aes.encrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_KEY)), &secrets.hmac_key).map_err(failed)?;
+    let encrypted_hmac_value = package_aes.encrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_VALUE)), &mac).map_err(failed)?;
+
+    // The password key encryptor: verifier input and hash, and the package key, each under a key
+    // derived from the iterated password hash.
+    let h = iterated_hash(hash, password, &key.salt, spin);
+    let iv = key.iv(None);
+    let field = |block_key: &[u8], data: &[u8]| -> Result<String, EncryptError> {
+        let aes = Aes::new(&derive(hash, &h, block_key, key.key_len)).map_err(failed)?;
+        Ok(base64_encode(&aes.encrypt_cbc(&iv, data).map_err(failed)?))
+    };
+    let verifier_input = field(&BLOCK_VERIFIER_INPUT, &secrets.verifier)?;
+    let verifier_hash = field(&BLOCK_VERIFIER_HASH, &hash.digest(&[&secrets.verifier]))?;
+    let key_value = field(&BLOCK_KEY, &secrets.package_key)?;
+    let params = |salt: &[u8]| {
+        format!(
+            "saltSize=\"{SALT}\" blockSize=\"16\" keyBits=\"256\" hashSize=\"{SHA512_SIZE}\" cipherAlgorithm=\"AES\" cipherChaining=\"ChainingModeCBC\" hashAlgorithm=\"SHA512\" saltValue=\"{}\"",
+            base64_encode(salt)
+        )
+    };
+    let xml = format!(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<encryption xmlns=\"http://schemas.microsoft.com/office/2006/encryption\" xmlns:p=\"http://schemas.microsoft.com/office/2006/keyEncryptor/password\"><keyData {}/><dataIntegrity encryptedHmacKey=\"{}\" encryptedHmacValue=\"{}\"/><keyEncryptors><keyEncryptor uri=\"{PASSWORD_ENCRYPTOR}\"><p:encryptedKey spinCount=\"{spin}\" {} encryptedVerifierHashInput=\"{verifier_input}\" encryptedVerifierHashValue=\"{verifier_hash}\" encryptedKeyValue=\"{key_value}\"/></keyEncryptor></keyEncryptors></encryption>",
+        params(&key_data.salt),
+        base64_encode(&encrypted_hmac_key),
+        base64_encode(&encrypted_hmac_value),
+        params(&key.salt),
+    );
+    // EncryptionInfo: version 4.4, reserved 0x40, then the XML descriptor.
+    let mut info = vec![4, 0, 4, 0, 0x40, 0, 0, 0];
+    info.extend_from_slice(xml.as_bytes());
+
+    let spaces = DataSpaces::new();
+    use crate::cfb_write::Entry;
+    crate::cfb_write::write(&[
+        Entry::Stream("EncryptionInfo", &info),
+        Entry::Stream("EncryptedPackage", &stream),
+        Entry::Storage(
+            "\u{6}DataSpaces",
+            vec![
+                Entry::Stream("Version", &spaces.version),
+                Entry::Stream("DataSpaceMap", &spaces.map),
+                Entry::Storage("DataSpaceInfo", vec![Entry::Stream("StrongEncryptionDataSpace", &spaces.definition)]),
+                Entry::Storage(
+                    "TransformInfo",
+                    vec![Entry::Storage("StrongEncryptionTransform", vec![Entry::Stream("\u{6}Primary", &spaces.transform)])],
+                ),
+            ],
+        ),
+    ])
+    .map_err(EncryptError::Failed)
+}
+
+/// The `\x06DataSpaces` streams of an encrypted package ([MS-OFFCRYPTO] 2.1 and 2.2.6): the
+/// package is the `StrongEncryptionDataSpace`, which applies the encryption transform.
+struct DataSpaces {
+    version: Vec<u8>,
+    map: Vec<u8>,
+    definition: Vec<u8>,
+    transform: Vec<u8>,
+}
+
+/// UNICODE-LP-P4: byte length, UTF-16LE, padded to a multiple of 4 bytes.
+fn lp_p4(s: &str) -> Vec<u8> {
+    let units: Vec<u8> = s.encode_utf16().flat_map(u16::to_le_bytes).collect();
+    let mut out = (units.len() as u32).to_le_bytes().to_vec();
+    out.extend(units);
+    out.resize(out.len().div_ceil(4) * 4, 0);
+    out
+}
+
+impl DataSpaces {
+    fn new() -> DataSpaces {
+        let versions = |out: &mut Vec<u8>| {
+            // Reader, updater and writer versions, each 1.0.
+            for _ in 0..3 {
+                out.extend_from_slice(&1u16.to_le_bytes());
+                out.extend_from_slice(&0u16.to_le_bytes());
+            }
+        };
+        let mut version = lp_p4("Microsoft.Container.DataSpaces");
+        versions(&mut version);
+
+        // DataSpaceMap: header length, one entry mapping the EncryptedPackage stream.
+        let mut entry = 1u32.to_le_bytes().to_vec(); // reference component count
+        entry.extend_from_slice(&0u32.to_le_bytes()); // a stream
+        entry.extend(lp_p4("EncryptedPackage"));
+        entry.extend(lp_p4("StrongEncryptionDataSpace"));
+        let mut map = 8u32.to_le_bytes().to_vec();
+        map.extend_from_slice(&1u32.to_le_bytes());
+        map.extend_from_slice(&((entry.len() + 4) as u32).to_le_bytes());
+        map.extend(entry);
+
+        let mut definition = 8u32.to_le_bytes().to_vec();
+        definition.extend_from_slice(&1u32.to_le_bytes());
+        definition.extend(lp_p4("StrongEncryptionTransform"));
+
+        // TransformInfoHeader: its length up to the name, type 1, id, name, versions; then
+        // EncryptionTransformInfo: empty name, block size 0, cipher mode 0, reserved 4.
+        let transform_id = lp_p4("{FF9A3F03-56EF-4613-BDD5-5A41C1D07246}");
+        let mut transform = ((8 + transform_id.len()) as u32).to_le_bytes().to_vec();
+        transform.extend_from_slice(&1u32.to_le_bytes());
+        transform.extend(transform_id);
+        transform.extend(lp_p4("Microsoft.Container.EncryptionTransform"));
+        versions(&mut transform);
+        for v in [0u32, 0, 0, 4] {
+            transform.extend_from_slice(&v.to_le_bytes());
+        }
+        DataSpaces { version, map, definition, transform }
+    }
+}
+
+/// Standard base64 with `=` padding.
+pub(crate) fn base64_encode(b: &[u8]) -> String {
+    const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut s = String::with_capacity(b.len().div_ceil(3) * 4);
+    for c in b.chunks(3) {
+        let at = |i: usize| u32::from(c.get(i).copied().unwrap_or(0));
+        let n = (at(0) << 16) | (at(1) << 8) | at(2);
+        for i in 0..4 {
+            let sextet = (n >> (18 - 6 * i)) & 63;
+            s.push(if i <= c.len() { T.get(sextet as usize).map_or('A', |&x| char::from(x)) } else { '=' });
+        }
+    }
+    s
 }
 
 // ---- base64 --------------------------------------------------------------------------------

@@ -283,6 +283,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Oraindik gorde gabe",
         "Location" => "Kokalekua",
         "Sheets" => "Orriak",
+        "Encrypt with Password" => "Zifratu pasahitzarekin",
+        "Require a password to open this workbook." => "Eskatu pasahitza liburu hau irekitzeko.",
+        "A password is required to open this workbook." => "Pasahitza behar da liburu hau irekitzeko.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Fitxategi honen edukia zifratzen du. Pasahitza galtzen edo ahazten baduzu, ezin da berreskuratu. Utzi hutsik pasahitza kentzeko."
+        }
+        "Reenter password:" => "Idatzi berriro pasahitza:",
         "Protect Workbook" => "Babestu liburua",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "Orrien egitura blokeatuta dago: ezin da orririk gehitu, mugitu, izenez aldatu edo ezabatu."

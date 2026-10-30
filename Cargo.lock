@@ -2134,6 +2134,7 @@ name = "gridcraft-xlsx"
 version = "0.12.1"
 dependencies = [
  "aes",
+ "getrandom 0.4.3",
  "gridcraft-brand",
  "gridcraft-core",
  "gridcraft-formula",

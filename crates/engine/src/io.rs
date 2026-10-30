@@ -44,7 +44,8 @@ pub const PASSWORD_REQUIRED: &str = "is password-protected. Enter its password t
 /// The error for a wrong password contains this.
 pub const WRONG_PASSWORD: &str = "The password is incorrect.";
 /// The first open warning of a workbook decrypted with its password.
-pub const DECRYPTED_NOTICE: &str = "This workbook was password-protected. GridCraft saves it without the password.";
+pub const DECRYPTED_NOTICE: &str =
+    "This workbook is password-protected. Saving it keeps the password; File › Info › Encrypt with Password changes or removes it.";
 
 /// Parses a file's bytes into a workbook. `name` picks the format by extension when the bytes
 /// don't say. An encrypted workbook needs [`open_bytes_with_password`].
@@ -81,6 +82,12 @@ pub fn open_bytes_with(name: &str, bytes: &[u8], password: Option<&str>, csv_as_
     fit_imported_rows(&mut wb);
     warnings.insert(0, DECRYPTED_NOTICE.into());
     Ok((wb, warnings))
+}
+
+/// `xlsx` (a package written by [`save_bytes_as`]) encrypted with `password`, as Excel stores a
+/// password-protected workbook. Errors never quote the password.
+pub fn encrypt_bytes(xlsx: &[u8], password: &str) -> Result<Vec<u8>> {
+    gridcraft_xlsx::encrypt(xlsx, password).map_err(|e| EngineError::Other(format!("We couldn't save the workbook with a password: {e}.")))
 }
 
 /// Excel auto-fits rows to their tallest font when opening a file: rows without a user-set

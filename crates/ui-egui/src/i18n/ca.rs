@@ -284,6 +284,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Encara no s'ha desat",
         "Location" => "Ubicació",
         "Sheets" => "Fulls",
+        "Encrypt with Password" => "Xifra amb contrasenya",
+        "Require a password to open this workbook." => "Demana una contrasenya per obrir aquest llibre.",
+        "A password is required to open this workbook." => "Cal una contrasenya per obrir aquest llibre.",
+        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
+            "Xifra el contingut d'aquest fitxer. Si perds o oblides la contrasenya, no es pot recuperar. Deixa-la buida per treure la contrasenya."
+        }
+        "Reenter password:" => "Torna a escriure la contrasenya:",
         "Protect Workbook" => "Protegeix el llibre",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "L'estructura de fulls està bloquejada: no es poden afegir, moure, canviar de nom ni suprimir fulls."

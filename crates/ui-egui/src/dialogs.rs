@@ -346,6 +346,17 @@ impl Dialog {
                 ],
                 json!({"on": true}),
             ),
+            "encryptPassword" => Dialog::form(
+                "encryptPassword",
+                "Encrypt with Password",
+                "file.encrypt",
+                vec![
+                    Note("Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password.".into()),
+                    Password { key: "password", label: "Password:" },
+                    Password { key: "confirmPassword", label: "Reenter password:" },
+                ],
+                json!({"password": "", "confirmPassword": ""}),
+            ),
             "unprotectWorkbook" => Dialog::form(
                 "unprotectWorkbook",
                 "Unprotect Workbook",
