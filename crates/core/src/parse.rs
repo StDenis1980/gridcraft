@@ -18,6 +18,16 @@ pub struct Parsed {
 /// Interprets typed cell input (not formulas). Text that isn't a number, date, boolean or error
 /// stays text. A leading apostrophe forces text.
 pub fn parse_input(s: &str, sys: DateSystem) -> Parsed {
+    parse_value(s, sys, true)
+}
+
+/// Like [`parse_input`] for values read from a file such as CSV, which stays en-US: the euro
+/// and hryvnia forms only typed entry reads (`€5`, `12,50 €`, `250 грн`) remain text.
+pub fn parse_file_input(s: &str, sys: DateSystem) -> Parsed {
+    parse_value(s, sys, false)
+}
+
+fn parse_value(s: &str, sys: DateSystem, entry: bool) -> Parsed {
     if s.is_empty() {
         return Parsed { value: Value::Empty, format: None };
     }
@@ -34,7 +44,7 @@ pub fn parse_input(s: &str, sys: DateSystem) -> Parsed {
     if let Some(e) = CellError::parse(t) {
         return Parsed { value: Value::Error(e), format: None };
     }
-    if let Some((n, f)) = parse_numeric(t, sys, true) {
+    if let Some((n, f)) = parse_numeric(t, sys, entry) {
         return Parsed { value: Value::number(n), format: f };
     }
     Parsed { value: Value::text(s), format: None }
@@ -487,7 +497,9 @@ fn delocalize_number(t: &str, region: Region) -> Option<String> {
     let after = format!("{}{after}", body.get(trimmed.len()..).unwrap_or(""));
     let body = trimmed;
     let before = t.get(..start)?;
-    if body.is_empty() {
+    // A separator the region does not use right after the digits (`1 234.5` in Ukraine) makes
+    // the entry no number here, rather than a decimal read the en-US way.
+    if body.is_empty() || after.starts_with(['.', ',']) {
         return None;
     }
     let (int, frac) = match body.split_once(d) {
