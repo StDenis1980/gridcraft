@@ -77,7 +77,7 @@ No alpha blockers: every core workflow passes the [alpha gate](roadmap.md#alpha-
   `.xlsx` workbooks (Agile and Standard encryption) open with their password since #11 and save
   back with it (Agile, AES-256, as Excel writes by default); File › Info › Encrypt with Password
   sets, changes or removes it. Encrypted `.xls` (FILEPASS) and RC4-encrypted files are still
-  refused with a message. Our encrypted output is verified by msoffcrypto-tool, not yet by Excel.
+  refused with a message. Our encrypted output opens in Excel (checked 2026-11-01).
 - **Impact:** common in finance, government and anything older than 2007; encrypted files are
   routine in business.
 - **Estimate:** 10–15 h (`.xls` styles and objects). [file-format-parity.md](file-format-parity.md)
