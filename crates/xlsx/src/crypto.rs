@@ -497,16 +497,20 @@ fn agile(xml: &[u8], package: &[u8], password: &str) -> Result<Vec<u8>, DecryptE
     let secret = field(&key_value, &BLOCK_KEY)?;
     let aes = Aes::new(secret.get(..key_data.key_len).ok_or_else(|| malformed("a short encryptedKeyValue"))?)?;
     // Package integrity, [MS-OFFCRYPTO] 2.3.4.14: both HMAC fields are encrypted with the
-    // package key (the verifier above only authenticates the password), keyed by a random
-    // hash-size array, computed over the whole EncryptedPackage stream, StreamSize field included.
-    // The key is the decrypted field cut to the hash size (only its block padding is dropped).
+    // package key (the verifier above only authenticates the password), computed over the whole
+    // EncryptedPackage stream, StreamSize field included. The specification keys the HMAC with a
+    // random salt-size array, but Excel's key is as long as the hash (64 bytes for SHA-512), so
+    // both lengths are tried (only the field's block padding is ever dropped).
     let mut mac_field = hmac_key;
     aes.decrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_KEY)), &mut mac_field)?;
-    mac_field.truncate(key_data.hash.output_size());
     let mut declared = hmac_value;
     aes.decrypt_cbc(&key_data.iv(Some(&BLOCK_HMAC_VALUE)), &mut declared)?;
-    let mac = hmac(key_data.hash, &mac_field, package);
-    if declared.get(..mac.len()) != Some(mac.as_slice()) {
+    let verified = [key_data.hash.output_size(), key_data.salt.len()].into_iter().any(|len| {
+        let Some(key) = mac_field.get(..len) else { return false };
+        let mac = hmac(key_data.hash, key, package);
+        declared.get(..mac.len()) == Some(mac.as_slice())
+    });
+    if !verified {
         return Err(malformed("the decrypted data failed its integrity check"));
     }
     let (size, data) = package_parts(package)?;

@@ -3,7 +3,7 @@
 //! files are built in code by `crate::testing`. No Excel-produced file is used.
 
 use super::*;
-use crate::testing::{agile_info, encrypt_agile, encrypt_standard, with_agile_header};
+use crate::testing::{agile_info, encrypt_agile, encrypt_agile_with_hmac_key, encrypt_standard, with_agile_header};
 
 const PASSWORD: &str = "Pass1234";
 /// 16 zero bytes (whole AES blocks), a stand-in for a real integrity field where the values
@@ -318,4 +318,21 @@ fn base64_round_trips() {
     }
     assert_eq!(super::base64_encode(b"Man"), "TWFu");
     assert_eq!(super::base64_encode(b"Ma"), "TWE=");
+}
+
+#[test]
+fn integrity_keys_as_long_as_the_hash_or_the_salt_verify() {
+    // Excel keys the HMAC with 64 bytes (#2712); [MS-OFFCRYPTO] 2.3.4.14 describes a salt-size
+    // key. Both verify, and neither lets a modified package through.
+    let plain = payload(5000);
+    for key in [vec![7u8; 64], vec![7u8; 16]] {
+        let (info, package) = encrypt_agile_with_hmac_key(&plain, PASSWORD, 1000, &key);
+        assert_eq!(decrypt_streams(&info, &package, PASSWORD).unwrap(), plain, "{}-byte key", key.len());
+        let mut tampered = package.clone();
+        tampered[100] ^= 1;
+        assert!(matches!(decrypt_streams(&info, &tampered, PASSWORD), Err(DecryptError::Malformed(m)) if m.contains("integrity")));
+    }
+    // Another length (a key that matches neither) fails.
+    let (info, package) = encrypt_agile_with_hmac_key(&plain, PASSWORD, 1000, &[7u8; 32]);
+    assert!(matches!(decrypt_streams(&info, &package, PASSWORD), Err(DecryptError::Malformed(m)) if m.contains("integrity")));
 }
