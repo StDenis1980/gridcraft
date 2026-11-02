@@ -256,6 +256,7 @@ fn set_chart_series(s: &mut Session, sheet: &str, series: &[(String, String, Str
             quartiles: Default::default(),
             smooth: false,
             trendlines: Vec::new(),
+            label_number_format: None,
         })
         .collect();
     true
