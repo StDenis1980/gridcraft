@@ -19,10 +19,13 @@ pub enum FormulaLocale {
     Semicolon,
 }
 
+/// English -> Spanish and Spanish -> English function-name maps, keyed upper-case.
+type SpanishMaps = (HashMap<String, &'static str>, HashMap<String, &'static str>);
+
 /// Upper-case English name -> Spanish name, and upper-case Spanish name -> English name.
 /// Keys are upper-cased in full Unicode, so `año` finds `AÑO`.
-fn spanish_maps() -> &'static (HashMap<String, &'static str>, HashMap<String, &'static str>) {
-    static MAPS: OnceLock<(HashMap<String, &'static str>, HashMap<String, &'static str>)> = OnceLock::new();
+fn spanish_maps() -> &'static SpanishMaps {
+    static MAPS: OnceLock<SpanishMaps> = OnceLock::new();
     MAPS.get_or_init(|| {
         let to_es = SPANISH.iter().map(|&(en, es)| (en.to_uppercase(), es)).collect();
         let to_en = SPANISH.iter().map(|&(en, es)| (es.to_uppercase(), en)).collect();

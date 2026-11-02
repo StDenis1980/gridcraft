@@ -1,0 +1,43 @@
+use super::Dialog;
+
+/// Help ▸ About GridCraft: the app, its contributors and the AI models that helped. The credits
+/// are compiled in (`crate::credits`, docs/contributors.md).
+pub(super) fn about(ui: &mut egui::Ui, d: &mut Dialog) {
+    ui.horizontal(|ui| {
+        for tab in ["About", "Contributors", "Models"] {
+            if ui.selectable_label(d.tab == tab, tab).clicked() {
+                d.tab = tab.to_string();
+            }
+        }
+    });
+    ui.separator();
+    match d.tab.as_str() {
+        "Contributors" => crate::credits::contributors_ui(ui),
+        "Models" => crate::credits::models_ui(ui),
+        _ => {
+            use gridcraft_engine::brand;
+            ui.heading(brand::NAME);
+            ui.label(format!("Version {}", env!("CARGO_PKG_VERSION")));
+            ui.add_space(4.0);
+            if brand::REBRANDED {
+                // The ArtCraft marks and community are only the release's (docs/brand/LICENSE-brand.txt).
+                ui.label("A clean-room, open-source, Rust-native spreadsheet.");
+                if let Some(publisher) = brand::PUBLISHER {
+                    ui.label(publisher);
+                }
+                ui.label(egui::RichText::new("Based on GridCraft by the ArtCraft team.").weak());
+                ui.hyperlink_to(brand::APP_PAGE, brand::APP_PAGE);
+                if brand::GITHUB != brand::APP_PAGE {
+                    ui.hyperlink_to(brand::GITHUB, brand::GITHUB);
+                }
+                if brand::SUPPORT != brand::APP_PAGE {
+                    ui.hyperlink_to("Get help and support", brand::SUPPORT);
+                }
+            } else {
+                ui.label("A clean-room, open-source, Rust-native spreadsheet. Part of ArtCraft.");
+                ui.hyperlink_to("getartcraft.com/apps/gridcraft", "https://getartcraft.com/apps/gridcraft");
+                ui.hyperlink_to("Join the ArtCraft Discord", "https://discord.gg/artcraft");
+            }
+        }
+    }
+}

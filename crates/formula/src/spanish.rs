@@ -148,6 +148,7 @@ pub(crate) const SPANISH: &[(&str, &str)] = &[
     ("DURATION", "DURACION"),
     ("DVAR", "BDVAR"),
     ("DVARP", "BDVARP"),
+    ("ECMA.CEILING", "MULTIPLO.SUPERIOR.ECMA"),
     ("EDATE", "FECHA.MES"),
     ("EFFECT", "INT.EFECTIVO"),
     ("ENCODEURL", "URLCODIF"),
