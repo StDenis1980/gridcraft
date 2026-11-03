@@ -215,14 +215,16 @@ impl Language {
         gridcraft_engine::core::Region::from_tag(self.code()).unwrap_or_default()
     }
 
-    /// Formula entry: Spanish names for Spanish; English names with `;` and the decimal comma
-    /// wherever the region writes numbers with a comma (Catalan, Galician, Basque, Ukrainian, Czech,
-    /// Romanian, Lithuanian),
+    /// Formula entry: Spanish names for Spanish, Czech names for Czech; English names with `;` and
+    /// the decimal comma wherever else the region writes numbers with a comma (Catalan, Galician,
+    /// Basque, Ukrainian, Romanian, Lithuanian),
     /// so a constant reads the same in a cell and in a formula.
     pub fn formula_locale(self) -> gridcraft_engine::formula::FormulaLocale {
         use gridcraft_engine::formula::FormulaLocale;
         if self == Self::Es {
             FormulaLocale::Es
+        } else if self == Self::Cs {
+            FormulaLocale::Cs
         } else if self.region().decimal() == ',' {
             FormulaLocale::Semicolon
         } else {
@@ -526,9 +528,14 @@ mod tests {
     fn czech_romanian_and_lithuanian_use_their_regions_and_semicolons() {
         use gridcraft_engine::core::Region;
         use gridcraft_engine::formula::FormulaLocale;
-        for (lang, region) in [(Language::Cs, Region::CsCz), (Language::Ro, Region::RoRo), (Language::Lt, Region::LtLt)] {
+        for (lang, region, locale) in [
+            (Language::Cs, Region::CsCz, FormulaLocale::Cs),
+            (Language::Ro, Region::RoRo, FormulaLocale::Semicolon),
+            (Language::Lt, Region::LtLt, FormulaLocale::Semicolon),
+        ] {
             assert_eq!(lang.region(), region);
-            assert_eq!(lang.formula_locale(), FormulaLocale::Semicolon);
+            assert_eq!(lang.formula_locale(), locale);
+            assert_eq!(locale.list_separator(), ';');
         }
     }
 

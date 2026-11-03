@@ -462,12 +462,14 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
     if t.is_empty() || t.starts_with(['=', '\'']) {
         return None;
     }
-    // Booleans as the Spanish and Ukrainian interfaces write them, in any case (`істина`).
+    // Booleans as the Spanish, Ukrainian and Czech interfaces write them, in any case (`істина`).
     let booleans = match region {
         Region::EsEs => Some(("VERDADERO", "FALSO")),
         Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
-        // Czech, Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE.
-        Region::EnUs | Region::CsCz | Region::RoRo | Region::LtLt => None,
+        // Czech formulas write them PRAVDA and NEPRAVDA.
+        Region::CsCz => Some(("PRAVDA", "NEPRAVDA")),
+        // Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE.
+        Region::EnUs | Region::RoRo | Region::LtLt => None,
     };
     if let Some((yes, no)) = booleans {
         let upper = t.to_uppercase();

@@ -156,7 +156,11 @@ fn czech_romanian_and_lithuanian_numbers_and_dates() {
     assert_eq!(number("05.11.2026", ro), serial(2026, 11, 5));
     assert_eq!(delocalize_input("2026-11-05", lt), None);
     assert_eq!(number("2026-11-05", lt), serial(2026, 11, 5));
-    // Booleans stay the English names, as their formulas do.
+    // Czech writes the booleans PRAVDA and NEPRAVDA, as its formulas do; Romanian and
+    // Lithuanian keep the English names.
     assert_eq!(read("TRUE", cs).0, Value::Bool(true));
-    assert_eq!(delocalize_input("pravda", cs), None);
+    assert_eq!(read("pravda", cs).0, Value::Bool(true));
+    assert_eq!(read("NEPRAVDA", cs).0, Value::Bool(false));
+    assert_eq!(delocalize_input("adevărat", ro), None);
+    assert_eq!(read("TRUE", lt).0, Value::Bool(true));
 }
