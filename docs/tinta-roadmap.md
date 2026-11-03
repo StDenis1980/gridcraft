@@ -1,6 +1,6 @@
 # Tinta Calculo — Tinta Office roadmap
 
-> **Status:** 2026-10-27 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry; 2026-10-27 self-employed and family budget test workbooks; 2026-10-28 templates in New, regional chart labels; 2026-10-30 lesson and video for the Autónomo template; save with password.
+> **Status:** 2026-11-03 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry; 2026-10-27 self-employed and family budget test workbooks; 2026-10-28 templates in New, regional chart labels; 2026-10-30 lesson and video for the Autónomo template; save with password; 2026-11-03 Flatpak bundle manifest under the Tinta id.
 
 Tinta Calculo is the Tinta Office build of GridCraft and replaces Microsoft Excel. Upstream keeps the
 feature-parity roadmap ([ROADMAP.md](../ROADMAP.md), [roadmap.md](roadmap.md),
@@ -46,6 +46,7 @@ the most ready apps), **3** = 2027 (1.0). Dates are indicative.
 | GitHub Actions | 1 | GitHub disabled Actions in pdfcraft, wordcraft and deckcraft; ask GitHub Support. Until then, run the gates locally. |
 | Releases | 1 | A preview every month for all five apps, release notes in es/uk/en, one build script. |
 | Linux | 1 | AppImage + .deb with Tinta names for all five (built in the cloud); Flatpak in stage 2. |
+| Flatpak | 2 | Bundle manifest under the Tinta id (`packaging/linux/flatpak/io.github.stdenis1980.tintacalculo.bundle.yml`, generated from upstream's by `packaging/linux/tinta-flatpak.sh generate`; `tinta-flatpak.sh bundle` turns the Linux tarball into a `.flatpak`). Requested by Vilna OS (tintaoffice-web#14): bundles in releases by April 2027; Flathub only with Denys's approval. |
 | Windows installers | 1 | Desktop shortcuts for Texto and Calculo; Presenta registered for .pptx. |
 | Code signing | 2 | Windows (Certum Open Source or Azure Trusted Signing; scripts exist), macOS (Apple Developer + notarization). Owner decision and payment. |
 | Automated tests | 1–2 | Coverage audit per app; tests for every fork change (brand, languages, installers); a smoke test of each release installer on Windows; investigate the flaky tests upstream. |
