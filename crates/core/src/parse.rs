@@ -468,6 +468,7 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
         Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
         // Czech formulas write them PRAVDA and NEPRAVDA.
         Region::CsCz => Some(("PRAVDA", "NEPRAVDA")),
+        Region::ItIt => Some(("VERO", "FALSO")),
         Region::FrFr => Some(("VRAI", "FAUX")),
         Region::DeDe => Some(("WAHR", "FALSCH")),
         // Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE.

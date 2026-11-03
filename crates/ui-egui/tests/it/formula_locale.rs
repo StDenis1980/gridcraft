@@ -299,6 +299,25 @@ fn french_entry_uses_french_names_and_stores_english() {
     assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Bool(false));
 }
 
+/// Italian entry: Italian names, `;`, the decimal comma and Italian numbers; stored English.
+#[test]
+fn italian_entry_uses_italian_names_and_stores_english() {
+    use gridcraft_engine::formula::FormulaLocale;
+    assert_eq!(Language::It.formula_locale(), FormulaLocale::It);
+    let mut app = app();
+    app.run("app.language.set", json!({"language":"it"})).unwrap();
+    assert!(enter(&mut app, "=se(VERO;SOMMA(1,5;2,25);0)"));
+    assert_eq!(formula(&app), "IF(TRUE,SUM(1.5,2.25),0)");
+    assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Number(3.75));
+    app.begin_edit(None, true);
+    assert_eq!(app.editor.as_ref().unwrap().text, "=SE(VERO;SOMMA(1,5;2,25);0)");
+    assert!(app.commit_edit(0, 0, false, false));
+    assert!(enter(&mut app, "1.234,5"));
+    assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Number(1234.5));
+    assert!(enter(&mut app, "falso"));
+    assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Bool(false));
+}
+
 #[test]
 fn ukrainian_entry_uses_english_names_with_semicolons_and_the_decimal_comma() {
     use gridcraft_engine::formula::FormulaLocale;
