@@ -1,6 +1,6 @@
 # Tinta Calculo — Tinta Office roadmap
 
-> **Status:** 2026-11-03 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry; 2026-10-27 self-employed and family budget test workbooks; 2026-10-28 templates in New, regional chart labels; 2026-10-30 lesson and video for the Autónomo template; save with password; 2026-11-03 Flatpak bundle manifest under the Tinta id.
+> **Status:** 2026-11-03 · approved by the owner (Denys) · **Revision history:** 2026-10-27 created; 2026-10-27 Spanish names for every function; 2026-10-27 embedded fonts for Cyrillic in PDF export; 2026-10-27 es-ES and uk-UA regional formats; 2026-10-27 Ukrainian formula entry; 2026-10-27 self-employed and family budget test workbooks; 2026-10-28 templates in New, regional chart labels; 2026-10-30 lesson and video for the Autónomo template; save with password; 2026-11-03 Flatpak bundle manifest under the Tinta id; 2026-11-03 plan revision 2 (owner-approved): Preview 3 and a closed beta first, stage gates, next steps per stage.
 
 Tinta Calculo is the Tinta Office build of GridCraft and replaces Microsoft Excel. Upstream keeps the
 feature-parity roadmap ([ROADMAP.md](../ROADMAP.md), [roadmap.md](roadmap.md),
@@ -33,6 +33,48 @@ and Arabic or Devanagari would need text shaping first.
 | 6 | Charts: kinds and options survive a save (≈ 30% today) | upstream | 2 |
 | 7 | Large workbooks (100 MB, 1M rows), PivotTables | upstream | 3 |
 | 8 | Bank statement import, CSV and Norma 43 (an idea for self-employed users) | fork, if the owner wants it | 3 |
+
+## Plan revision 2 (2026-11-03, approved by the owner)
+
+Since 2026-10-27 the suite shipped more than stage 1 planned, but no new build has reached people:
+the last releases are from 2026-10-26/27. So November is about delivery, not new features.
+
+Suite priorities for November (stage 1), in order:
+
+1. **Preview 3 for all five apps, 10–14 November**, after the 9 November upstream sync: Windows MSI
+   and portable, Linux .deb, AppImage and .flatpak, the extra dictionary pack as its own file,
+   release notes in es/uk/en, the site's Download section; every installer smoke-tested on the
+   owner's PC first.
+2. **Closed beta in Spain** from Preview 3: a sign-up form on tintaoffice.com (none yet), a page for
+   testers (what to check, how to report), 20–50 autónomos and 1–2 gestorías, Ukrainians in Spain
+   as testers; weekly triage of error reports and issues.
+3. **Tinta Presenta catches up** (it has barely moved since 2026-10-27): #74, a .pptx test set, #70/#77.
+4. **Tinta Correo finishes M5**: calendar and contacts from .pst, export, the Outlook migration guide.
+5. **Translation review**: Ukrainian by the owner, Spanish by the first testers, ca/gl/eu through
+   Softcatalà and Proxecto Trasno.
+6. **Tests and stability**: a coverage audit of fork changes per app, an installer smoke-test script,
+   fuzzing file opening before each release.
+7. **A smaller fork**: port Texto's proofing to upstream's engine, see the open upstream PRs through
+   (Calculo ×4, Texto #4952), ask GitHub Support to re-enable Actions.
+
+Gates: stage 2 starts when Preview 3 is out and its installers passed the smoke test; the **public
+beta (February 2027)** starts when the Windows installers are code-signed and the es/uk
+translations are reviewed; 1.0 when no critical reports remain. Public beta: Tinta PDF, Texto and
+Calculo; Presenta if its test set passes by January; Correo stays a preview without promotion.
+Ukraine not before Q2 2027 (KEP), the rest of Europe in H2 2027; no paid ads or support sales
+before the public beta.
+
+This app's next steps:
+
+| Stage | Next steps |
+|---|---|
+| 1 — November 2026 | Password-protected .xlsx, kept chart XML and the cs/de/fr/it/pl function names reach testers in Preview 3; reconcile our de/fr/it names with upstream's open PRs (#3020, #2655, #1894) at the next sync |
+| 2 — December 2026 – January 2027 | Legacy .xls; the remaining chart options (axis bounds, error bars) once upstream merges #1290 and #2623 |
+| 3 — 2027 | Large workbooks, PivotTables; Norma 43 bank statement import if the owner wants it |
+
+Owner decisions still open: the Preview 3 date, code signing for Windows by 1 December (Certum Open
+Source or Azure Trusted Signing), the beta sign-up channel, which apps enter the public beta, time
+for the Ukrainian review, the video channel and playlists.
 
 ## Suite-wide work (all five Tinta Office apps)
 
