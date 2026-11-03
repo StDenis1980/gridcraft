@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use crate::czech::CZECH;
+use crate::german::GERMAN;
 use crate::spanish::SPANISH;
 use crate::{Expr, ParseError, parser};
 
@@ -21,6 +22,9 @@ pub enum FormulaLocale {
     /// Czech function names (`SUMA`, `KDYŽ`), `;` between arguments, decimal comma, `\` between
     /// array columns.
     Cs,
+    /// German function names (`SUMME`, `WENN`, `SVERWEIS`), `;` between arguments, decimal comma, `\\` between
+    /// array columns.
+    De,
 }
 
 /// A language's function names and the spelling of its two booleans.
@@ -32,6 +36,7 @@ struct Table {
 
 const SPANISH_TABLE: Table = Table { names: SPANISH, true_name: "VERDADERO", false_name: "FALSO" };
 const CZECH_TABLE: Table = Table { names: CZECH, true_name: "PRAVDA", false_name: "NEPRAVDA" };
+const GERMAN_TABLE: Table = Table { names: GERMAN, true_name: "WAHR", false_name: "FALSCH" };
 
 /// English -> localized and localized -> English function-name maps, keyed upper-case.
 type NameMaps = (HashMap<String, &'static str>, HashMap<String, &'static str>);
@@ -52,23 +57,26 @@ pub fn spanish_function_names() -> &'static [(&'static str, &'static str)] {
 
 impl FormulaLocale {
     /// Every formula locale.
-    pub const ALL: [FormulaLocale; 4] = [FormulaLocale::En, FormulaLocale::Es, FormulaLocale::Semicolon, FormulaLocale::Cs];
+    pub const ALL: [FormulaLocale; 5] = [FormulaLocale::En, FormulaLocale::Es, FormulaLocale::Semicolon, FormulaLocale::Cs, FormulaLocale::De];
 
     fn table(self) -> Option<&'static Table> {
         match self {
             Self::En | Self::Semicolon => None,
             Self::Es => Some(&SPANISH_TABLE),
             Self::Cs => Some(&CZECH_TABLE),
+            Self::De => Some(&GERMAN_TABLE),
         }
     }
 
     fn maps(self) -> Option<&'static NameMaps> {
         static ES: OnceLock<NameMaps> = OnceLock::new();
         static CS: OnceLock<NameMaps> = OnceLock::new();
+        static DE: OnceLock<NameMaps> = OnceLock::new();
         let cell = match self {
             Self::En | Self::Semicolon => return None,
             Self::Es => &ES,
             Self::Cs => &CS,
+            Self::De => &DE,
         };
         let names = self.table()?.names;
         Some(cell.get_or_init(|| build_maps(names)))

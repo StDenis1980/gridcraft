@@ -16,16 +16,18 @@ pub enum Region {
     RoRo,
     /// Lithuania: `1 234,56` (non-breaking space), `2026-12-31`, euro after the amount.
     LtLt,
+    /// Germany: `1.234,56`, `31.12.2026`, euro after the amount.
+    DeDe,
 }
 
 impl Region {
-    pub const ALL: [Region; 6] = [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt];
+    pub const ALL: [Region; 7] = [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt, Region::DeDe];
 
     /// The decimal separator.
     pub fn decimal(self) -> char {
         match self {
             Region::EnUs => '.',
-            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt => ',',
+            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt | Region::DeDe => ',',
         }
     }
 
@@ -33,7 +35,7 @@ impl Region {
     pub fn group(self) -> char {
         match self {
             Region::EnUs => ',',
-            Region::EsEs | Region::RoRo => '.',
+            Region::EsEs | Region::RoRo | Region::DeDe => '.',
             Region::UkUa | Region::CsCz | Region::LtLt => '\u{a0}',
         }
     }
@@ -43,7 +45,7 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy",
             Region::EsEs => "dd/mm/yyyy",
-            Region::UkUa | Region::CsCz | Region::RoRo => "dd.mm.yyyy",
+            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy",
             Region::LtLt => "yyyy-mm-dd",
         }
     }
@@ -53,7 +55,7 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy h:mm",
             Region::EsEs => "dd/mm/yyyy h:mm",
-            Region::UkUa | Region::CsCz | Region::RoRo => "dd.mm.yyyy h:mm",
+            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy h:mm",
             Region::LtLt => "yyyy-mm-dd h:mm",
         }
     }
@@ -68,7 +70,7 @@ impl Region {
     pub fn currency(self) -> Option<&'static str> {
         match self {
             Region::EnUs => None,
-            Region::EsEs | Region::LtLt => Some("€"),
+            Region::EsEs | Region::LtLt | Region::DeDe => Some("€"),
             Region::UkUa => Some("₴"),
             Region::CsCz => Some("Kč"),
             Region::RoRo => Some("lei"),
@@ -84,6 +86,7 @@ impl Region {
             Region::CsCz => "cs-CZ",
             Region::RoRo => "ro-RO",
             Region::LtLt => "lt-LT",
+            Region::DeDe => "de-DE",
         }
     }
 
@@ -98,6 +101,7 @@ impl Region {
             "cs" => Some(Region::CsCz),
             "ro" => Some(Region::RoRo),
             "lt" => Some(Region::LtLt),
+            "de" => Some(Region::DeDe),
             _ => None,
         }
     }

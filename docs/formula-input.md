@@ -7,7 +7,10 @@ shows them (`SUMA`, `KDYŽ`, `SVYHLEDAT`, `PRAVDA`/`NEPRAVDA`; Czech `LOG` is `L
 is `LOG`), with the same separators as Spanish; functions Czech Excel keeps in English keep
 their English names (`SUMIF`, `XLOOKUP`), and an English name typed with Czech separators is read
 too. The tables live in `crates/formula/src/{spanish,czech}.rs`; the Czech one is AI-assisted
-and not yet checked against Czech Excel. Catalan, Galician, Basque, Ukrainian, Romanian and
+and not yet checked against Czech Excel. Choose **Deutsch** for German names (`SUMME`, `WENN`, `SVERWEIS`, Tinta Office fork; same separators,
+AI-assisted table in `crates/formula/src/german.rs`); the interface also writes numbers
+and dates the de-DE way.
+Catalan, Galician, Basque, Ukrainian, Romanian and
 Lithuanian use English names with `;` and the decimal comma; English and the other interface
 languages use the English formula table and separators.
 

@@ -164,3 +164,16 @@ fn czech_romanian_and_lithuanian_numbers_and_dates() {
     assert_eq!(delocalize_input("adevărat", ro), None);
     assert_eq!(read("TRUE", lt).0, Value::Bool(true));
 }
+
+#[test]
+fn german_numbers_dates_and_booleans() {
+    let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
+    let de = Region::DeDe;
+    assert_eq!(Region::from_tag("de-DE"), Some(de));
+    assert_eq!(Region::from_tag("de_AT"), Some(de));
+    assert_eq!(read("1.234,50", de), (Value::Number(1234.5), Some("#,##0.00")));
+    assert_eq!(read("12,50 €", de), (Value::Number(12.5), Some("#,##0.00 \"€\"")));
+    assert_eq!(number("5.11.2026", de), serial(2026, 11, 5));
+    assert_eq!(read("wahr", de).0, Value::Bool(true));
+    assert_eq!(read("FALSCH", de).0, Value::Bool(false));
+}

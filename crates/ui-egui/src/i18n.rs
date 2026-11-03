@@ -225,6 +225,8 @@ impl Language {
             FormulaLocale::Es
         } else if self == Self::Cs {
             FormulaLocale::Cs
+        } else if self == Self::De {
+            FormulaLocale::De
         } else if self.region().decimal() == ',' {
             FormulaLocale::Semicolon
         } else {
