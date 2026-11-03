@@ -47,3 +47,15 @@ fn text_function_results_do_not_depend_on_the_region() {
     assert_eq!(text_function(&Value::Number(1234.5), "#,##0.00", DateSystem::D1900).unwrap(), "1,234.50");
     assert_eq!(text_function(&Value::Number(date(2026, 11, 5)), "m/d/yyyy", DateSystem::D1900).unwrap(), "11/5/2026");
 }
+
+#[test]
+fn czech_romanian_and_lithuanian_values_show_their_way() {
+    let d = date(2026, 11, 5);
+    assert_eq!(show(1234.5, "#,##0.00", Region::CsCz), "1\u{a0}234,50");
+    assert_eq!(show(1234.5, "#,##0.00", Region::RoRo), "1.234,50");
+    assert_eq!(show(1234.5, "#,##0.00", Region::LtLt), "1\u{a0}234,50");
+    assert_eq!(show(d, "m/d/yyyy", Region::CsCz), "05.11.2026");
+    assert_eq!(show(d, "m/d/yyyy", Region::RoRo), "05.11.2026");
+    assert_eq!(show(d, "m/d/yyyy", Region::LtLt), "2026-11-05");
+    assert_eq!(show(d + 0.5, "m/d/yyyy h:mm", Region::LtLt), "2026-11-05 12:00");
+}

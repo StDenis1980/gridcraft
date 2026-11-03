@@ -210,13 +210,14 @@ impl Language {
     }
 
     /// The regional formats values show and are typed in: Spain's for the languages of Spain,
-    /// Ukraine's for Ukrainian, en-US for the rest.
+    /// Ukraine's for Ukrainian, Czechia's, Romania's and Lithuania's for theirs, en-US for the rest.
     pub fn region(self) -> gridcraft_engine::core::Region {
         gridcraft_engine::core::Region::from_tag(self.code()).unwrap_or_default()
     }
 
     /// Formula entry: Spanish names for Spanish; English names with `;` and the decimal comma
-    /// wherever the region writes numbers with a comma (Catalan, Galician, Basque, Ukrainian),
+    /// wherever the region writes numbers with a comma (Catalan, Galician, Basque, Ukrainian, Czech,
+    /// Romanian, Lithuanian),
     /// so a constant reads the same in a cell and in a formula.
     pub fn formula_locale(self) -> gridcraft_engine::formula::FormulaLocale {
         use gridcraft_engine::formula::FormulaLocale;
@@ -519,6 +520,16 @@ mod tests {
         assert_eq!(Language::from_tag("RU_ru"), Some(Language::Ru));
         assert_eq!(Language::from_tag("de-DE"), Some(Language::De));
         assert_eq!(Language::from_tag("de_AT"), Some(Language::De));
+    }
+
+    #[test]
+    fn czech_romanian_and_lithuanian_use_their_regions_and_semicolons() {
+        use gridcraft_engine::core::Region;
+        use gridcraft_engine::formula::FormulaLocale;
+        for (lang, region) in [(Language::Cs, Region::CsCz), (Language::Ro, Region::RoRo), (Language::Lt, Region::LtLt)] {
+            assert_eq!(lang.region(), region);
+            assert_eq!(lang.formula_locale(), FormulaLocale::Semicolon);
+        }
     }
 
     #[test]
