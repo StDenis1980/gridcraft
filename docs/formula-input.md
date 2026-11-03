@@ -10,6 +10,9 @@ too. The tables live in `crates/formula/src/{spanish,czech}.rs`; the Czech one i
 and not yet checked against Czech Excel. Choose **Deutsch** for German names (`SUMME`, `WENN`, `SVERWEIS`, Tinta Office fork; same separators,
 AI-assisted table in `crates/formula/src/german.rs`); the interface also writes numbers
 and dates the de-DE way.
+Choose **Français** for French names (`SOMME`, `SI`, `RECHERCHEV`, Tinta Office fork; same separators,
+AI-assisted table in `crates/formula/src/french.rs`); the interface also writes numbers
+and dates the fr-FR way.
 Catalan, Galician, Basque, Ukrainian, Romanian and
 Lithuanian use English names with `;` and the decimal comma; English and the other interface
 languages use the English formula table and separators.

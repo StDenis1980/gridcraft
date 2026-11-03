@@ -6,6 +6,7 @@
 pub mod adjust;
 pub mod ast;
 mod czech;
+mod french;
 mod german;
 mod input;
 pub mod lexer;

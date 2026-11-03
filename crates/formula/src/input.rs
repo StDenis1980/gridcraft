@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use crate::czech::CZECH;
+use crate::french::FRENCH;
 use crate::german::GERMAN;
 use crate::spanish::SPANISH;
 use crate::{Expr, ParseError, parser};
@@ -22,6 +23,9 @@ pub enum FormulaLocale {
     /// Czech function names (`SUMA`, `KDYŽ`), `;` between arguments, decimal comma, `\` between
     /// array columns.
     Cs,
+    /// French function names (`SOMME`, `SI`, `RECHERCHEV`), `;` between arguments, decimal comma, `\\` between
+    /// array columns.
+    Fr,
     /// German function names (`SUMME`, `WENN`, `SVERWEIS`), `;` between arguments, decimal comma, `\\` between
     /// array columns.
     De,
@@ -36,6 +40,7 @@ struct Table {
 
 const SPANISH_TABLE: Table = Table { names: SPANISH, true_name: "VERDADERO", false_name: "FALSO" };
 const CZECH_TABLE: Table = Table { names: CZECH, true_name: "PRAVDA", false_name: "NEPRAVDA" };
+const FRENCH_TABLE: Table = Table { names: FRENCH, true_name: "VRAI", false_name: "FAUX" };
 const GERMAN_TABLE: Table = Table { names: GERMAN, true_name: "WAHR", false_name: "FALSCH" };
 
 /// English -> localized and localized -> English function-name maps, keyed upper-case.
@@ -57,13 +62,15 @@ pub fn spanish_function_names() -> &'static [(&'static str, &'static str)] {
 
 impl FormulaLocale {
     /// Every formula locale.
-    pub const ALL: [FormulaLocale; 5] = [FormulaLocale::En, FormulaLocale::Es, FormulaLocale::Semicolon, FormulaLocale::Cs, FormulaLocale::De];
+    pub const ALL: [FormulaLocale; 6] =
+        [FormulaLocale::En, FormulaLocale::Es, FormulaLocale::Semicolon, FormulaLocale::Cs, FormulaLocale::De, FormulaLocale::Fr];
 
     fn table(self) -> Option<&'static Table> {
         match self {
             Self::En | Self::Semicolon => None,
             Self::Es => Some(&SPANISH_TABLE),
             Self::Cs => Some(&CZECH_TABLE),
+            Self::Fr => Some(&FRENCH_TABLE),
             Self::De => Some(&GERMAN_TABLE),
         }
     }
@@ -71,11 +78,13 @@ impl FormulaLocale {
     fn maps(self) -> Option<&'static NameMaps> {
         static ES: OnceLock<NameMaps> = OnceLock::new();
         static CS: OnceLock<NameMaps> = OnceLock::new();
+        static FR: OnceLock<NameMaps> = OnceLock::new();
         static DE: OnceLock<NameMaps> = OnceLock::new();
         let cell = match self {
             Self::En | Self::Semicolon => return None,
             Self::Es => &ES,
             Self::Cs => &CS,
+            Self::Fr => &FR,
             Self::De => &DE,
         };
         let names = self.table()?.names;

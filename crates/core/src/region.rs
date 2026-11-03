@@ -16,18 +16,20 @@ pub enum Region {
     RoRo,
     /// Lithuania: `1 234,56` (non-breaking space), `2026-12-31`, euro after the amount.
     LtLt,
+    /// France: `1 234,56` (non-breaking space), `31/12/2026`, euro after the amount.
+    FrFr,
     /// Germany: `1.234,56`, `31.12.2026`, euro after the amount.
     DeDe,
 }
 
 impl Region {
-    pub const ALL: [Region; 7] = [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt, Region::DeDe];
+    pub const ALL: [Region; 8] = [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt, Region::DeDe, Region::FrFr];
 
     /// The decimal separator.
     pub fn decimal(self) -> char {
         match self {
             Region::EnUs => '.',
-            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt | Region::DeDe => ',',
+            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt | Region::DeDe | Region::FrFr => ',',
         }
     }
 
@@ -36,7 +38,7 @@ impl Region {
         match self {
             Region::EnUs => ',',
             Region::EsEs | Region::RoRo | Region::DeDe => '.',
-            Region::UkUa | Region::CsCz | Region::LtLt => '\u{a0}',
+            Region::UkUa | Region::CsCz | Region::LtLt | Region::FrFr => '\u{a0}',
         }
     }
 
@@ -44,7 +46,7 @@ impl Region {
     pub fn short_date(self) -> &'static str {
         match self {
             Region::EnUs => "m/d/yyyy",
-            Region::EsEs => "dd/mm/yyyy",
+            Region::EsEs | Region::FrFr => "dd/mm/yyyy",
             Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy",
             Region::LtLt => "yyyy-mm-dd",
         }
@@ -54,7 +56,7 @@ impl Region {
     pub fn short_date_time(self) -> &'static str {
         match self {
             Region::EnUs => "m/d/yyyy h:mm",
-            Region::EsEs => "dd/mm/yyyy h:mm",
+            Region::EsEs | Region::FrFr => "dd/mm/yyyy h:mm",
             Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy h:mm",
             Region::LtLt => "yyyy-mm-dd h:mm",
         }
@@ -70,7 +72,7 @@ impl Region {
     pub fn currency(self) -> Option<&'static str> {
         match self {
             Region::EnUs => None,
-            Region::EsEs | Region::LtLt | Region::DeDe => Some("€"),
+            Region::EsEs | Region::LtLt | Region::DeDe | Region::FrFr => Some("€"),
             Region::UkUa => Some("₴"),
             Region::CsCz => Some("Kč"),
             Region::RoRo => Some("lei"),
@@ -86,6 +88,7 @@ impl Region {
             Region::CsCz => "cs-CZ",
             Region::RoRo => "ro-RO",
             Region::LtLt => "lt-LT",
+            Region::FrFr => "fr-FR",
             Region::DeDe => "de-DE",
         }
     }
@@ -101,6 +104,7 @@ impl Region {
             "cs" => Some(Region::CsCz),
             "ro" => Some(Region::RoRo),
             "lt" => Some(Region::LtLt),
+            "fr" => Some(Region::FrFr),
             "de" => Some(Region::DeDe),
             _ => None,
         }
