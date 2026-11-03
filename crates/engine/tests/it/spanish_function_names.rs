@@ -96,3 +96,25 @@ fn german_formulas_compute_like_english_ones() {
         assert_eq!(shown, *expected, "{german}");
     }
 }
+
+#[test]
+fn french_formulas_compute_like_english_ones() {
+    use gridcraft_engine::formula::{parse_input, print};
+    let mut s = gridcraft_engine::Session::new();
+    s.new_workbook();
+    let cases = [
+        ("SOMME.SI.ENS({10\\20\\30};{1\\2\\1};1)", "40"),
+        ("ANNEE(DATE(2026;11;3))", "2026"),
+        ("ARRONDI(MOYENNE(1;2;4);2)", "2.33"),
+        ("SIERREUR(1/0;\"aucune donnée\")", "aucune donnée"),
+        ("MAJUSCULE(GAUCHE(\"tinta\";3))", "TIN"),
+        ("SI(ET(VRAI;NON(FAUX));NBCAR(\"abc\");0)", "3"),
+    ];
+    for (row, (local, expected)) in cases.iter().enumerate() {
+        let expr = parse_input(local, FormulaLocale::Fr, |_| false).unwrap();
+        s.execute("cell.set", json!({"cell": format!("A{}", row + 1), "input": format!("={}", print(&expr))})).unwrap();
+        let d = s.doc().unwrap();
+        let shown = cell_text(&d.wb, d.wb.active().unwrap(), gridcraft_engine::core::CellRef::new(row as u32, 0));
+        assert_eq!(shown, *expected, "{local}");
+    }
+}
