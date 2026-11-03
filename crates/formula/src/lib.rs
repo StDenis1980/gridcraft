@@ -9,6 +9,7 @@ mod czech;
 mod french;
 mod german;
 mod input;
+mod italian;
 pub mod lexer;
 pub mod parser;
 pub mod printer;

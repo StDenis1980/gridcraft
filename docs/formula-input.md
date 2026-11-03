@@ -13,6 +13,9 @@ and dates the de-DE way.
 Choose **Français** for French names (`SOMME`, `SI`, `RECHERCHEV`, Tinta Office fork; same separators,
 AI-assisted table in `crates/formula/src/french.rs`); the interface also writes numbers
 and dates the fr-FR way.
+Choose **Italiano** for Italian names (`SOMMA`, `SE`, `CERCA.VERT`, Tinta Office fork; same separators,
+AI-assisted table in `crates/formula/src/italian.rs`); the interface also writes numbers
+and dates the it-IT way.
 Catalan, Galician, Basque, Ukrainian, Romanian and
 Lithuanian use English names with `;` and the decimal comma; English and the other interface
 languages use the English formula table and separators.
