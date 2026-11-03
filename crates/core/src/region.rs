@@ -16,6 +16,8 @@ pub enum Region {
     RoRo,
     /// Lithuania: `1 234,56` (non-breaking space), `2026-12-31`, euro after the amount.
     LtLt,
+    /// Poland: `1 234,56` (non-breaking space), `31.12.2026`, złoty after the amount.
+    PlPl,
     /// Italy: `1.234,56`, `31/12/2026`, euro after the amount.
     ItIt,
     /// France: `1 234,56` (non-breaking space), `31/12/2026`, euro after the amount.
@@ -25,14 +27,16 @@ pub enum Region {
 }
 
 impl Region {
-    pub const ALL: [Region; 9] =
-        [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt, Region::DeDe, Region::FrFr, Region::ItIt];
+    pub const ALL: [Region; 10] =
+        [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt, Region::DeDe, Region::FrFr, Region::ItIt, Region::PlPl];
 
     /// The decimal separator.
     pub fn decimal(self) -> char {
         match self {
             Region::EnUs => '.',
-            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt | Region::DeDe | Region::FrFr | Region::ItIt => ',',
+            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt | Region::DeDe | Region::FrFr | Region::ItIt | Region::PlPl => {
+                ','
+            }
         }
     }
 
@@ -41,7 +45,7 @@ impl Region {
         match self {
             Region::EnUs => ',',
             Region::EsEs | Region::RoRo | Region::DeDe | Region::ItIt => '.',
-            Region::UkUa | Region::CsCz | Region::LtLt | Region::FrFr => '\u{a0}',
+            Region::UkUa | Region::CsCz | Region::LtLt | Region::FrFr | Region::PlPl => '\u{a0}',
         }
     }
 
@@ -50,7 +54,7 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy",
             Region::EsEs | Region::FrFr | Region::ItIt => "dd/mm/yyyy",
-            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy",
+            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe | Region::PlPl => "dd.mm.yyyy",
             Region::LtLt => "yyyy-mm-dd",
         }
     }
@@ -60,7 +64,7 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy h:mm",
             Region::EsEs | Region::FrFr | Region::ItIt => "dd/mm/yyyy h:mm",
-            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe => "dd.mm.yyyy h:mm",
+            Region::UkUa | Region::CsCz | Region::RoRo | Region::DeDe | Region::PlPl => "dd.mm.yyyy h:mm",
             Region::LtLt => "yyyy-mm-dd h:mm",
         }
     }
@@ -79,6 +83,7 @@ impl Region {
             Region::UkUa => Some("₴"),
             Region::CsCz => Some("Kč"),
             Region::RoRo => Some("lei"),
+            Region::PlPl => Some("zł"),
         }
     }
 
@@ -91,6 +96,7 @@ impl Region {
             Region::CsCz => "cs-CZ",
             Region::RoRo => "ro-RO",
             Region::LtLt => "lt-LT",
+            Region::PlPl => "pl-PL",
             Region::ItIt => "it-IT",
             Region::FrFr => "fr-FR",
             Region::DeDe => "de-DE",
@@ -108,6 +114,7 @@ impl Region {
             "cs" => Some(Region::CsCz),
             "ro" => Some(Region::RoRo),
             "lt" => Some(Region::LtLt),
+            "pl" => Some(Region::PlPl),
             "it" => Some(Region::ItIt),
             "fr" => Some(Region::FrFr),
             "de" => Some(Region::DeDe),

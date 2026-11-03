@@ -201,3 +201,15 @@ fn italian_numbers_dates_and_booleans() {
     assert_eq!(number("5/11/2026", r), serial(2026, 11, 5));
     assert_eq!(read("falso", r).0, Value::Bool(false));
 }
+
+#[test]
+fn polish_numbers_dates_and_booleans() {
+    let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
+    let r = Region::PlPl;
+    assert_eq!(Region::from_tag("pl-PL"), Some(r));
+    assert_eq!(r.tag(), "pl-PL");
+    assert_eq!(read("1 234,5", r).0, Value::Number(1234.5));
+    assert_eq!(read("12,50 zł", r), (Value::Number(12.5), Some("#,##0.00 \"zł\"")));
+    assert_eq!(number("5.11.2026", r), serial(2026, 11, 5));
+    assert_eq!(read("fałsz", r).0, Value::Bool(false));
+}

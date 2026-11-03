@@ -225,6 +225,8 @@ impl Language {
             FormulaLocale::Es
         } else if self == Self::Cs {
             FormulaLocale::Cs
+        } else if self == Self::Pl {
+            FormulaLocale::Pl
         } else if self == Self::It {
             FormulaLocale::It
         } else if self == Self::Fr {

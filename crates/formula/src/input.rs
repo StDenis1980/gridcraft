@@ -7,6 +7,7 @@ use crate::czech::CZECH;
 use crate::french::FRENCH;
 use crate::german::GERMAN;
 use crate::italian::ITALIAN;
+use crate::polish::POLISH;
 use crate::spanish::SPANISH;
 use crate::{Expr, ParseError, parser};
 
@@ -24,6 +25,9 @@ pub enum FormulaLocale {
     /// Czech function names (`SUMA`, `KDYŽ`), `;` between arguments, decimal comma, `\` between
     /// array columns.
     Cs,
+    /// Polish function names (`SUMA`, `JEŻELI`, `WYSZUKAJ.PIONOWO`), `;` between arguments, decimal comma, `\\` between
+    /// array columns.
+    Pl,
     /// Italian function names (`SOMMA`, `SE`, `CERCA.VERT`), `;` between arguments, decimal comma, `\\` between
     /// array columns.
     It,
@@ -44,6 +48,7 @@ struct Table {
 
 const SPANISH_TABLE: Table = Table { names: SPANISH, true_name: "VERDADERO", false_name: "FALSO" };
 const CZECH_TABLE: Table = Table { names: CZECH, true_name: "PRAVDA", false_name: "NEPRAVDA" };
+const POLISH_TABLE: Table = Table { names: POLISH, true_name: "PRAWDA", false_name: "FAŁSZ" };
 const ITALIAN_TABLE: Table = Table { names: ITALIAN, true_name: "VERO", false_name: "FALSO" };
 const FRENCH_TABLE: Table = Table { names: FRENCH, true_name: "VRAI", false_name: "FAUX" };
 const GERMAN_TABLE: Table = Table { names: GERMAN, true_name: "WAHR", false_name: "FALSCH" };
@@ -67,14 +72,23 @@ pub fn spanish_function_names() -> &'static [(&'static str, &'static str)] {
 
 impl FormulaLocale {
     /// Every formula locale.
-    pub const ALL: [FormulaLocale; 7] =
-        [FormulaLocale::En, FormulaLocale::Es, FormulaLocale::Semicolon, FormulaLocale::Cs, FormulaLocale::De, FormulaLocale::Fr, FormulaLocale::It];
+    pub const ALL: [FormulaLocale; 8] = [
+        FormulaLocale::En,
+        FormulaLocale::Es,
+        FormulaLocale::Semicolon,
+        FormulaLocale::Cs,
+        FormulaLocale::De,
+        FormulaLocale::Fr,
+        FormulaLocale::It,
+        FormulaLocale::Pl,
+    ];
 
     fn table(self) -> Option<&'static Table> {
         match self {
             Self::En | Self::Semicolon => None,
             Self::Es => Some(&SPANISH_TABLE),
             Self::Cs => Some(&CZECH_TABLE),
+            Self::Pl => Some(&POLISH_TABLE),
             Self::It => Some(&ITALIAN_TABLE),
             Self::Fr => Some(&FRENCH_TABLE),
             Self::De => Some(&GERMAN_TABLE),
@@ -84,6 +98,7 @@ impl FormulaLocale {
     fn maps(self) -> Option<&'static NameMaps> {
         static ES: OnceLock<NameMaps> = OnceLock::new();
         static CS: OnceLock<NameMaps> = OnceLock::new();
+        static PL: OnceLock<NameMaps> = OnceLock::new();
         static IT: OnceLock<NameMaps> = OnceLock::new();
         static FR: OnceLock<NameMaps> = OnceLock::new();
         static DE: OnceLock<NameMaps> = OnceLock::new();
@@ -91,6 +106,7 @@ impl FormulaLocale {
             Self::En | Self::Semicolon => return None,
             Self::Es => &ES,
             Self::Cs => &CS,
+            Self::Pl => &PL,
             Self::It => &IT,
             Self::Fr => &FR,
             Self::De => &DE,

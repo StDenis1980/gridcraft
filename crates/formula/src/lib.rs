@@ -12,6 +12,7 @@ mod input;
 mod italian;
 pub mod lexer;
 pub mod parser;
+mod polish;
 pub mod printer;
 mod spanish;
 
