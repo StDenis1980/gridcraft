@@ -135,3 +135,28 @@ fn a_sign_after_the_euro_inside_parentheses_is_not_a_number() {
     assert_eq!(parse_input("(€5)", DateSystem::D1900).value, Value::Number(-5.0));
     assert_eq!(number_stored_as_text("(€5)"), Some(-5.0));
 }
+
+#[test]
+fn czech_romanian_and_lithuanian_numbers_and_dates() {
+    let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
+    let (cs, ro, lt) = (Region::CsCz, Region::RoRo, Region::LtLt);
+    assert_eq!(Region::from_tag("cs-CZ"), Some(cs));
+    assert_eq!(Region::from_tag("ro_RO.UTF-8"), Some(ro));
+    assert_eq!(Region::from_tag("lt"), Some(lt));
+    // Czech and Lithuanian group with spaces, Romanian with dots; all three use a decimal comma.
+    assert_eq!(read("1 234,50", cs), (Value::Number(1234.5), Some("#,##0.00")));
+    assert_eq!(read("1\u{a0}234,50", lt), (Value::Number(1234.5), Some("#,##0.00")));
+    assert_eq!(read("1.234,50", ro), (Value::Number(1234.5), Some("#,##0.00")));
+    assert_eq!(read("99,90 Kč", cs), (Value::Number(99.9), Some("#,##0.00 \"Kč\"")));
+    assert_eq!(read("1.500 lei", ro), (Value::Number(1500.0), Some("#,##0 \"lei\"")));
+    assert_eq!(read("12,50 €", lt), (Value::Number(12.5), Some("#,##0.00 \"€\"")));
+    assert!(matches!(read("1 234.5", cs).0, Value::Text(_)));
+    // Day first in Czechia and Romania; Lithuania's year-first dates need no rewriting.
+    assert_eq!(number("5.11.2026", cs), serial(2026, 11, 5));
+    assert_eq!(number("05.11.2026", ro), serial(2026, 11, 5));
+    assert_eq!(delocalize_input("2026-11-05", lt), None);
+    assert_eq!(number("2026-11-05", lt), serial(2026, 11, 5));
+    // Booleans stay the English names, as their formulas do.
+    assert_eq!(read("TRUE", cs).0, Value::Bool(true));
+    assert_eq!(delocalize_input("pravda", cs), None);
+}

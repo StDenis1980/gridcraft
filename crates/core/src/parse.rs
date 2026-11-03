@@ -22,7 +22,7 @@ pub fn parse_input(s: &str, sys: DateSystem) -> Parsed {
 }
 
 /// Like [`parse_input`] for values read from a file such as CSV, which stays en-US: the euro
-/// and hryvnia forms only typed entry reads (`€5`, `12,50 €`, `250 грн`) remain text.
+/// and hryvnia, koruna and leu forms only typed entry reads (`€5`, `12,50 €`, `250 грн`, `99 Kč`, `5 lei`) remain text.
 pub fn parse_file_input(s: &str, sys: DateSystem) -> Parsed {
     parse_value(s, sys, false)
 }
@@ -74,7 +74,7 @@ pub fn number_stored_as_text(s: &str) -> Option<f64> {
     }
 }
 
-/// `entry`: typed cell input, which also reads the euro and hryvnia forms (`€5`, `12,50 €`, `250 грн`).
+/// `entry`: typed cell input, which also reads the euro, hryvnia, koruna and leu forms (`€5`, `12,50 €`, `250 грн`, `99 Kč`).
 fn parse_numeric(t: &str, sys: DateSystem, entry: bool) -> Option<(f64, Option<&'static str>)> {
     // Parenthesised negatives: (100) = -100, and the accounting forms `$(100)` and `(5)%`.
     if let Some(inner) = parenthesized(t) {
@@ -128,8 +128,10 @@ fn parenthesized(t: &str) -> Option<String> {
 }
 
 /// Currency symbols typed after the amount (`12.50 €`), with the format each gives.
-const SUFFIX_CURRENCIES: [(&str, &str, &str); 4] = [
+const SUFFIX_CURRENCIES: [(&str, &str, &str); 6] = [
     ("€", "#,##0.00 \"€\"", "#,##0 \"€\""),
+    ("Kč", "#,##0.00 \"Kč\"", "#,##0 \"Kč\""),
+    ("lei", "#,##0.00 \"lei\"", "#,##0 \"lei\""),
     ("₴", "#,##0.00 \"₴\"", "#,##0 \"₴\""),
     ("грн.", "#,##0.00 \"грн.\"", "#,##0 \"грн.\""),
     ("грн", "#,##0.00 \"грн\"", "#,##0 \"грн\""),
@@ -464,7 +466,8 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
     let booleans = match region {
         Region::EsEs => Some(("VERDADERO", "FALSO")),
         Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
-        Region::EnUs => None,
+        // Czech, Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE.
+        Region::EnUs | Region::CsCz | Region::RoRo | Region::LtLt => None,
     };
     if let Some((yes, no)) = booleans {
         let upper = t.to_uppercase();
@@ -487,7 +490,7 @@ fn delocalize_number(t: &str, region: Region) -> Option<String> {
     let (d, g) = (region.decimal(), region.group());
     // Where the digits start and end: everything around them (signs, symbols, %, parentheses)
     // is kept as typed.
-    let is_body = |c: char| c.is_ascii_digit() || c == d || c == g || (region == Region::UkUa && c == ' ');
+    let is_body = |c: char| c.is_ascii_digit() || c == d || c == g || (g == '\u{a0}' && c == ' ');
     let start = t.find(|c: char| c.is_ascii_digit() || c == d)?;
     let rest = t.get(start..)?;
     let end = rest.find(|c: char| !is_body(c)).unwrap_or(rest.len());

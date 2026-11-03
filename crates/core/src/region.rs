@@ -10,16 +10,22 @@ pub enum Region {
     EsEs,
     /// Ukraine: `1 234,56` (non-breaking space), `31.12.2026`, hryvnia after the amount.
     UkUa,
+    /// Czechia: `1 234,56` (non-breaking space), `31.12.2026`, koruna after the amount.
+    CsCz,
+    /// Romania: `1.234,56`, `31.12.2026`, leu after the amount.
+    RoRo,
+    /// Lithuania: `1 234,56` (non-breaking space), `2026-12-31`, euro after the amount.
+    LtLt,
 }
 
 impl Region {
-    pub const ALL: [Region; 3] = [Region::EnUs, Region::EsEs, Region::UkUa];
+    pub const ALL: [Region; 6] = [Region::EnUs, Region::EsEs, Region::UkUa, Region::CsCz, Region::RoRo, Region::LtLt];
 
     /// The decimal separator.
     pub fn decimal(self) -> char {
         match self {
             Region::EnUs => '.',
-            Region::EsEs | Region::UkUa => ',',
+            Region::EsEs | Region::UkUa | Region::CsCz | Region::RoRo | Region::LtLt => ',',
         }
     }
 
@@ -27,8 +33,8 @@ impl Region {
     pub fn group(self) -> char {
         match self {
             Region::EnUs => ',',
-            Region::EsEs => '.',
-            Region::UkUa => '\u{a0}',
+            Region::EsEs | Region::RoRo => '.',
+            Region::UkUa | Region::CsCz | Region::LtLt => '\u{a0}',
         }
     }
 
@@ -37,7 +43,8 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy",
             Region::EsEs => "dd/mm/yyyy",
-            Region::UkUa => "dd.mm.yyyy",
+            Region::UkUa | Region::CsCz | Region::RoRo => "dd.mm.yyyy",
+            Region::LtLt => "yyyy-mm-dd",
         }
     }
 
@@ -46,11 +53,13 @@ impl Region {
         match self {
             Region::EnUs => "m/d/yyyy h:mm",
             Region::EsEs => "dd/mm/yyyy h:mm",
-            Region::UkUa => "dd.mm.yyyy h:mm",
+            Region::UkUa | Region::CsCz | Region::RoRo => "dd.mm.yyyy h:mm",
+            Region::LtLt => "yyyy-mm-dd h:mm",
         }
     }
 
-    /// Whether dates are written day first (`31/12`), as everywhere but the United States.
+    /// Whether typed dates are read day first (`31/12`), as everywhere but the United States.
+    /// Lithuania writes dates year first; a four-digit first part is always read that way.
     pub fn day_first(self) -> bool {
         self != Region::EnUs
     }
@@ -59,8 +68,10 @@ impl Region {
     pub fn currency(self) -> Option<&'static str> {
         match self {
             Region::EnUs => None,
-            Region::EsEs => Some("€"),
+            Region::EsEs | Region::LtLt => Some("€"),
             Region::UkUa => Some("₴"),
+            Region::CsCz => Some("Kč"),
+            Region::RoRo => Some("lei"),
         }
     }
 
@@ -70,10 +81,13 @@ impl Region {
             Region::EnUs => "en-US",
             Region::EsEs => "es-ES",
             Region::UkUa => "uk-UA",
+            Region::CsCz => "cs-CZ",
+            Region::RoRo => "ro-RO",
+            Region::LtLt => "lt-LT",
         }
     }
 
-    /// The region for a BCP 47 tag or language code (`es`, `es-ES`, `uk`, `ca`…), if known.
+    /// The region for a BCP 47 tag or language code (`es`, `es-ES`, `uk`, `ca`, `cs`, `ro`, `lt`…), if known.
     pub fn from_tag(tag: &str) -> Option<Region> {
         let lang = tag.split(['-', '_']).next().unwrap_or("").to_ascii_lowercase();
         match lang.as_str() {
@@ -81,6 +95,9 @@ impl Region {
             // The languages of Spain write numbers and dates the Spanish way.
             "es" | "ca" | "gl" | "eu" => Some(Region::EsEs),
             "uk" => Some(Region::UkUa),
+            "cs" => Some(Region::CsCz),
+            "ro" => Some(Region::RoRo),
+            "lt" => Some(Region::LtLt),
             _ => None,
         }
     }
