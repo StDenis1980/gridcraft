@@ -21,6 +21,7 @@ mod gl;
 mod it;
 mod ja;
 mod ko;
+mod lt;
 mod nl;
 mod pl;
 mod pt;
@@ -59,10 +60,11 @@ pub enum Language {
     Vi,
     Nl,
     Ro,
+    Lt,
 }
 
 impl Language {
-    pub const ALL: [Self; 22] = [
+    pub const ALL: [Self; 23] = [
         Self::En,
         Self::Es,
         Self::Ca,
@@ -85,6 +87,7 @@ impl Language {
         Self::Nl,
         Self::Ro,
         Self::Tr,
+        Self::Lt,
     ];
 
     /// Every language in the order the switcher lists them: English first (the source language),
@@ -121,6 +124,7 @@ impl Language {
             Self::Vi => "Tiếng Việt",
             Self::Nl => "Nederlands",
             Self::Ro => "Română",
+            Self::Lt => "Lietuvių",
         }
     }
 
@@ -149,6 +153,7 @@ impl Language {
             Self::Vi => "vi",
             Self::Nl => "nl",
             Self::Ro => "ro",
+            Self::Lt => "lt",
         }
     }
 
@@ -186,6 +191,7 @@ impl Language {
             "vi" => Some(Self::Vi),
             "nl" => Some(Self::Nl),
             "ro" => Some(Self::Ro),
+            "lt" => Some(Self::Lt),
             _ => None,
         }
     }
@@ -251,6 +257,7 @@ impl Language {
             Self::Vi => vi::translate(text),
             Self::Nl => nl::translate(text),
             Self::Ro => ro::translate(text),
+            Self::Lt => lt::translate(text),
         };
         branded(translated.unwrap_or_else(|| text.rsplit_once('|').map_or(text, |(_, label)| label)))
     }
@@ -400,6 +407,9 @@ mod tests {
         assert_eq!(Language::Eu.tr("Page {page} of {pages}"), "{page}/{pages} orrialdea");
         assert_eq!(Language::Ca.tr("Freeze Panes"), "Immobilitza les subfinestres");
         assert_eq!(Language::Ca.tr("Page {page} of {pages}"), "Pàgina {page} de {pages}");
+        assert_eq!(Language::Lt.tr("Freeze Panes"), "Fiksuoti sritis");
+        assert_eq!(Language::Cs.tr("Freeze Panes"), "Ukotvit příčky");
+        assert_eq!(Language::Ro.tr("Page {page} of {pages}"), "Pagina {page} din {pages}");
         // A `context|label` key shows only its label in English.
         assert_eq!(Language::En.tr("Page Layout|Orientation"), "Orientation");
         // Errors drop the `command `id`:` prefix before translating; an untranslated one stays whole.
@@ -433,8 +443,20 @@ mod tests {
     /// Format Painter, Undo, Redo) are named in the interface language, not English.
     #[test]
     fn ribbon_button_names_are_translated() {
-        for language in [Language::Es, Language::Ca, Language::Gl, Language::Eu, Language::Uk, Language::It, Language::Fr, Language::De, Language::Pl]
-        {
+        for language in [
+            Language::Es,
+            Language::Ca,
+            Language::Gl,
+            Language::Eu,
+            Language::Uk,
+            Language::It,
+            Language::Fr,
+            Language::De,
+            Language::Pl,
+            Language::Ro,
+            Language::Cs,
+            Language::Lt,
+        ] {
             for key in ["Paste", "Format Painter", "Undo", "Redo"] {
                 assert_ne!(language.tr(key), key, "{} falls back to English for {key:?}", language.code());
             }
@@ -541,6 +563,9 @@ mod tests {
         assert_eq!(Language::from_tag("ro-RO"), Some(Language::Ro));
         assert_eq!(Language::from_tag("ro_MD.UTF-8"), Some(Language::Ro));
         assert_eq!(Language::parse("ro"), Some(Language::Ro));
+        assert_eq!(Language::from_tag("lt_LT.UTF-8"), Some(Language::Lt));
+        assert_eq!(Language::parse("lt"), Some(Language::Lt));
+        assert_eq!(Language::from_tag("cs_CZ.UTF-8"), Some(Language::Cs));
         assert_eq!(Language::from_tag("ca-ES-valencia"), Some(Language::Ca));
         assert_eq!(Language::parse("ca"), Some(Language::Ca));
         assert_eq!(Language::from_tag("gl_ES.UTF-8"), Some(Language::Gl));

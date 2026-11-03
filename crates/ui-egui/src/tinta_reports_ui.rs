@@ -361,6 +361,22 @@ const TRANSLATIONS: &[(&str, [&str; 11])] = &[
             "Deschide folderul cu rapoarte",
         ],
     ),
+    (
+        "lt",
+        [
+            "Siųsti klaidų ataskaitas automatiškai?",
+            "Kai programa užstringa ar nustoja reaguoti, ji gali išsiųsti ataskaitą, kad problema būtų ištaisyta jums mums nerašant. Ataskaitoje yra programos versija, sistema, kalba, kodo vieta, kur įvyko klaida, ir paskutinės techninio žurnalo eilutės. Niekada – jūsų dokumentų tekstas, failų pavadinimai, aplankai, el. pašto adresai ar slaptažodžiai.",
+            "Ataskaitos siunčiamos Tinta Office (report.tintaoffice.com, saugomos ES) ir ištrinamos po 90 dienų. Tai galite bet kada pakeisti Failas › Parinktys › Bendra ir ten ištrinti savo ataskaitas iš serverio. Išsamiau: tintaoffice.com/en/legal",
+            "Taip, siųsti ataskaitas",
+            "Ne",
+            "Klaidų ataskaitos",
+            "Automatiškai siųsti klaidų ataskaitas",
+            "Diegimo ID: {id}",
+            "Ištrinti mano ataskaitas iš serverio",
+            "Ištrynimas užsakytas: jis bus baigtas, kai programa kitą kartą prisijungs prie interneto.",
+            "Atidaryti ataskaitų aplanką",
+        ],
+    ),
 ];
 
 /// `text` (one of [`STRINGS`]) in the interface language; English when there is no translation.
