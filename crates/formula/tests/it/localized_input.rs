@@ -129,3 +129,21 @@ fn italian_formulas_are_stored_in_english() {
     let shown = |src: &str| print_input(&gridcraft_formula::parse(src).unwrap(), locale, |_| false).unwrap();
     assert_eq!(shown("IF(A1>0.5,TRUE,SUMIFS(B:B,A:A,1))"), "SE(A1>0,5;VERO;SOMMA.PIÙ.SE(B:B;A:A;1))");
 }
+
+#[test]
+fn polish_formulas_are_stored_in_english() {
+    let locale = FormulaLocale::Pl;
+    for (src, expected) in [
+        ("=suma(A1:A10)", "SUM(A1:A10)"),
+        ("JEŻELI(A1>0;\"Tak\";\"Nie\")", "IF(A1>0,\"Tak\",\"Nie\")"),
+        ("WYSZUKAJ.PIONOWO(A2;D:E;2;FAŁSZ)", "VLOOKUP(A2,D:E,2,FALSE)"),
+        ("LICZ.JEŻELI(A:A;\">0\")+ILE.NIEPUSTYCH(B:B)", "COUNTIF(A:A,\">0\")+COUNTA(B:B)"),
+        ("ZAOKR(ŚREDNIA(1;2,5);1)", "ROUND(AVERAGE(1,2.5),1)"),
+        ("SIN(0)+ORAZ(PRAWDA;NIE(FAŁSZ))", "SIN(0)+AND(TRUE,NOT(FALSE))"),
+        ("{1\\2;PRAWDA\\FAŁSZ}", "{1,2;TRUE,FALSE}"),
+    ] {
+        assert_eq!(input(src, locale), expected, "{src}");
+    }
+    let shown = |src: &str| print_input(&gridcraft_formula::parse(src).unwrap(), locale, |_| false).unwrap();
+    assert_eq!(shown("IF(A1>0.5,TRUE,SUMIFS(B:B,A:A,1))"), "JEŻELI(A1>0,5;PRAWDA;SUMA.WARUNKÓW(B:B;A:A;1))");
+}

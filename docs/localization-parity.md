@@ -1,6 +1,6 @@
 # Localization parity
 
-> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-11-03 · **Change:** minor (Tinta Office fork: Italian formula names and it-IT region; previously minor: Tinta Office fork: French formula names and fr-FR region; previously minor: Tinta Office fork: German formula names and de-DE region; previously minor: Tinta Office fork: Czech formula names; previously minor: missing translations are listed by `cargo xtask i18n-report` and never fail a check) · **Target:** Microsoft Excel (Microsoft 365), Excel for Mac 16.113.4
+> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-11-03 · **Change:** minor (Tinta Office fork: Polish formula names and pl-PL region; previously minor: Tinta Office fork: Italian formula names and it-IT region; previously minor: Tinta Office fork: French formula names and fr-FR region; previously minor: Tinta Office fork: German formula names and de-DE region; previously minor: Tinta Office fork: Czech formula names; previously minor: missing translations are listed by `cargo xtask i18n-report` and never fail a check) · **Target:** Microsoft Excel (Microsoft 365), Excel for Mac 16.113.4
 
 Per-language status against Excel, which ships its UI in dozens of languages (Windows language
 packs cover 100+), with localized function names, argument separators, number and date formats,
@@ -110,6 +110,7 @@ language (none so far) and of localized function names.
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-11-03 | minor | Tinta Office fork: Polish formula entry (`FormulaLocale::Pl`, every built-in in `crates/formula/src/polish.rs`) and the pl-PL region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against Polish Excel |
 | 2026-11-03 | minor | Tinta Office fork: Italian formula entry (`FormulaLocale::It`, every built-in in `crates/formula/src/italian.rs`) and the it-IT region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against Italian Excel |
 | 2026-11-03 | minor | Tinta Office fork: French formula entry (`FormulaLocale::Fr`, every built-in in `crates/formula/src/french.rs`) and the fr-FR region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against French Excel |
 | 2026-11-03 | minor | Tinta Office fork: German formula entry (`FormulaLocale::De`, every built-in in `crates/formula/src/german.rs`) and the de-DE region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against German Excel |

@@ -140,3 +140,25 @@ fn italian_formulas_compute_like_english_ones() {
         assert_eq!(shown, *expected, "{local}");
     }
 }
+
+#[test]
+fn polish_formulas_compute_like_english_ones() {
+    use gridcraft_engine::formula::{parse_input, print};
+    let mut s = gridcraft_engine::Session::new();
+    s.new_workbook();
+    let cases = [
+        ("SUMA.WARUNKÓW({10\\20\\30};{1\\2\\1};1)", "40"),
+        ("ROK(DATA(2026;11;3))", "2026"),
+        ("ZAOKR(ŚREDNIA(1;2;4);2)", "2.33"),
+        ("JEŻELI.BŁĄD(1/0;\"brak danych\")", "brak danych"),
+        ("LITERY.WIELKIE(LEWY(\"tinta\";3))", "TIN"),
+        ("JEŻELI(ORAZ(PRAWDA;NIE(FAŁSZ));DŁ(\"abc\");0)", "3"),
+    ];
+    for (row, (local, expected)) in cases.iter().enumerate() {
+        let expr = parse_input(local, FormulaLocale::Pl, |_| false).unwrap();
+        s.execute("cell.set", json!({"cell": format!("A{}", row + 1), "input": format!("={}", print(&expr))})).unwrap();
+        let d = s.doc().unwrap();
+        let shown = cell_text(&d.wb, d.wb.active().unwrap(), gridcraft_engine::core::CellRef::new(row as u32, 0));
+        assert_eq!(shown, *expected, "{local}");
+    }
+}

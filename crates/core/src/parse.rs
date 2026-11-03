@@ -128,10 +128,11 @@ fn parenthesized(t: &str) -> Option<String> {
 }
 
 /// Currency symbols typed after the amount (`12.50 €`), with the format each gives.
-const SUFFIX_CURRENCIES: [(&str, &str, &str); 6] = [
+const SUFFIX_CURRENCIES: [(&str, &str, &str); 7] = [
     ("€", "#,##0.00 \"€\"", "#,##0 \"€\""),
     ("Kč", "#,##0.00 \"Kč\"", "#,##0 \"Kč\""),
     ("lei", "#,##0.00 \"lei\"", "#,##0 \"lei\""),
+    ("zł", "#,##0.00 \"zł\"", "#,##0 \"zł\""),
     ("₴", "#,##0.00 \"₴\"", "#,##0 \"₴\""),
     ("грн.", "#,##0.00 \"грн.\"", "#,##0 \"грн.\""),
     ("грн", "#,##0.00 \"грн\"", "#,##0 \"грн\""),
@@ -468,6 +469,7 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
         Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
         // Czech formulas write them PRAVDA and NEPRAVDA.
         Region::CsCz => Some(("PRAVDA", "NEPRAVDA")),
+        Region::PlPl => Some(("PRAWDA", "FAŁSZ")),
         Region::ItIt => Some(("VERO", "FALSO")),
         Region::FrFr => Some(("VRAI", "FAUX")),
         Region::DeDe => Some(("WAHR", "FALSCH")),
