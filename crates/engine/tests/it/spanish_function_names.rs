@@ -74,3 +74,25 @@ fn czech_formulas_compute_like_english_ones() {
         assert_eq!(shown, *expected, "{czech}");
     }
 }
+
+#[test]
+fn german_formulas_compute_like_english_ones() {
+    use gridcraft_engine::formula::{parse_input, print};
+    let mut s = gridcraft_engine::Session::new();
+    s.new_workbook();
+    let cases = [
+        ("SUMMEWENNS({10\\20\\30};{1\\2\\1};1)", "40"),
+        ("JAHR(DATUM(2026;11;3))", "2026"),
+        ("RUNDEN(MITTELWERT(1;2;4);2)", "2.33"),
+        ("WENNFEHLER(1/0;\"keine Daten\")", "keine Daten"),
+        ("GROSS(LINKS(\"tinta\";3))", "TIN"),
+        ("WENN(UND(WAHR;NICHT(FALSCH));LÄNGE(\"abc\");0)", "3"),
+    ];
+    for (row, (german, expected)) in cases.iter().enumerate() {
+        let expr = parse_input(german, FormulaLocale::De, |_| false).unwrap();
+        s.execute("cell.set", json!({"cell": format!("A{}", row + 1), "input": format!("={}", print(&expr))})).unwrap();
+        let d = s.doc().unwrap();
+        let shown = cell_text(&d.wb, d.wb.active().unwrap(), gridcraft_engine::core::CellRef::new(row as u32, 0));
+        assert_eq!(shown, *expected, "{german}");
+    }
+}

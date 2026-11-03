@@ -75,3 +75,21 @@ fn spanish_booleans_are_not_czech_and_back() {
     assert_eq!(FormulaLocale::En.boolean_names(), ("TRUE", "FALSE"));
     assert!(FormulaLocale::Semicolon.function_names().is_empty());
 }
+
+#[test]
+fn german_formulas_are_stored_in_english() {
+    let de = FormulaLocale::De;
+    for (src, expected) in [
+        ("=summe(A1:A10)", "SUM(A1:A10)"),
+        ("WENN(A1>0;\"Ja\";\"Nein\")", "IF(A1>0,\"Ja\",\"Nein\")"),
+        ("SVERWEIS(A2;D:E;2;FALSCH)", "VLOOKUP(A2,D:E,2,FALSE)"),
+        ("ZÄHLENWENN(A:A;\">0\")+zählenwenns(A:A;1)", "COUNTIF(A:A,\">0\")+COUNTIFS(A:A,1)"),
+        ("RUNDEN(MITTELWERT(1;2,5);1)", "ROUND(AVERAGE(1,2.5),1)"),
+        ("XVERWEIS(1;A:A;B:B)+JAHR(HEUTE())", "XLOOKUP(1,A:A,B:B)+YEAR(TODAY())"),
+        ("{1\\2;WAHR\\FALSCH}", "{1,2;TRUE,FALSE}"),
+    ] {
+        assert_eq!(input(src, de), expected, "{src}");
+    }
+    let shown = |src: &str| print_input(&gridcraft_formula::parse(src).unwrap(), de, |_| false).unwrap();
+    assert_eq!(shown("IF(A1>0.5,TRUE,SUMIFS(B:B,A:A,1))"), "WENN(A1>0,5;WAHR;SUMMEWENNS(B:B;A:A;1))");
+}
