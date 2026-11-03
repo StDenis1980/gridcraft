@@ -2,7 +2,14 @@
 
 View → Interface language is the existing, persisted language preference. Choose **Español**
 for Spanish formula entry and display. On first run the preference follows the system language.
-English and the other interface languages currently use the English formula table and separators.
+Choose **Čeština** for Czech formula entry (Tinta Office fork): Czech names as Czech Excel
+shows them (`SUMA`, `KDYŽ`, `SVYHLEDAT`, `PRAVDA`/`NEPRAVDA`; Czech `LOG` is `LOG10` and `LOGZ`
+is `LOG`), with the same separators as Spanish; functions Czech Excel keeps in English keep
+their English names (`SUMIF`, `XLOOKUP`), and an English name typed with Czech separators is read
+too. The tables live in `crates/formula/src/{spanish,czech}.rs`; the Czech one is AI-assisted
+and not yet checked against Czech Excel. Catalan, Galician, Basque, Ukrainian, Romanian and
+Lithuanian use English names with `;` and the decimal comma; English and the other interface
+languages use the English formula table and separators.
 
 | Spanish | Canonical English |
 | --- | --- |

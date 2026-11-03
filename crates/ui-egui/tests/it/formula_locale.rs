@@ -196,16 +196,17 @@ fn portuguese_interface_retains_its_canonical_formula_fallback() {
 }
 
 #[test]
-fn czech_interface_retains_its_canonical_formula_fallback() {
-    // The Czech table translates interface labels only: formulas keep canonical English names,
-    // `,` separators and `.` decimals until a Czech formula locale exists.
+fn czech_interface_reads_english_names_with_czech_separators() {
+    // Czech has its own formula names (`SUMA`); an English name typed with Czech separators is
+    // still read, and shows in Czech afterwards. English separators are not Czech ones.
     let mut app = app();
     app.run("app.language.set", json!({"code":"cs-CZ"})).unwrap();
     assert_eq!(app.ui.language, Language::Cs);
-    assert!(enter(&mut app, "=SUM(1.5,2.25)"));
+    assert!(enter(&mut app, "=SUM(1,5;2,25)"));
+    assert_eq!(formula(&app), "SUM(1.5,2.25)");
     app.begin_edit(None, true);
-    assert_eq!(app.editor.as_ref().unwrap().text, "=SUM(1.5,2.25)");
-    assert!(!enter(&mut app, "=SUMA(1;2)"));
+    assert_eq!(app.editor.as_ref().unwrap().text, "=SUMA(1,5;2,25)");
+    assert!(!enter(&mut app, "=SUM(1.5,2.25)"));
     let restored: UiState = serde_json::from_str(&serde_json::to_string(&app.ui).unwrap()).unwrap();
     assert_eq!(restored.language, Language::Cs);
 }
@@ -239,6 +240,25 @@ fn turkish_interface_retains_its_canonical_formula_fallback() {
     assert!(!enter(&mut app, "=TOPLA(1;2)"));
     let restored: UiState = serde_json::from_str(&serde_json::to_string(&app.ui).unwrap()).unwrap();
     assert_eq!(restored.language, Language::Tr);
+}
+
+/// Czech entry: Czech names (`KDYŽ`, `SUMA`, `PRAVDA`), `;` and the decimal comma; stored English.
+#[test]
+fn czech_entry_uses_czech_names_and_stores_english() {
+    use gridcraft_engine::formula::FormulaLocale;
+    assert_eq!(Language::Cs.formula_locale(), FormulaLocale::Cs);
+    let mut app = app();
+    app.run("app.language.set", json!({"language":"cs"})).unwrap();
+    assert!(enter(&mut app, "=když(PRAVDA;SUMA(1,5;2,25);0)"));
+    assert_eq!(formula(&app), "IF(TRUE,SUM(1.5,2.25),0)");
+    assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Number(3.75));
+    app.begin_edit(None, true);
+    assert_eq!(app.editor.as_ref().unwrap().text, "=KDYŽ(PRAVDA;SUMA(1,5;2,25);0)");
+    assert!(app.commit_edit(0, 0, false, false));
+    assert_eq!(formula(&app), "IF(TRUE,SUM(1.5,2.25),0)");
+    // A typed boolean is one too.
+    assert!(enter(&mut app, "nepravda"));
+    assert_eq!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Bool(false));
 }
 
 #[test]
