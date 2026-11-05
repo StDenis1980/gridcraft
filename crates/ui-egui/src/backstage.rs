@@ -842,6 +842,22 @@ fn account(app: &mut SheetApp, ui: &mut Ui) {
             dim(ui, lang.tr("Version, contributors and the AI models that helped"));
         });
     });
+    if app.tinta_feedback.available {
+        // Tinta Office: Office's File › Feedback, here beside About.
+        let send = crate::tinta_feedback::tr(lang.code(), crate::tinta_feedback::BUTTON);
+        ui.add_space(12.0);
+        ui.horizontal(|ui| {
+            if square_button(ui, Icon::Comment, send).clicked() {
+                app.tinta_feedback.request();
+            }
+            ui.add_space(12.0);
+            ui.vertical(|ui| {
+                ui.add_space(14.0);
+                ui.label(RichText::new(send).font(theme::ui_bold(13.5)).color(t.text));
+                dim(ui, crate::tinta_feedback::tr(lang.code(), crate::tinta_feedback::IDEA));
+            });
+        });
+    }
 }
 
 #[cfg(test)]

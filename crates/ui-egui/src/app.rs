@@ -41,6 +41,7 @@ impl SheetApp {
             services,
             printing: Default::default(),
             print_feedback_seen: None,
+            tinta_feedback: Default::default(),
             synthetic: Default::default(),
             synthetic_pending: false,
             synthetic_injected_at_pass: None,
@@ -215,6 +216,7 @@ impl SheetApp {
         #[cfg(not(target_arch = "wasm32"))]
         updates_ui::show(self, &ctx);
         tinta_reports_ui::first_start(self, &ctx);
+        self.tinta_feedback.show(&ctx, self.ui.language.code());
         let t = theme::Tokens::get(&ctx);
         // A host can turn the File tab off while Backstage is already open: close it.
         if !self.chrome.file_tab {

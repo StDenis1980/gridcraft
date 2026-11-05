@@ -239,6 +239,11 @@ impl SheetApp {
                 }
                 Ok(json!({"page": self.backstage.as_ref().map(|b| b.page.id())}))
             }
+            "ui.feedback" => {
+                // Tinta Office: Send feedback (the dialog opens on the next frame).
+                self.tinta_feedback.request();
+                Ok(json!({"available": self.tinta_feedback.available}))
+            }
             "ui.dialog" => {
                 let name = p.get("name").and_then(Json::as_str).unwrap_or("");
                 self.open_dialog(name, p.clone());

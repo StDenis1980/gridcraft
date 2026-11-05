@@ -50,6 +50,7 @@ pub mod selection_glide;
 pub mod tabs;
 pub mod text_box;
 pub mod theme;
+pub mod tinta_feedback;
 mod tinta_reports_ui;
 #[cfg(not(target_arch = "wasm32"))]
 mod updates_ui;
@@ -213,6 +214,8 @@ pub struct SheetApp {
     pub editor: Option<editor::EditState>,
     pub text_box_editor: Option<text_box::EditState>,
     pub dialog: Option<dialogs::Dialog>,
+    /// Tinta Office: the Send feedback dialog ([`tinta_feedback`]); the desktop app sends.
+    pub tinta_feedback: tinta_feedback::Feedback,
     /// The File tab's Backstage view, when open (UI-only; replaces the ribbon, grid and tabs).
     pub backstage: Option<backstage::Backstage>,
     pub message: Option<(String, String)>,
