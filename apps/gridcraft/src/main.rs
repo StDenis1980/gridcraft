@@ -18,6 +18,7 @@ mod logging;
 #[cfg(target_os = "macos")]
 mod native_menu;
 mod print;
+mod tinta_feedback_send;
 mod tinta_report;
 
 use std::cell::RefCell;
@@ -46,6 +47,7 @@ impl eframe::App for App {
         tinta_report::busy();
         self.0.logic(ctx);
         tinta_report::tick(&mut self.0);
+        tinta_feedback_send::tick(&mut self.0.tinta_feedback, self.0.ui.language.code());
         self.1.logic(&mut self.0, ctx);
         if ctx.input(|input| input.viewport().close_requested()) && self.0.printing.busy() {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
