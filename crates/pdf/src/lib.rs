@@ -5,7 +5,8 @@
 //!   WinAnsiEncoding (Cyrillic, Greek, …) are set in an embedded TrueType subset when the
 //!   application has installed a font for the face ([`install_font`]); the rest (CJK and other
 //!   scripts) in a predefined, non-embedded Adobe-GB1 CID font with the `UniGB-UTF16-H` CMap
-//!   instead of being replaced by `?`.
+//!   instead of being replaced by `?`. Symbol uses its own built-in encoding ([`symbol_code`]),
+//!   for Greek letters and mathematical operators.
 //! - Vector drawing: rectangles, lines (solid or dashed), polygons, circles (Bézier), clipping.
 //! - RGBA images as RGB image XObjects with a soft mask for alpha (run-length encoded).
 //! - Coordinates are points with a **top-left origin** (y grows down); text `y` is the baseline.
@@ -17,6 +18,9 @@
 
 mod embed;
 mod metrics;
+mod symbol;
+
+pub use symbol::{symbol_code, symbol_width};
 
 pub use embed::{EmbeddedFont, FontError, MAX_FONT_BYTES, can_draw, clear_fonts, has_font, install_font};
 
@@ -53,7 +57,7 @@ impl Rect {
     }
 }
 
-/// The standard 14 fonts minus Symbol and ZapfDingbats.
+/// The standard 14 fonts minus ZapfDingbats.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Font {
     #[default]
@@ -69,7 +73,12 @@ pub enum Font {
     CourierBold,
     CourierOblique,
     CourierBoldOblique,
+    /// Greek letters and mathematical symbols, in the font's own encoding.
+    Symbol,
 }
+
+/// How many fonts a document can use.
+const FONT_COUNT: usize = 13;
 
 /// A font family for [`Font::styled`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -81,7 +90,7 @@ pub enum Family {
 }
 
 impl Font {
-    pub const ALL: [Font; 12] = [
+    pub const ALL: [Font; FONT_COUNT] = [
         Font::Helvetica,
         Font::HelveticaBold,
         Font::HelveticaOblique,
@@ -94,6 +103,7 @@ impl Font {
         Font::CourierBold,
         Font::CourierOblique,
         Font::CourierBoldOblique,
+        Font::Symbol,
     ];
 
     /// PostScript base font name.
@@ -111,6 +121,7 @@ impl Font {
             Font::CourierBold => "Courier-Bold",
             Font::CourierOblique => "Courier-Oblique",
             Font::CourierBoldOblique => "Courier-BoldOblique",
+            Font::Symbol => "Symbol",
         }
     }
 
@@ -160,8 +171,20 @@ impl Font {
         }
     }
 
+    /// Whether this font can show `c` by itself (in its own encoding; for the text faces,
+    /// without the CID fallback).
+    pub fn can_encode(self, c: char) -> bool {
+        match self {
+            Font::Symbol => symbol_code(c).is_some(),
+            _ => c == '?' || win_ansi(c) != b'?',
+        }
+    }
+
     /// Advance width of a character in 1/1000 em.
     pub fn char_width(self, c: char) -> u16 {
+        if self == Font::Symbol {
+            return symbol_code(c).and_then(symbol_width).unwrap_or(500);
+        }
         embed::with_installed(|fonts| self.char_width_with(c, fonts))
     }
 
@@ -272,10 +295,16 @@ fn pdf_utf16_string(text: &str) -> String {
 
 /// A PDF literal string `( … )` for `text` in WinAnsiEncoding.
 fn pdf_string(text: &str) -> String {
+    pdf_string_in(text, false)
+}
+
+/// A PDF literal string for `text` in WinAnsiEncoding, or in Symbol's encoding (where a
+/// character Symbol lacks becomes `?`).
+fn pdf_string_in(text: &str, symbol: bool) -> String {
     let mut s = String::with_capacity(text.len() + 2);
     s.push('(');
     for c in text.chars() {
-        let b = win_ansi(c);
+        let b = if symbol { symbol_code(c).unwrap_or(b'?') } else { win_ansi(c) };
         match b {
             b'(' | b')' | b'\\' => {
                 s.push('\\');
@@ -613,6 +642,16 @@ impl Page {
         let (sn, cs) = if angle.is_finite() { angle.sin_cos() } else { (0.0, 1.0) };
         // Clockwise in y-down = counter-clockwise negated in PDF's y-up space.
         let mut s = format!("BT\n{}\n{} {} {} {} {} {} Tm\n", rgb_op(color, false), n(cs), n(-sn), n(sn), n(cs), n(origin.x), n(self.y(origin.y)));
+        // Symbol text is one run in Symbol's own encoding (the CID font has no maths symbols).
+        if font == Font::Symbol {
+            if let Some(f) = self.fonts.get_mut(fi) {
+                *f = true;
+            }
+            let _ = writeln!(s, "/F{} {} Tf\n{} Tj", fi + 1, size, pdf_string_in(text, true));
+            s.push_str("ET");
+            self.op(&s);
+            return;
+        }
         // Runs of WinAnsi text use `font`; runs it cannot encode use an embedded font that has
         // the glyphs, else the CID font. Each `Tj` advances the text position, so the runs follow
         // each other on the baseline.
