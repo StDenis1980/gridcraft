@@ -100,6 +100,8 @@ fn candidates(face: Font) -> &'static [&'static str] {
             "DejaVuSansMono-BoldOblique.ttf",
             "FreeMonoBoldOblique.ttf",
         ],
+        // Symbol is written in its own built-in encoding, never through an embedded face.
+        Font::Symbol => &[],
     }
 }
 

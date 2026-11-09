@@ -59,6 +59,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Format\nPane" => "Formatu-\npanela",
         "Format" => "Formatua",
         "Insert" => "Txertatu",
+        "Header Menu|Insert" => "Txertatu",
         "Insert Cells…" => "Txertatu gelaxkak…",
         "Delete" => "Ezabatu",
         "Delete Cells…" => "Ezabatu gelaxkak…",

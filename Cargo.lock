@@ -2043,9 +2043,14 @@ dependencies = [
  "pollster 1.0.1",
  "rfd",
  "serde_json",
+ "ureq",
  "winit",
  "winresource",
 ]
+
+[[package]]
+name = "gridcraft-brand"
+version = "0.16.0"
 
 [[package]]
 name = "gridcraft-calc"
@@ -2097,6 +2102,7 @@ dependencies = [
 name = "gridcraft-engine"
 version = "0.16.0"
 dependencies = [
+ "gridcraft-brand",
  "gridcraft-calc",
  "gridcraft-chart",
  "gridcraft-core",
@@ -2129,6 +2135,7 @@ dependencies = [
 name = "gridcraft-functions"
 version = "0.16.0"
 dependencies = [
+ "gridcraft-brand",
  "gridcraft-core",
  "regex",
 ]
@@ -2175,6 +2182,11 @@ dependencies = [
 [[package]]
 name = "gridcraft-pdf"
 version = "0.16.0"
+dependencies = [
+ "gridcraft-brand",
+ "skrifa",
+ "subsetter",
+]
 
 [[package]]
 name = "gridcraft-ui-egui"
@@ -2192,6 +2204,7 @@ dependencies = [
  "gridcraft-xlsx",
  "image",
  "log",
+ "png",
  "serde",
  "serde_json",
  "skrifa",
@@ -2226,6 +2239,8 @@ name = "gridcraft-xlsx"
 version = "0.16.0"
 dependencies = [
  "aes",
+ "getrandom 0.4.3",
+ "gridcraft-brand",
  "gridcraft-core",
  "gridcraft-formula",
  "gridcraft-functions",
@@ -5100,6 +5115,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "subsetter"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38803281d1c23166c5ebcb455439a5d2afe711cc909cf88af72448c297756ad6"
+dependencies = [
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]

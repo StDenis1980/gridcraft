@@ -135,6 +135,8 @@ impl Font {
             Font::Helvetica | Font::HelveticaBold | Font::HelveticaOblique | Font::HelveticaBoldOblique => Family::Sans,
             Font::TimesRoman | Font::TimesBold | Font::TimesItalic | Font::TimesBoldItalic => Family::Serif,
             Font::Courier | Font::CourierBold | Font::CourierOblique | Font::CourierBoldOblique => Family::Mono,
+            // Symbol has no styled faces; it sits with the sans faces.
+            Font::Symbol => Family::Sans,
         }
     }
 
@@ -182,13 +184,13 @@ impl Font {
 
     /// Advance width of a character in 1/1000 em.
     pub fn char_width(self, c: char) -> u16 {
-        if self == Font::Symbol {
-            return symbol_code(c).and_then(symbol_width).unwrap_or(500);
-        }
         embed::with_installed(|fonts| self.char_width_with(c, fonts))
     }
 
     fn char_width_with(self, c: char, fonts: &embed::Installed) -> u16 {
+        if self == Font::Symbol {
+            return symbol_code(c).and_then(symbol_width).unwrap_or(500);
+        }
         let table: Option<&[u16; 95]> = match self {
             Font::Helvetica | Font::HelveticaOblique => Some(&metrics::HELVETICA),
             Font::HelveticaBold | Font::HelveticaBoldOblique => Some(&metrics::HELVETICA_BOLD),

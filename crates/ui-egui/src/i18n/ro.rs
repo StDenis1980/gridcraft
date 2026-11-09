@@ -1229,7 +1229,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "White - Green" => "Alb - Verde",
         "White - Red" => "Alb - Roșu",
         "Win/Loss" => "Câștig/pierdere",
-||||||| 25881a8e
         "Collapse dialog" => "Restrângere casetă de dialog",
         "Expand dialog" => "Extindere casetă de dialog",
         _ => return None,

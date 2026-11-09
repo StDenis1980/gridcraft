@@ -4,7 +4,7 @@ use super::lines::{decimate_area, draw_markers, draw_runs};
 use super::trend::{draw_trend_labels, draw_trendlines, max_backward, max_forward, max_forward_slots, supports_trendline};
 use super::{
     Chart, ChartData, ChartKind, Ctx, Fmt, HAlign, LABEL_SIZE, MAX_CATS, MAX_LABELS, MAX_LINE_PTS, MAX_MARKERS, MIN_BAR_PX, Prim, Rgba, Scale,
-    SeriesData, TEXT, VAlign, WHITE, axis_fmt, clean, fixed_scale, label_fmt, nice_scale,
+    SeriesData, TEXT, VAlign, WHITE, axis_fmt, clean, label_fmt, nice_scale,
 };
 
 // ---------------------------------------------------------------- cartesian (column/bar/line/area/combo)
@@ -251,7 +251,10 @@ fn axis_scales(chart: &Chart, data: &ChartData, fams: &[Fam], sec: &[bool], span
         let (lo, hi) = range.unwrap_or((0.0, 0.0));
         let typed = if axis { chart.axis_number_formats.y2.as_deref() } else { chart.axis_number_formats.y.as_deref() };
         let (scale, fmt) = if all100 {
-            (Scale { min: if lo < -1e-9 { -1.0 } else { 0.0 }, max: if hi > 1e-9 || lo >= -1e-9 { 1.0 } else { 0.0 }, step: 0.2 }, Fmt::new(typed.unwrap_or("0%")))
+            (
+                Scale { min: if lo < -1e-9 { -1.0 } else { 0.0 }, max: if hi > 1e-9 || lo >= -1e-9 { 1.0 } else { 0.0 }, step: 0.2 },
+                Fmt::new(typed.unwrap_or("0%")),
+            )
         } else {
             let code = typed.or_else(|| members.first().and_then(|i| data.series.get(*i)).map(|s| s.number_format.as_str())).unwrap_or("General");
             (nice_scale(lo, hi, force_zero), Fmt::new(code))

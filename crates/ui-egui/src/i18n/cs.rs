@@ -1235,7 +1235,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "— 1 step" => "— 1 krok",
         "— VBA project (preserved, not run)" => "— projekt VBA (zachován, nespouští se)",
         "— {steps} steps" => "— kroků: {steps}",
-||||||| 25881a8e
         "Collapse dialog" => "Sbalit dialogové okno",
         "Expand dialog" => "Rozbalit dialogové okno",
         _ => return None,
