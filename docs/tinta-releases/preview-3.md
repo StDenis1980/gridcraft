@@ -1,12 +1,11 @@
 # Tinta Calculo — Preview 3
 
-> **Status:** 2026-11-05 · draft for the Preview 3 release (12 November 2026), to be finished
-> after the 9 November upstream sync · **Revision history:** 2026-11-05 created (changes from
-> Preview 2, 27 October, to #44).
+> **Status:** 2026-11-10 · for the Preview 3 release (12 November 2026), with the 9 November
+> upstream sync · **Revision history:** 2026-11-05 created (changes from Preview 2, 27 October, to
+> #44); 2026-11-10 the upstream sync (#47), the feedback button (#46) and the window fix (#45).
 
 Release notes for the GitHub release and the site, in Spanish, Ukrainian and English. Changes since
-Preview 2 (v0.12.1, 27 October 2026). Before publishing: add what the 9 November upstream sync
-brings and set the version.
+Preview 2 (v0.12.1, 27 October 2026). Before publishing: set the version.
 
 ## Español
 
@@ -25,6 +24,10 @@ Novedades:
   región; formatos de Chequia, Rumanía y Lituania.
 - **Ayuda ▸ Informar de un problema** y envío opcional de informes de error (solo si lo acepta al
   primer inicio).
+- **Enviar comentarios:** el botón de la carita en la barra de título (también en Ayuda) para
+  decirnos qué le gusta, qué falla o qué idea tiene, con correo opcional, captura de pantalla y
+  datos técnicos; sin conexión se guarda y se envía después.
+- **Varios monitores:** las ventanas nuevas se abren en la pantalla correcta.
 - **Idiomas de la interfaz:** lituano, y el checo y el rumano completos.
 - **Linux:** paquete Flatpak además de .deb y AppImage.
 - Del proyecto original (GridCraft): muchas funciones y correcciones nuevas.
@@ -50,6 +53,10 @@ revisado un hablante nativo.
   регіонів; формати Чехії, Румунії та Литви.
 - **Довідка ▸ Повідомити про проблему** і необов'язкові звіти про помилки (лише якщо ви
   погодилися під час першого запуску).
+- **Надіслати відгук:** кнопка з усмішкою в заголовку вікна (а також у меню «Довідка»): що
+  подобається, що не працює або яка є ідея, з необов'язковою адресою пошти, знімком екрана й
+  технічними даними; без мережі відгук зберігається і надсилається пізніше.
+- **Кілька моніторів:** нові вікна відкриваються на правильному екрані.
 - **Мови інтерфейсу:** литовська, а чеська й румунська тепер повні.
 - **Linux:** пакет Flatpak на додачу до .deb і AppImage.
 - З основного проєкту (GridCraft): багато нових функцій і виправлень.
@@ -73,6 +80,10 @@ What's new:
 - **More formula languages:** German, French, Italian, Polish and Czech, with their region formats;
   Czech, Romanian and Lithuanian formats.
 - **Help ▸ Report a problem**, and optional error reports (only if you agree at first start).
+- **Send feedback:** the smiley button in the title bar (also in Help) tells us what you like, what
+  went wrong or an idea, with an optional e-mail address, a screenshot and technical details;
+  offline, it is kept and sent later.
+- **Several monitors:** new windows open on the right screen.
 - **Interface languages:** Lithuanian, and complete Czech and Romanian.
 - **Linux:** a Flatpak bundle besides .deb and AppImage.
 - From the original project (GridCraft): many new functions and fixes.
