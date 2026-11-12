@@ -82,3 +82,21 @@ fn a_good_list_starts_the_server_held_to_it() {
     assert!(stderr.contains("commands: cell.get, cell.set, home.bold"), "{stderr}");
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// The roots may be repeated, one flag per folder (tintaoffice-web#33): the server starts held to
+/// all of them; a missing folder anywhere in the list stops it.
+#[test]
+fn repeated_root_flags_start_the_server_with_every_root() {
+    let dir = std::env::temp_dir().join(format!("gridcraft-it-roots-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    for d in ["a", "b"] {
+        std::fs::create_dir_all(dir.join(d)).unwrap();
+    }
+    let (a, b) = (dir.join("a").display().to_string(), dir.join("b").display().to_string());
+    let out = cli(&["mcp", "--automation-read-root", &a, "--automation-read-root", &b, "--automation-write-root", &b]);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(out.status.success(), "{stderr}");
+    assert!(stderr.contains(&format!("read roots {a}, {b}, write roots {b}")), "{stderr}");
+    refused(&["mcp", "--automation-read-root", &a, "--automation-read-root", &dir.join("missing").display().to_string()], "read root");
+    let _ = std::fs::remove_dir_all(&dir);
+}

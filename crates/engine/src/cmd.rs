@@ -66,6 +66,8 @@ pub struct CommandInfo {
     pub enabled: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled_reason: Option<String>,
+    /// What the command may do beyond the workbook (`crate::tinta_risk`).
+    pub risk: serde_json::Value,
 }
 
 impl CommandInfo {
@@ -99,6 +101,7 @@ impl CommandSpec {
             params: self.params,
             enabled: e.is_ok(),
             disabled_reason: e.err(),
+            risk: crate::tinta_risk::risk(self),
         }
     }
 }

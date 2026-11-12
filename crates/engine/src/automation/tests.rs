@@ -145,3 +145,30 @@ fn commands_only_leave_files_unrestricted() {
     assert!(a.check_path("/anything/at/all.xlsx", Access::Write).is_ok());
     assert!(a.check_command("file.open").is_err());
 }
+
+/// `--automation-read-root A --automation-read-root B --automation-write-root B` (tintaoffice-web#33):
+/// reads from either root, writes only to B, and a path outside both is refused naming both.
+#[test]
+fn several_roots_of_a_kind_each_grant_their_access() {
+    let base = folders("several");
+    std::fs::write(base.join("in2/b.csv"), "b\n").unwrap();
+    let (a_root, b_root) = (base.join("in"), base.join("in2"));
+    let a = Automation::with_roots(&[&a_root, &b_root], &[&b_root], None).unwrap().unwrap();
+    assert_eq!(a.read_roots().len(), 2);
+    assert!(a.check_path(&s(&base.join("in/a.csv")), Access::Read).is_ok());
+    assert!(a.check_path(&s(&base.join("in2/b.csv")), Access::Read).is_ok());
+    assert!(a.check_path(&s(&base.join("in2/new.xlsx")), Access::Write).is_ok());
+    assert!(a.check_path(&s(&base.join("in/new.xlsx")), Access::Write).is_err(), "A is a read root only");
+    let e = a.check_path(&s(&base.join("outside/secret.csv")), Access::Read).unwrap_err();
+    assert!(e.contains("outside the read roots") && e.contains("in2"), "{e}");
+    // A refusal that isn't about the roots keeps its own reason.
+    let e = a.check_path(&s(&b_root), Access::Write).unwrap_err();
+    assert!(e.contains("not a file to write") || e.contains("outside the write root"), "{e}");
+    // The same folder twice counts once; a bad folder anywhere stops it.
+    assert_eq!(Automation::with_roots(&[&a_root, &a_root], &[], None).unwrap().unwrap().read_roots().len(), 1);
+    assert!(Automation::with_roots(&[&a_root, &base.join("nope")], &[], None).is_err());
+    let many: Vec<PathBuf> = (0..=MAX_ROOTS).map(|_| a_root.clone()).collect();
+    let many: Vec<&Path> = many.iter().map(PathBuf::as_path).collect();
+    assert!(Automation::with_roots(&many, &[], None).unwrap_err().contains("too many read roots"));
+    let _ = std::fs::remove_dir_all(&base);
+}

@@ -4,8 +4,9 @@
 //! keeps an agent to the files and commands it was given (the same flags as the other crafting
 //! apps). While [`Automation`] is in force:
 //!
-//! - every file [`crate::io::read_file`] opens must lie inside the **read root**, and every file
-//!   [`crate::io::write_file`] writes inside the **write root**. Those two functions are the only
+//! - every file [`crate::io::read_file`] opens must lie inside a **read root**, and every file
+//!   [`crate::io::write_file`] writes inside a **write root**. Each flag may be given more than
+//!   once (several folders of its kind); a path inside any root of its kind is allowed. Those two functions are the only
 //!   way the engine reaches files (open, import, `data.getData`, templates, save, export…), so no
 //!   command can go around them. With one root given, the access the other would grant is
 //!   denied: with only a read root, nothing can be written. With neither root, files are not
@@ -35,6 +36,9 @@ use crate::{EngineError, Result};
 
 /// Longest command list accepted (bytes).
 pub const MAX_LIST_BYTES: usize = 256 * 1024;
+
+/// Most roots of one kind accepted: more is refused at startup, never cut short.
+pub const MAX_ROOTS: usize = 256;
 
 /// Read or write access.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -102,8 +106,8 @@ impl CommandAllowlist {
 /// access as it was (no roots: files unrestricted; no list: every command).
 #[derive(Clone, Debug, Default)]
 pub struct Automation {
-    read_root: Option<PathBuf>,
-    write_root: Option<PathBuf>,
+    read_roots: Vec<PathBuf>,
+    write_roots: Vec<PathBuf>,
     confined: bool,
     commands: Option<CommandAllowlist>,
 }
@@ -113,37 +117,50 @@ impl Automation {
     /// other would grant is denied, and with neither, files are not confined) and, with
     /// `commands`, commands to that list. Neither root nor list: `None`.
     pub fn new(read: Option<&Path>, write: Option<&Path>, commands: Option<CommandAllowlist>) -> std::result::Result<Option<Self>, String> {
-        let root = |p: Option<&Path>, kind: &str| -> std::result::Result<Option<PathBuf>, String> {
-            match p {
-                None => Ok(None),
-                Some(p) if p.as_os_str().is_empty() => Err(format!("the {kind} root is empty")),
-                Some(p) => {
-                    let c = std::fs::canonicalize(p).map_err(|e| format!("the {kind} root {}: {e}", p.display()))?;
-                    if !c.is_dir() {
-                        return Err(format!("the {kind} root {} is not a folder", p.display()));
-                    }
-                    Ok(Some(c))
+        Self::with_roots(read.as_slice(), write.as_slice(), commands)
+    }
+
+    /// [`new`](Self::new) with any number of roots of each kind (`--automation-read-root` and
+    /// `--automation-write-root` given more than once). Every root must be an existing folder; a
+    /// bad one anywhere in the list is an error, and so are more than [`MAX_ROOTS`] of a kind.
+    pub fn with_roots(read: &[&Path], write: &[&Path], commands: Option<CommandAllowlist>) -> std::result::Result<Option<Self>, String> {
+        let roots = |paths: &[&Path], kind: &str| -> std::result::Result<Vec<PathBuf>, String> {
+            if paths.len() > MAX_ROOTS {
+                return Err(format!("too many {kind} roots: {} (at most {MAX_ROOTS})", paths.len()));
+            }
+            let mut out: Vec<PathBuf> = Vec::with_capacity(paths.len());
+            for p in paths {
+                if p.as_os_str().is_empty() {
+                    return Err(format!("the {kind} root is empty"));
+                }
+                let c = std::fs::canonicalize(p).map_err(|e| format!("the {kind} root {}: {e}", p.display()))?;
+                if !c.is_dir() {
+                    return Err(format!("the {kind} root {} is not a folder", p.display()));
+                }
+                if !out.contains(&c) {
+                    out.push(c);
                 }
             }
+            Ok(out)
         };
-        let (read_root, write_root) = (root(read, "read")?, root(write, "write")?);
-        let confined = read.is_some() || write.is_some();
+        let (read_roots, write_roots) = (roots(read, "read")?, roots(write, "write")?);
+        let confined = !read.is_empty() || !write.is_empty();
         if !confined && commands.is_none() {
             return Ok(None);
         }
-        Ok(Some(Self { read_root, write_root, confined, commands }))
+        Ok(Some(Self { read_roots, write_roots, confined, commands }))
     }
 
-    /// The folder files may be read from, resolved. `None` refuses every read only while file
-    /// confinement is in force (a write root was given); with neither root, files are not confined.
-    pub fn read_root(&self) -> Option<&Path> {
-        self.read_root.as_deref()
+    /// The folders files may be read from, resolved. None refuses every read only while file
+    /// confinement is in force (a write root was given); with neither kind, files are not confined.
+    pub fn read_roots(&self) -> &[PathBuf] {
+        &self.read_roots
     }
 
-    /// The folder files may be written to, resolved. `None` refuses every write only while file
-    /// confinement is in force (a read root was given); with neither root, files are not confined.
-    pub fn write_root(&self) -> Option<&Path> {
-        self.write_root.as_deref()
+    /// The folders files may be written to, resolved. None refuses every write only while file
+    /// confinement is in force (a read root was given); with neither kind, files are not confined.
+    pub fn write_roots(&self) -> &[PathBuf] {
+        &self.write_roots
     }
 
     /// The commands that may run; `None`: every command.
@@ -151,18 +168,37 @@ impl Automation {
         self.commands.as_ref()
     }
 
-    /// May `path` be read (or written) under these roots?
+    /// May `path` be read (or written) under these roots? Inside any root of its kind is enough;
+    /// a refusal names the last root tried (all of them when the path is simply outside).
     pub fn check_path(&self, path: &str, access: Access) -> std::result::Result<(), String> {
         if !self.confined {
             return Ok(());
         }
-        let (root, kind) = match access {
-            Access::Read => (self.read_root.as_deref(), "read"),
-            Access::Write => (self.write_root.as_deref(), "write"),
+        let (roots, kind) = match access {
+            Access::Read => (&self.read_roots, "read"),
+            Access::Write => (&self.write_roots, "write"),
         };
-        let Some(root) = root else {
+        if roots.is_empty() {
             return Err(format!("automation filesystem access is not granted: {kind} root is absent: {path}"));
-        };
+        }
+        let mut refusal = None;
+        for root in roots {
+            match Self::check_in(root, kind, path, access) {
+                Ok(()) => return Ok(()),
+                Err(why) => refusal = Some(why),
+            }
+        }
+        // A path simply outside every root says so with all of them; any other refusal (an empty
+        // path, a device name, a folder to write) says why.
+        if roots.len() > 1 && refusal.as_deref().is_none_or(|why| why.contains(": outside the ")) {
+            let list = roots.iter().map(|r| plain(r).display().to_string()).collect::<Vec<_>>().join(", ");
+            return Err(format!("automation path rejected: outside the {kind} roots {list}: {path}"));
+        }
+        Err(refusal.unwrap_or_else(|| format!("automation path rejected: outside the {kind} root: {path}")))
+    }
+
+    /// [`check_path`](Self::check_path) against one root.
+    fn check_in(root: &Path, kind: &str, path: &str, access: Access) -> std::result::Result<(), String> {
         let reject = |why: &str| format!("automation path rejected: {why}: {path}");
         if path.is_empty() {
             return Err(reject("path is empty"));

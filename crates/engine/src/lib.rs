@@ -29,6 +29,7 @@ pub mod sample;
 pub mod selection;
 pub mod tables;
 pub mod tinta_reports;
+pub mod tinta_risk;
 pub mod tinta_templates;
 pub mod windows;
 
