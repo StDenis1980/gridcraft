@@ -416,3 +416,49 @@ fn an_edit_begun_outside_a_frame_reads_back_as_the_same_date() {
     assert_eq!(cell(&a), before);
     set_region(Region::EnUs);
 }
+
+/// Catalan, Galician and Basque type the Spanish names, as Excel in Spain does; the file keeps
+/// the English names.
+#[test]
+fn languages_of_spain_type_the_spanish_function_names() {
+    use gridcraft_engine::formula::FormulaLocale;
+    for code in ["ca", "gl", "eu"] {
+        let language = Language::parse(code).unwrap();
+        assert_eq!(language.formula_locale(), FormulaLocale::Es, "{code}");
+        let mut app = app();
+        app.run("app.language.set", json!({"language": code})).unwrap();
+        assert!(enter(&mut app, "=SI(VERDADERO;SUMA(1,5;2,25);0)"), "{code}");
+        assert_eq!(formula(&app), "IF(TRUE,SUM(1.5,2.25),0)", "{code}");
+        app.begin_edit(None, true);
+        assert_eq!(app.editor.as_ref().unwrap().text, "=SI(VERDADERO;SUMA(1,5;2,25);0)", "{code}");
+    }
+}
+
+/// "Use English function names" keeps the region's separators and stores English as before.
+#[test]
+fn english_function_names_option_keeps_the_separators() {
+    use gridcraft_engine::formula::FormulaLocale;
+    let mut app = app();
+    app.run("app.language.set", json!({"language":"es"})).unwrap();
+    assert!(enter(&mut app, "=SUMA(1,5;2)"));
+    assert_eq!(app.run("options.englishFunctionNames", json!({"on": true})).unwrap(), json!({"on": true}));
+    assert_eq!(app.ui.formula_locale(), FormulaLocale::Semicolon);
+    app.begin_edit(None, true);
+    assert_eq!(app.editor.as_ref().unwrap().text, "=SUM(1,5;2)");
+    assert!(app.commit_edit(0, 0, false, false));
+    assert!(enter(&mut app, "=IF(TRUE;AVERAGE(1;2);0)"));
+    assert_eq!(formula(&app), "IF(TRUE,AVERAGE(1,2),0)");
+    // The Spanish names are not read while the option is on.
+    assert!(enter(&mut app, "=PROMEDIO(1;2)"));
+    assert_ne!(app.session.active().unwrap().wb.active().unwrap().value(CellRef::new(0, 0)), Value::Number(1.5));
+    // The preference persists, and a ui.json without it reads as off.
+    let state: UiState = serde_json::from_str(&serde_json::to_string(&app.ui).unwrap()).unwrap();
+    assert!(state.english_function_names);
+    let old: UiState = serde_json::from_str(r#"{"language":"es"}"#).unwrap();
+    assert!(!old.english_function_names);
+    // Toggling without `on` turns it back off.
+    assert_eq!(app.run("options.englishFunctionNames", json!({})).unwrap(), json!({"on": false}));
+    assert_eq!(app.ui.formula_locale(), FormulaLocale::Es);
+    // An English-region language stays English.
+    assert_eq!(Language::En.formula_locale_with(true), FormulaLocale::En);
+}

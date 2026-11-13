@@ -436,6 +436,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show formula bar" => "Mostra barra della formula",
         "Highlight the active cell's row" => "Evidenzia la riga della cella attiva",
         "Enable AutoComplete for cell values" => "Abilita Completamento automatico per i valori delle celle",
+        "Use English function names" => "Usa i nomi delle funzioni in inglese",
         "Save .xlsx workbooks automatically after every change" => "Salva automaticamente le cartelle di lavoro .xlsx dopo ogni modifica",
         "Workbook calculation" => "Calcolo della cartella di lavoro",
         "Enable iterative calculation" => "Abilita calcolo iterativo",

@@ -215,13 +215,24 @@ impl Language {
         gridcraft_engine::core::Region::from_tag(self.code()).unwrap_or_default()
     }
 
-    /// Formula entry: Spanish names for Spanish, Czech names for Czech; English names with `;` and
-    /// the decimal comma wherever else the region writes numbers with a comma (Catalan, Galician,
-    /// Basque, Ukrainian, Romanian, Lithuanian),
-    /// so a constant reads the same in a cell and in a formula.
+    /// Formula entry: Spanish names for Spanish and for the other languages of Spain (Catalan,
+    /// Galician, Basque), which Excel in Spain also writes with the Spanish names; Czech names for
+    /// Czech, and so on; English names with `;` and the decimal comma wherever else the region
+    /// writes numbers with a comma (Ukrainian, Romanian, Lithuanian), as Excel does there, so a
+    /// constant reads the same in a cell and in a formula.
     pub fn formula_locale(self) -> gridcraft_engine::formula::FormulaLocale {
+        self.formula_locale_with(false)
+    }
+
+    /// [`Self::formula_locale`], or with `english_names` the English function names and booleans
+    /// but the separators of this language's region (File ▸ Options ▸ Formulas, "Use English
+    /// function names"). Files keep the English names either way.
+    pub fn formula_locale_with(self, english_names: bool) -> gridcraft_engine::formula::FormulaLocale {
         use gridcraft_engine::formula::FormulaLocale;
-        if self == Self::Es {
+        if english_names {
+            return if self.region().decimal() == ',' { FormulaLocale::Semicolon } else { FormulaLocale::En };
+        }
+        if matches!(self, Self::Es | Self::Ca | Self::Gl | Self::Eu) {
             FormulaLocale::Es
         } else if self == Self::Cs {
             FormulaLocale::Cs
@@ -361,6 +372,21 @@ pub fn current(ctx: &egui::Context) -> Language {
 /// Sets the language for the current frame; call once per frame before anything is drawn.
 pub fn set_current(ctx: &egui::Context, language: Language) {
     ctx.data_mut(|d| d.insert_temp(lang_key(), language));
+}
+
+fn formula_locale_key() -> egui::Id {
+    egui::Id::unique("gridcraft.formula_locale")
+}
+
+/// The formula locale of the frame being drawn ([`crate::UiState::formula_locale`]), for widgets
+/// that only get a `Ui`. English when unset.
+pub fn current_formula_locale(ctx: &egui::Context) -> gridcraft_engine::formula::FormulaLocale {
+    ctx.data(|d| d.get_temp(formula_locale_key())).unwrap_or_default()
+}
+
+/// Sets the formula locale for the current frame, next to [`set_current`].
+pub fn set_current_formula_locale(ctx: &egui::Context, locale: gridcraft_engine::formula::FormulaLocale) {
+    ctx.data_mut(|d| d.insert_temp(formula_locale_key(), locale));
 }
 
 /// `name` lowercased with the Latin accents that occur in language names folded away, so a

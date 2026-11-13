@@ -57,7 +57,7 @@ impl SheetApp {
             self.session.mode = gridcraft_engine::Mode::Edit;
             return;
         }
-        let locale = self.ui.language.formula_locale();
+        let locale = self.ui.formula_locale();
         let current = if sh.cell_pictures.contains_key(&at) {
             String::new()
         } else {
