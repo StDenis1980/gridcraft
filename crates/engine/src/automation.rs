@@ -291,7 +291,7 @@ fn strictly_inside(root: &Path, path: &Path) -> bool {
 }
 
 /// `path` without Windows' `\\?\` prefix, for people to read.
-fn plain(path: &Path) -> PathBuf {
+pub fn plain(path: &Path) -> PathBuf {
     let text = path.to_string_lossy();
     match text.strip_prefix(r"\\?\") {
         Some(rest) if cfg!(windows) => PathBuf::from(rest),

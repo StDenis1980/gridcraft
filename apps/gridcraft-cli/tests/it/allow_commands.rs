@@ -93,10 +93,13 @@ fn repeated_root_flags_start_the_server_with_every_root() {
         std::fs::create_dir_all(dir.join(d)).unwrap();
     }
     let (a, b) = (dir.join("a").display().to_string(), dir.join("b").display().to_string());
+    // The line shows the roots resolved, without Windows' `\\?\` prefix.
+    let shown = |d: &str| gridcraft_engine::automation::plain(&dir.join(d).canonicalize().unwrap()).display().to_string();
+    let (shown_a, shown_b) = (shown("a"), shown("b"));
     let out = cli(&["mcp", "--automation-read-root", &a, "--automation-read-root", &b, "--automation-write-root", &b]);
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(out.status.success(), "{stderr}");
-    assert!(stderr.contains(&format!("read roots {a}, {b}, write roots {b}")), "{stderr}");
+    assert!(stderr.contains(&format!("read roots {shown_a}, {shown_b}, write roots {shown_b}")), "{stderr}");
     refused(&["mcp", "--automation-read-root", &a, "--automation-read-root", &dir.join("missing").display().to_string()], "read root");
     let _ = std::fs::remove_dir_all(&dir);
 }

@@ -620,7 +620,11 @@ fn mcp(args: &[String]) -> Result<(), String> {
                 // Every thread of this process, before `--in` is opened: it must be inside the read root too.
                 gridcraft_engine::automation::confine_process(au.clone());
                 let show = |r: &[std::path::PathBuf]| {
-                    if r.is_empty() { "none".to_string() } else { r.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join(", ") }
+                    if r.is_empty() {
+                        "none".to_string()
+                    } else {
+                        r.iter().map(|p| gridcraft_engine::automation::plain(p).display().to_string()).collect::<Vec<_>>().join(", ")
+                    }
                 };
                 let commands = au.commands().map_or_else(|| "all".to_string(), |l| l.describe().join(", "));
                 eprintln!(
