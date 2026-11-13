@@ -357,6 +357,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Remove Hyperlink" => "Odebrat hypertextový odkaz",
         "Resize formula bar" => "Změnit velikost řádku vzorců",
         "Enable AutoComplete for cell values" => "Povolit automatické dokončování hodnot buněk",
+        "Use English function names" => "Používat anglické názvy funkcí",
         "Save .xlsx workbooks automatically after every change" => "Automaticky ukládat sešity .xlsx po každé změně",
         "Workbook calculation" => "Výpočet sešitu",
         "Enable iterative calculation" => "Povolit iterativní výpočet",

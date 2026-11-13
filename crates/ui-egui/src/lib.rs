@@ -124,6 +124,10 @@ pub struct UiState {
     /// rather than failing the whole `UiState`.
     #[serde(deserialize_with = "i18n::lenient")]
     pub language: i18n::Language,
+    /// Type and show formulas with the English function names in every interface language
+    /// (File ▸ Options ▸ Formulas). Only the names: the separators still follow the language's
+    /// region. A preference: files always store the English names.
+    pub english_function_names: bool,
     /// Interface size in percent on top of the desktop's scale (100 = Auto), applied as egui's
     /// zoom factor so the ribbon, menus, dialogs and grid grow together. Kept within
     /// [`INTERFACE_SCALE_MIN`]..=[`INTERFACE_SCALE_MAX`]; a malformed saved value reads as 100.
@@ -163,6 +167,7 @@ impl Default for UiState {
             keytip_invoke: None,
             keytip_invoke_next: None,
             language: i18n::Language::En,
+            english_function_names: false,
             interface_scale: 100,
         }
     }
@@ -185,6 +190,12 @@ impl UiState {
         } else {
             egui::ThemePreference::Light
         }
+    }
+
+    /// How formulas are typed and shown: the interface language's function names and separators,
+    /// or its separators with the English names when [`Self::english_function_names`] is on.
+    pub fn formula_locale(&self) -> gridcraft_engine::formula::FormulaLocale {
+        self.language.formula_locale_with(self.english_function_names)
     }
 
     /// The zoom factor for the interface size preference.

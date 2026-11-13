@@ -335,6 +335,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Options|Save" => "Gardar",
         "Show formula bar" => "Mostrar a barra de fórmulas",
         "Enable AutoComplete for cell values" => "Activar o autocompletado dos valores de cela",
+        "Use English function names" => "Usar os nomes de función en inglés",
         "Save .xlsx workbooks automatically after every change" => "Gardar automaticamente os libros .xlsx despois de cada cambio",
         "Workbook calculation" => "Cálculo do libro",
         "Enable iterative calculation" => "Activar o cálculo iterativo",

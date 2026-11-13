@@ -427,6 +427,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Options|Editing" => "Editing",
         "Show formula bar" => "Pokaż pasek formuły",
         "Enable AutoComplete for cell values" => "Włącz Autouzupełnianie dla wartości komórek",
+        "Use English function names" => "Używaj angielskich nazw funkcji",
         "Save .xlsx workbooks automatically after every change" => "Automatycznie zapisuj skoroszyty .xlsx po każdej zmianie",
         "Workbook calculation" => "Obliczenia w skoroszycie",
         "Enable iterative calculation" => "Włącz obliczenia iteracyjne",

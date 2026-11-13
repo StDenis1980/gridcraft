@@ -26,6 +26,13 @@ pub(super) fn options(app: &mut SheetApp, ui: &mut Ui) {
     if ui.checkbox(&mut autocomplete, lang.tr("Enable AutoComplete for cell values")).changed() {
         app.run_or_alert("options.autoComplete", json!({"on": autocomplete}));
     }
+    // Only for languages with function names of their own; the others already type English.
+    if lang.formula_locale().is_localized() {
+        let mut english = app.ui.english_function_names;
+        if ui.checkbox(&mut english, lang.tr("Use English function names")).changed() {
+            app.run_or_alert("options.englishFunctionNames", json!({"on": english}));
+        }
+    }
     ui.add_space(18.0);
     section(ui, lang, "Options|Save");
     let mut autosave = app.ui.autosave;

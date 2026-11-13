@@ -335,6 +335,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Options|Save" => "Gorde",
         "Show formula bar" => "Erakutsi formula-barra",
         "Enable AutoComplete for cell values" => "Gaitu gelaxka-balioen osatze automatikoa",
+        "Use English function names" => "Erabili funtzio-izenak ingelesez",
         "Save .xlsx workbooks automatically after every change" => "Gorde automatikoki .xlsx liburuak aldaketa bakoitzaren ondoren",
         "Workbook calculation" => "Liburuaren kalkulua",
         "Enable iterative calculation" => "Gaitu kalkulu iteratiboa",

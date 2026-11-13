@@ -213,6 +213,10 @@ impl SheetApp {
                 self.ui.highlight_active_row = p.get("on").and_then(Json::as_bool).unwrap_or(!self.ui.highlight_active_row);
                 Ok(json!({"on": self.ui.highlight_active_row}))
             }
+            "options.englishFunctionNames" => {
+                self.ui.english_function_names = p.get("on").and_then(Json::as_bool).unwrap_or(!self.ui.english_function_names);
+                Ok(json!({"on": self.ui.english_function_names}))
+            }
             "view.interfaceScale" => {
                 // `{"percent": 125}` or `{"percent": "auto"}`; out-of-range values are clamped.
                 let percent = match p.get("percent") {
@@ -314,7 +318,7 @@ impl SheetApp {
                     let text = text.map(|text| {
                         self.session
                             .active()
-                            .map(|d| formula_locale::display_template(&text, self.ui.language.formula_locale(), &d.wb, d.wb.active_sheet()))
+                            .map(|d| formula_locale::display_template(&text, self.ui.formula_locale(), &d.wb, d.wb.active_sheet()))
                             .unwrap_or(text)
                     });
                     self.begin_edit(text, false);

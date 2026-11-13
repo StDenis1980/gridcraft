@@ -55,7 +55,7 @@ pub(super) fn insert_function(app: &mut SheetApp, ui: &mut egui::Ui, d: &mut Dia
         d.list_index = 0;
     }
     d.values.insert("category".into(), json!(category));
-    let locale = language.formula_locale();
+    let locale = app.ui.formula_locale();
     // The names and descriptions searched are the ones shown, so in the interface language.
     let q = d.search.trim().to_lowercase();
     let matches = |f: &lib::FnEntry| {

@@ -370,6 +370,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Remove Hyperlink" => "Quitar hipervínculo",
         "Resize formula bar" => "Cambiar el tamaño de la barra de fórmulas",
         "Enable AutoComplete for cell values" => "Habilitar Autocompletar para valores de celda",
+        "Use English function names" => "Usar los nombres de función en inglés",
         "Save .xlsx workbooks automatically after every change" => "Guardar automáticamente los libros .xlsx tras cada cambio",
         "Workbook calculation" => "Cálculo del libro",
         "Enable iterative calculation" => "Habilitar cálculo iterativo",
