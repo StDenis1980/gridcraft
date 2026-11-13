@@ -47,7 +47,8 @@ gridcraft-cli mcp --automation-read-root ~/work/in --automation-write-root ~/wor
 - `--automation-read-root DIR`: workbooks, CSV imports and every other file a command reads must be inside `DIR`
   (`--in` too). `--automation-write-root DIR`: saves and exports must land inside `DIR`, in a folder that already
   exists (a save doesn't create folders); the write root itself and a folder are not files to write. Each root
-  must be an existing folder. With one root given, the access the other would grant is denied: with only a read
+  must be an existing folder. Each flag may be given more than once, one folder each (at most 256 of a kind): a
+  path inside any root of its kind is allowed, and a bad folder anywhere in the list stops the server. With one kind given, the access the other would grant is denied: with only a read
   root the agent can't write a file at all. With neither root, files are not confined (`--allow-commands` alone
   holds the agent to commands only). Paths are resolved before they are checked: `..`, symbolic links and
   junctions that lead out are refused, and so are Windows device names (`NUL`, `COM1`…). Case is ignored on
@@ -68,6 +69,29 @@ gridcraft-cli mcp --automation-read-root ~/work/in --automation-write-root ~/wor
 A refused path or command is a tool error (`isError: true`) naming what was refused; nothing is read or written.
 Each flag may be given once, any problem with them stops the server at startup, and they are an error with
 `--connect`: a running app is not confined by them.
+
+## What each command may do (Tinta)
+
+Every command in `list_commands` (and `gridcraft-cli commands --json`) carries a `risk` object, so a
+permission layer such as Vilna OS's Herkos can grade a call before it runs (tintaoffice-web#26):
+
+| Flag | Set when the command… |
+|---|---|
+| `reads_document` / `changes_document` | reads / changes the open workbook |
+| `reads_disk` / `writes_disk` | reads / writes files (still held to the automation roots) |
+| `network` | may reach the network |
+| `print` | prints |
+| `sign` | signs with a certificate |
+| `other_program` | hands something to another program on the computer |
+| `runs_commands` | runs other commands (macros, scripts), each still held to `--allow-commands` |
+| `ui_only` | changes only the window |
+
+The flags come from hand-reviewed tables in `crates/engine/src/tinta_risk.rs`. Command ids and MCP
+tool names are kept stable between versions: `docs/tinta-commands.tsv` (every command id with its
+flags) and `docs/tinta-mcp-tools.tsv` (every MCP tool) are snapshots, and a test fails when a
+command or tool is added, renamed or removed, or a flag changes, until the snapshot is regenerated
+on purpose (`TINTA_UPDATE_SNAPSHOT=1`). A rename or removal is noted in the release notes and, where
+possible, the old id is kept as deprecated for one version.
 
 ## Tools
 

@@ -9,8 +9,8 @@
 //! gridcraft-cli run [--in FILE | --sample NAME] [--cmd 'id={json}']... [--script FILE.jsonl] [--out FILE] [--print RANGE] [--quiet]
 //! gridcraft-cli commands [--json] [--search X]
 //! gridcraft-cli functions [--json] [--search X] [--category C]
-//! gridcraft-cli mcp [--connect PORT] [--in FILE | --sample NAME] [--automation-read-root DIR]
-//!                   [--automation-write-root DIR] [--allow-commands LIST|@FILE]
+//! gridcraft-cli mcp [--connect PORT] [--in FILE | --sample NAME] [--automation-read-root DIR]...
+//!                   [--automation-write-root DIR]... [--allow-commands LIST|@FILE]
 //! gridcraft-cli send <port> <method> [json]
 //! gridcraft-cli version | --version
 //! ```
@@ -48,11 +48,11 @@ const USAGE: &str = "usage:
                      blank lines and lines starting with # or // are skipped
   gridcraft-cli commands [--json] [--search X]
   gridcraft-cli functions [--json] [--search X] [--category C]
-  gridcraft-cli mcp [--connect PORT] [--in FILE | --sample NAME] [--automation-read-root DIR]
-                    [--automation-write-root DIR] [--allow-commands LIST|@FILE]
-                     the roots confine the files the agent's commands read and write; with
-                     one root given, the access the other would grant is denied, and with
-                     neither, files are not confined. --allow-commands holds the agent to
+  gridcraft-cli mcp [--connect PORT] [--in FILE | --sample NAME] [--automation-read-root DIR]...
+                    [--automation-write-root DIR]... [--allow-commands LIST|@FILE]
+                     the roots confine the files the agent's commands read and write (repeat
+                     a flag for several folders); with only one kind given, the access the
+                     other would grant is denied, and with neither, files are not confined. --allow-commands holds the agent to
                      the commands listed (ids like home.bold, groups like home.*, or @FILE);
                      scripts are held to it too. All three confine the headless server only
                      and are an error with --connect
@@ -487,8 +487,10 @@ fn commands(args: &[String]) -> Result<(), String> {
         .collect();
     if a.has("json") {
         // Enablement depends on a live workbook; not meaningful here.
-        let v: Vec<Value> =
-            list.iter().map(|c| json!({"id": c.id, "label": c.label, "menu": c.menu, "shortcut": c.shortcut, "params": c.params})).collect();
+        let v: Vec<Value> = list
+            .iter()
+            .map(|c| json!({"id": c.id, "label": c.label, "menu": c.menu, "shortcut": c.shortcut, "params": c.params, "risk": c.risk}))
+            .collect();
         outln!("{}", pretty(&Value::Array(v)));
         return Ok(());
     }
@@ -539,13 +541,15 @@ fn once<'a>(a: &'a Args, name: &str) -> Result<Option<&'a str>, String> {
     Ok(a.opt(name))
 }
 
-/// `--automation-read-root`, `--automation-write-root` and `--allow-commands` (inline, or `@FILE`
+/// `--automation-read-root` and `--automation-write-root` (each as often as needed) and
+/// `--allow-commands` (once: inline, or `@FILE`
 /// with one id or `group.*` per line). Any problem is an error at startup, never a server that
 /// runs unconfined.
 fn automation_flags(a: &Args) -> Result<Option<std::sync::Arc<gridcraft_engine::automation::Automation>>, String> {
     use gridcraft_engine::automation::{Automation, CommandAllowlist, MAX_LIST_BYTES};
-    let read = once(a, "automation-read-root")?.map(std::path::Path::new);
-    let write = once(a, "automation-write-root")?.map(std::path::Path::new);
+    // The roots may be repeated, one flag per folder; the command list may not.
+    let all = |name: &str| a.opts.iter().filter(|(n, _)| n == name).map(|(_, v)| std::path::Path::new(v.as_str())).collect::<Vec<_>>();
+    let (read, write) = (all("automation-read-root"), all("automation-write-root"));
     let commands = match once(a, "allow-commands")? {
         None => None,
         // `--allow-commands --connect 7979` would otherwise take `--connect` as the list.
@@ -558,7 +562,7 @@ fn automation_flags(a: &Args) -> Result<Option<std::sync::Arc<gridcraft_engine::
             Some(CommandAllowlist::parse(&text).map_err(|e| format!("--allow-commands: {e}"))?)
         }
     };
-    Ok(Automation::new(read, write, commands).map_err(|e| format!("mcp: {e}"))?.map(std::sync::Arc::new))
+    Ok(Automation::with_roots(&read, &write, commands).map_err(|e| format!("mcp: {e}"))?.map(std::sync::Arc::new))
 }
 
 /// The text of an `@FILE` command list, at most `max` bytes. Only a regular file (or a link to one)
@@ -615,12 +619,18 @@ fn mcp(args: &[String]) -> Result<(), String> {
             if let Some(au) = &automation {
                 // Every thread of this process, before `--in` is opened: it must be inside the read root too.
                 gridcraft_engine::automation::confine_process(au.clone());
-                let show = |r: Option<&std::path::Path>| r.map_or_else(|| "none".to_string(), |p| p.display().to_string());
+                let show = |r: &[std::path::PathBuf]| {
+                    if r.is_empty() {
+                        "none".to_string()
+                    } else {
+                        r.iter().map(|p| gridcraft_engine::automation::plain(p).display().to_string()).collect::<Vec<_>>().join(", ")
+                    }
+                };
                 let commands = au.commands().map_or_else(|| "all".to_string(), |l| l.describe().join(", "));
                 eprintln!(
-                    "gridcraft-cli: files confined: read root {}, write root {}; commands: {commands}",
-                    show(au.read_root()),
-                    show(au.write_root())
+                    "gridcraft-cli: files confined: read roots {}, write roots {}; commands: {commands}",
+                    show(au.read_roots()),
+                    show(au.write_roots())
                 );
             }
             let session = match (a.opt("in"), a.opt("sample")) {
