@@ -678,7 +678,7 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let kind = gridcraft_engine::display::number_format(&code).kind();
     let current = format!("{kind:?}");
     let lang = app.ui.language;
-    let sample = app.session.active().and_then(|d| d.wb.active().map(|sh| sh.value(d.selection.active))).unwrap_or_default();
+    let sample = number_sample(app);
     let resp = ui.add_sized([150.0, 24.0], egui::Button::new(egui::RichText::new(lang.tr(&current)).font(theme::ui_font(12.5))));
     control_keytip(app, ui, &resp, "home.numberFormat");
     let forced = invoke(app, "home.numberFormat");
@@ -699,6 +699,22 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
             n => act(app, "home.numberFormat", json!({"format": n})),
         }
     }
+}
+
+/// The value the number format list previews: the active cell's, or what is being typed into it
+/// (read in the display region, `1234,5` in Ukraine), so the samples show before the entry is
+/// committed. A formula being typed has no value yet and previews nothing.
+fn number_sample(app: &SheetApp) -> gridcraft_engine::core::Value {
+    let Some(d) = app.session.active() else { return Default::default() };
+    if let Some(e) = app.editor.as_ref().filter(|e| e.doc == d.uid && e.cell == d.selection.active) {
+        let text = e.text.trim();
+        if text.starts_with('=') {
+            return Default::default();
+        }
+        let en = gridcraft_engine::core::parse::delocalize_input(text, gridcraft_engine::display::region()).unwrap_or_else(|| text.to_string());
+        return gridcraft_engine::core::parse::parse_input(&en, d.wb.date_system).value;
+    }
+    d.wb.active().map(|sh| sh.value(d.selection.active)).unwrap_or_default()
 }
 
 fn cf_menu(app: &mut SheetApp, ui: &mut Ui) {
@@ -813,5 +829,33 @@ mod accounting_symbol_tests {
             let symbol = tag.trim_start_matches("[$").split('-').next().unwrap_or_default();
             assert_eq!(out.fill.map(|(c, at)| (c, out.text[..at].trim_start())), Some((' ', symbol)), "{label}");
         }
+    }
+}
+
+#[cfg(test)]
+mod number_sample_tests {
+    use super::*;
+    use gridcraft_engine::Session;
+    use gridcraft_engine::core::Value;
+
+    fn app() -> SheetApp {
+        let mut s = Session::new();
+        s.new_workbook();
+        SheetApp::new(s, Default::default())
+    }
+
+    #[test]
+    fn the_number_format_list_previews_what_is_being_typed() {
+        let mut app = app();
+        app.run("cell.set", json!({"cell": "A1", "input": "7"})).unwrap();
+        app.run("selection.set", json!({"cell": "A1"})).unwrap();
+        assert_eq!(number_sample(&app), Value::number(7.0));
+        // Typing into the cell previews the typed number before Enter, when the list is opened.
+        app.begin_edit(Some("1234".into()), false);
+        assert_eq!(number_sample(&app), Value::number(1234.0));
+        // A formula has no value until it is committed.
+        app.cancel_edit();
+        app.begin_edit(Some("=1+1".into()), false);
+        assert_eq!(number_sample(&app), Value::Empty);
     }
 }
