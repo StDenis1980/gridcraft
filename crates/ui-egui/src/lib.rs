@@ -369,13 +369,14 @@ pub struct SheetApp {
 /// Tinta Calculo", with the product name ([`gridcraft_engine::brand::NAME`]) last the way desktop
 /// office apps on Windows and Linux do (taskbar, Alt+Tab). macOS names only the document, as its
 /// apps do; the app's name is already in the menu bar there.
-pub fn window_title(doc_title: &str, dirty: bool) -> String {
+pub fn window_title(doc_title: &str, dirty: bool, language: i18n::Language) -> String {
     let app = if cfg!(target_os = "macos") { None } else { Some(gridcraft_engine::brand::NAME) };
-    format_window_title(doc_title, dirty, app)
+    format_window_title(doc_title, dirty.then(|| language.tr("Edited")), app)
 }
 
-fn format_window_title(doc_title: &str, dirty: bool, app: Option<&str>) -> String {
-    let edited = if dirty { " — Edited" } else { "" };
+/// `edited` is the "Edited" marker in the interface's language, when the workbook has changes.
+fn format_window_title(doc_title: &str, edited: Option<&str>, app: Option<&str>) -> String {
+    let edited = edited.map(|e| format!(" — {e}")).unwrap_or_default();
     match app {
         Some(app) => format!("{doc_title}{edited} - {app}"),
         None => format!("{doc_title}{edited}"),

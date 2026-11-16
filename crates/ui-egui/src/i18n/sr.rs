@@ -482,6 +482,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Prikaži",
         "Collapse dialog" => "Skupi dijalog",
         "Expand dialog" => "Proširi dijalog",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Radna sveska",
+        "default name|Sheet" => "List",
+        "Edited" => "Izmenjeno",
         _ => return None,
     })
 }

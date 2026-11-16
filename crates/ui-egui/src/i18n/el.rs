@@ -1016,6 +1016,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Εμφάνιση",
         "Collapse dialog" => "Σύμπτυξη παραθύρου διαλόγου",
         "Expand dialog" => "Ανάπτυξη παραθύρου διαλόγου",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Βιβλίο",
+        "default name|Sheet" => "Φύλλο",
+        "Edited" => "Επεξεργάστηκε",
         _ => return None,
     })
 }

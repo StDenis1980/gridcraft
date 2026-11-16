@@ -165,6 +165,7 @@ impl SheetApp {
     fn set_language(&mut self, language: i18n::Language) -> Json {
         self.ui.language = language;
         gridcraft_engine::display::set_region(language.region());
+        self.apply_language_names();
         json!({"language": language})
     }
 

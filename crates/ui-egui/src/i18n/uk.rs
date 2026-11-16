@@ -1020,6 +1020,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "A password is required to open this workbook." => "Для відкриття цієї книги потрібен пароль.",
         "Reenter password:" => "Введіть пароль ще раз:",
         "Formula Builder" => "Конструктор формул",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Книга",
+        "default name|Sheet" => "Аркуш",
+        "Edited" => "Змінено",
         _ => return None,
     })
 }

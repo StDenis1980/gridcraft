@@ -109,7 +109,7 @@ fn lookup_number_formats(ctx: LookupContext) -> Option<Shortcut> {
         Num1 if ctrl && s => number_format("#,##0.00"),
         Num2 if ctrl && s => number_format("h:mm AM/PM"),
         Num3 if ctrl && s => number_format("d-mmm-yy"),
-        Num4 if ctrl && s => number_format("$#,##0.00_);($#,##0.00)"),
+        Num4 if ctrl && s => number_format(&gridcraft_engine::cmd::format::currency_shortcut_code()),
         Num5 if ctrl && s => number_format("0%"),
         Num6 if ctrl && s => number_format("0.00E+00"),
         Num7 if ctrl && s => borders("outside"),

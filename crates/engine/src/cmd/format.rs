@@ -217,8 +217,12 @@ const COMMA: &str = "_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)";
 
 /// Accounting Number Format with the currency symbol to use (Excel's own button takes the system
 /// currency; `symbol` is how the control channel picks another one, e.g. `"L"` for lempiras).
+/// Tinta Office fork: without `symbol`, the display region's currency, where that region writes it
+/// (`1 234,50 ₴` in Ukraine); en-US, the API's region, keeps `$`.
 fn accounting(s: &mut Session, p: &Json) -> Result<Json> {
-    let symbol = str_param(p, "symbol").unwrap_or("$");
+    let Some(symbol) = str_param(p, "symbol") else {
+        return set_fmt(s, p, &region_accounting(crate::display::region()));
+    };
     // The symbol goes into a quoted literal: a quote or a backslash would end it, and a control
     // character would reach the format's text as-is.
     if symbol.contains(['"', '\\']) || symbol.chars().any(char::is_control) {
@@ -705,13 +709,38 @@ fn merge(s: &mut Session, p: &Json, how: &str) -> Result<Json> {
     ok()
 }
 
-/// Ribbon format names → codes.
-pub fn format_code_for(name: &str) -> &str {
-    match name {
+/// The Accounting format of `region`'s currency (Tinta Office fork): en-US's is Excel's `$` one;
+/// a region that writes the symbol after the amount gets Excel's form for it there
+/// (`_-* #,##0.00\ "₴"_-;…`), one that writes it first the `$`-style form with its symbol.
+pub fn region_accounting(region: &gridcraft_core::Region) -> String {
+    if *region == gridcraft_core::region::EN_US {
+        return ACCOUNTING.to_string();
+    }
+    let symbol = format!("\"{}\"", region.currency.replace(['"', '\\'], ""));
+    if region.currency_first() {
+        format!("_({symbol}* #,##0.00_);_({symbol}* \\(#,##0.00\\);_({symbol}* \"-\"??_);_(@_)")
+    } else {
+        format!("_-* #,##0.00\\ {symbol}_-;\\-* #,##0.00\\ {symbol}_-;_-* \"-\"??\\ {symbol}_-;_-@_-")
+    }
+}
+
+/// Excel's Ctrl+Shift+$ (Currency, two decimals, negatives in parentheses) in the display region:
+/// en-US keeps Excel's code, other regions their currency format (Tinta Office fork).
+pub fn currency_shortcut_code() -> String {
+    let region = crate::display::region();
+    if *region == gridcraft_core::region::EN_US { "$#,##0.00_);($#,##0.00)".to_string() } else { region.currency_format.to_string() }
+}
+
+/// Ribbon format names → codes. Tinta Office fork: Currency and Accounting follow the display
+/// region's currency (`#,##0.00 "₴"` in Ukraine); en-US, the API's region, keeps `$`.
+pub fn format_code_for(name: &str) -> std::borrow::Cow<'static, str> {
+    use std::borrow::Cow;
+    let region = crate::display::region();
+    Cow::Borrowed(match name {
         "General" => "General",
         "Number" => "0.00",
-        "Currency" => "\"$\"#,##0.00",
-        "Accounting" => ACCOUNTING,
+        "Currency" => region.currency_format,
+        "Accounting" => return Cow::Owned(region_accounting(region)),
         "Short Date" => "m/d/yyyy",
         "Long Date" => "[$-F800]dddd, mmmm dd, yyyy",
         "Time" => "[$-F400]h:mm:ss AM/PM",
@@ -720,8 +749,8 @@ pub fn format_code_for(name: &str) -> &str {
         "Scientific" => "0.00E+00",
         "Text" => "@",
         "Comma" => COMMA,
-        other => other,
-    }
+        other => return Cow::Owned(other.to_string()),
+    })
 }
 
 fn number_format(s: &mut Session, p: &Json) -> Result<Json> {
@@ -842,6 +871,36 @@ mod tests {
     #[test]
     fn the_default_symbol_reproduces_the_accounting_format() {
         assert_eq!(accounting_format("$"), ACCOUNTING);
+    }
+
+    /// Tinta Office fork: Format Cells' Currency and Accounting, the Accounting button and
+    /// Ctrl+Shift+$ use the display region's currency, where the region writes it; the API's
+    /// region (en-US) keeps Excel's `$` codes.
+    #[test]
+    fn currency_formats_follow_the_display_region() {
+        use gridcraft_core::region::lookup;
+        let shown = |code: &str| crate::display::format(&gridcraft_core::Value::Number(1234.5), code, &gridcraft_model::Workbook::new()).text;
+        crate::display::in_region(lookup("uk-UA"), || {
+            assert_eq!(format_code_for("Currency"), "#,##0.00\u{a0}\"₴\"");
+            assert_eq!(shown(&format_code_for("Currency")), "1\u{a0}234,50\u{a0}₴");
+            let accounting = format_code_for("Accounting");
+            assert!(accounting.contains("\"₴\"") && !accounting.contains('$'), "{accounting}");
+            assert!(shown(&accounting).contains("1\u{a0}234,50") && shown(&accounting).contains('₴'), "{}", shown(&accounting));
+            assert!(!currency_shortcut_code().contains('$'));
+            let mut s = crate::Session::new();
+            s.new_workbook();
+            s.execute("cell.set", json!({"cell": "A1", "input": "1234.5"})).unwrap();
+            s.execute("home.accounting", json!({"range": "A1"})).unwrap();
+            let code = s.execute("cell.get", json!({"cell": "A1"})).unwrap()["style"]["num_fmt"].as_str().unwrap_or_default().to_string();
+            assert!(code.contains('₴') && !code.contains('$'), "the Accounting button: {code}");
+        });
+        crate::display::in_region(lookup("es-ES"), || {
+            assert!(format_code_for("Currency").contains('€'));
+            assert!(format_code_for("Accounting").contains('€'));
+        });
+        assert_eq!(format_code_for("Currency"), "\"$\"#,##0.00");
+        assert_eq!(format_code_for("Accounting"), ACCOUNTING);
+        assert_eq!(currency_shortcut_code(), "$#,##0.00_);($#,##0.00)");
     }
 
     #[test]

@@ -107,8 +107,16 @@ impl SheetApp {
         theme::apply(ctx, dark);
     }
 
+    /// Tinta Office fork: new workbooks and sheets are named in the interface's language
+    /// ("Книга1", "Аркуш1"; Excel's own names), on this thread. Existing names never change.
+    pub fn apply_language_names(&self) {
+        let lang = self.ui.language;
+        gridcraft_engine::display::set_default_names(lang.tr("default name|Book"), lang.tr("default name|Sheet"));
+    }
+
     /// Per-frame logic (control channel, screenshots). Call before `ui`.
     pub fn logic(&mut self, ctx: &egui::Context) {
+        self.apply_language_names();
         // Values show in the interface language's region (`1.234,5` and `31/12/2026` in Spanish).
         // The region is per thread: each frame sets this app's and puts the previous one back,
         // so apps sharing a thread never show values in each other's region.
@@ -171,7 +179,7 @@ impl SheetApp {
             return;
         }
         let Some(d) = self.session.active() else { return };
-        let title = window_title(&d.display_title(), d.is_dirty());
+        let title = window_title(&d.display_title(), d.is_dirty(), self.ui.language);
         if self.grid.last_title.as_deref() != Some(title.as_str()) {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.grid.last_title = Some(title);
@@ -338,20 +346,40 @@ mod window_title_tests {
 
     #[test]
     fn the_product_name_follows_the_document() {
-        assert_eq!(format_window_title("Book1", false, Some("Tinta Calculo")), "Book1 - Tinta Calculo");
-        assert_eq!(format_window_title("Budget.xlsx", false, Some("Tinta Calculo")), "Budget.xlsx - Tinta Calculo");
-        assert_eq!(format_window_title("Budget.xlsx", true, Some("Tinta Calculo")), "Budget.xlsx — Edited - Tinta Calculo");
+        assert_eq!(format_window_title("Book1", None, Some("Tinta Calculo")), "Book1 - Tinta Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", None, Some("Tinta Calculo")), "Budget.xlsx - Tinta Calculo");
+        assert_eq!(format_window_title("Budget.xlsx", Some("Edited"), Some("Tinta Calculo")), "Budget.xlsx — Edited - Tinta Calculo");
     }
 
     #[test]
     fn without_a_product_name_only_the_document_is_named() {
-        assert_eq!(format_window_title("Book1", false, None), "Book1");
-        assert_eq!(format_window_title("Book1", true, None), "Book1 — Edited");
+        assert_eq!(format_window_title("Book1", None, None), "Book1");
+        assert_eq!(format_window_title("Book1", Some("Edited"), None), "Book1 — Edited");
+    }
+
+    /// Tinta Office fork: the title's Edited mark, and the names new workbooks and sheets get,
+    /// are in the interface's language (Excel's names); every language's sheet name is one a
+    /// sheet can have.
+    #[test]
+    fn the_edited_mark_and_the_default_names_follow_the_language() {
+        use crate::i18n::Language;
+        assert!(window_title("Книга1", true, Language::Uk).starts_with("Книга1 — Змінено"));
+        assert!(window_title("Libro1", true, Language::Es).starts_with("Libro1 — Editado"));
+        assert_eq!(Language::Uk.tr("default name|Book"), "Книга");
+        assert_eq!(Language::Uk.tr("default name|Sheet"), "Аркуш");
+        assert_eq!(Language::Es.tr("default name|Sheet"), "Hoja");
+        assert_eq!(Language::En.tr("default name|Book"), "Book");
+        let wb = gridcraft_engine::model::Workbook { sheets: vec![], ..gridcraft_engine::model::Workbook::new() };
+        for language in Language::ALL {
+            let sheet = format!("{}1", language.tr("default name|Sheet"));
+            assert!(wb.check_sheet_name(&sheet, None).is_ok(), "{}: {sheet}", language.code());
+            assert!(!language.tr("Edited").is_empty());
+        }
     }
 
     #[test]
     fn the_window_title_uses_this_builds_name() {
-        let title = window_title("Book1", false);
+        let title = window_title("Book1", false, crate::i18n::Language::En);
         if cfg!(target_os = "macos") {
             assert_eq!(title, "Book1");
         } else {
@@ -551,14 +579,14 @@ mod lifecycle_tests {
         let mut app = app();
         let first = ctx.run_logic(&egui::RawInput::default(), |ctx| app.logic(ctx));
         let title = app.session.active().unwrap().display_title().to_string();
-        let expected = window_title(&title, app.session.active().unwrap().is_dirty());
+        let expected = window_title(&title, app.session.active().unwrap().is_dirty(), app.ui.language);
         assert_eq!(titles(&first), [expected], "the first logic tick titles the window");
         let second = ctx.run_logic(&egui::RawInput::default(), |ctx| app.logic(ctx));
         assert!(titles(&second).is_empty(), "an unchanged title is not sent every frame");
 
         app.session.active_mut().unwrap().title = "Renamed".into();
         let third = ctx.run_logic(&egui::RawInput::default(), |ctx| app.logic(ctx));
-        let expected = window_title("Renamed", app.session.active().unwrap().is_dirty());
+        let expected = window_title("Renamed", app.session.active().unwrap().is_dirty(), app.ui.language);
         assert_eq!(titles(&third), [expected], "a rename while hidden updates the title");
     }
 

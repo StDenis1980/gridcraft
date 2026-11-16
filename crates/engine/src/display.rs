@@ -8,6 +8,38 @@ use gridcraft_core::{CellRef, RangeRef, Value};
 use gridcraft_model::{Sheet, Workbook};
 use gridcraft_numfmt::{Formatted, NumberFormat, format_value_in};
 
+thread_local! {
+    // Tinta Office fork: the names new workbooks and sheets get, without their number ("Book",
+    // "Sheet"). The interface sets them from its language on its thread ("Книга", "Аркуш"); every
+    // other thread (files, the API, tests) keeps Excel's English ones.
+    static DEFAULT_NAMES: std::cell::RefCell<(String, String)> = std::cell::RefCell::new(("Book".into(), "Sheet".into()));
+}
+
+/// Names new workbooks `{book}N` and new sheets `{sheet}N` from now on, on this thread. Names that
+/// are empty or not valid sheet names keep the English ones. Existing names never change.
+pub fn set_default_names(book: &str, sheet: &str) {
+    let book = if book.trim().is_empty() { "Book" } else { book };
+    let empty = Workbook { sheets: vec![], ..Workbook::new() };
+    let sheet = if empty.check_sheet_name(&format!("{sheet}1"), None).is_ok() { sheet } else { "Sheet" };
+    let _ = DEFAULT_NAMES.try_with(|n| *n.borrow_mut() = (book.to_string(), sheet.to_string()));
+}
+
+/// The name a new workbook gets before its number ("Book", "Книга").
+pub fn default_book_name() -> String {
+    DEFAULT_NAMES.try_with(|n| n.borrow().0.clone()).unwrap_or_else(|_| "Book".into())
+}
+
+/// The name a new sheet gets before its number ("Sheet", "Аркуш").
+pub fn default_sheet_name() -> String {
+    DEFAULT_NAMES.try_with(|n| n.borrow().1.clone()).unwrap_or_else(|_| "Sheet".into())
+}
+
+/// A fresh sheet name `{sheet}N` not in use in `wb`.
+pub fn next_sheet_name(wb: &Workbook) -> String {
+    let base = default_sheet_name();
+    (1..).map(|n| format!("{base}{n}")).find(|n| wb.sheet_index(n).is_none()).unwrap_or(base)
+}
+
 /// Shows values in `region` from now on, on this thread (cells, print and charts). Files,
 /// formulas, CSV and the engine API stay en-US.
 pub fn set_region(region: &'static Region) {
@@ -311,5 +343,46 @@ mod tests {
         assert!(f.is_general());
         assert_eq!(f.code(), code);
         assert_ne!(f, number_format("General"));
+    }
+}
+
+#[cfg(test)]
+mod tinta_default_names {
+    use serde_json::json;
+
+    /// Tinta Office fork: new workbooks and sheets take the interface's names (Excel's, in its
+    /// language) on that thread only; names that exist never change, and other threads keep
+    /// Excel's English ones.
+    #[test]
+    fn new_workbooks_and_sheets_take_the_interface_names() {
+        std::thread::spawn(|| {
+            let mut s = crate::Session::new();
+            s.new_workbook();
+            super::set_default_names("Книга", "Аркуш");
+            s.new_workbook();
+            s.new_workbook();
+            let titles: Vec<String> = s.documents().iter().map(|d| d.title.clone()).collect();
+            assert_eq!(titles, ["Book1", "Книга1", "Книга2"], "the earlier workbook keeps its name");
+            let d = s.active().unwrap();
+            assert_eq!(d.wb.sheets.iter().map(|sh| sh.name.as_str()).collect::<Vec<_>>(), ["Аркуш1"]);
+            s.execute("home.insertSheet", json!({})).unwrap();
+            let names: Vec<String> = s.active().unwrap().wb.sheets.iter().map(|sh| sh.name.clone()).collect();
+            assert!(names.contains(&"Аркуш2".to_string()), "{names:?}");
+            assert_eq!(s.documents()[0].wb.sheets[0].name, "Sheet1", "the first workbook's sheet is not renamed");
+            // A name that can't be a sheet name keeps the English one.
+            super::set_default_names("Книга", "Лист:");
+            assert_eq!(super::default_sheet_name(), "Sheet");
+        })
+        .join()
+        .unwrap();
+        // Other threads (files, the API) keep Excel's English names.
+        std::thread::spawn(|| {
+            let mut s = crate::Session::new();
+            s.new_workbook();
+            assert_eq!(s.active().unwrap().title, "Book1");
+            assert_eq!(s.active().unwrap().wb.sheets[0].name, "Sheet1");
+        })
+        .join()
+        .unwrap();
     }
 }

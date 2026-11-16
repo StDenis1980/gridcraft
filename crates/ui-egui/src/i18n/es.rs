@@ -1062,6 +1062,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Mostrar",
         "Collapse dialog" => "Contraer diálogo",
         "Expand dialog" => "Expandir diálogo",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Libro",
+        "default name|Sheet" => "Hoja",
+        "Edited" => "Editado",
         _ => return None,
     })
 }
