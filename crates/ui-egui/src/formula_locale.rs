@@ -6,7 +6,7 @@ use gridcraft_engine::model::Workbook;
 pub(crate) fn canonical(
     text: &str,
     locale: FormulaLocale,
-    region: gridcraft_engine::core::Region,
+    region: &'static gridcraft_engine::core::Region,
     wb: &Workbook,
     sheet: usize,
     cell: gridcraft_engine::core::CellRef,

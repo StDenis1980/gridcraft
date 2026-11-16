@@ -239,6 +239,7 @@ insert.spinButton	changes_document,reads_document
 insert.symbol	changes_document,reads_document
 insert.table	changes_document,reads_document
 insert.textBox	changes_document,reads_document
+insert.wordArt	changes_document,reads_document
 link.open	changes_document,other_program,reads_document
 macro.check	reads_document
 macro.debug	changes_document,reads_document,runs_commands
@@ -386,3 +387,4 @@ view.zoomToSelection	changes_document,ui_only
 window.activate	ui_only
 window.close	ui_only
 window.list	ui_only
+wordArt.set	changes_document,reads_document

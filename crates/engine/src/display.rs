@@ -10,19 +10,19 @@ use gridcraft_numfmt::{Formatted, NumberFormat, format_value_in};
 
 /// Shows values in `region` from now on, on this thread (cells, print and charts). Files,
 /// formulas, CSV and the engine API stay en-US.
-pub fn set_region(region: Region) {
+pub fn set_region(region: &'static Region) {
     gridcraft_numfmt::set_display_region(region);
 }
 
 /// The region values are shown in on this thread.
-pub fn region() -> Region {
+pub fn region() -> &'static Region {
     gridcraft_numfmt::display_region()
 }
 
 /// Runs `f` with values shown in `region` on this thread, then puts the region back (also when
 /// `f` unwinds). Files and the engine API run in en-US whatever the interface shows.
-pub fn in_region<R>(region: Region, f: impl FnOnce() -> R) -> R {
-    struct Restore(Region);
+pub fn in_region<R>(region: &'static Region, f: impl FnOnce() -> R) -> R {
+    struct Restore(&'static Region);
     impl Drop for Restore {
         fn drop(&mut self) {
             set_region(self.0);
@@ -34,8 +34,13 @@ pub fn in_region<R>(region: Region, f: impl FnOnce() -> R) -> R {
 }
 
 /// Parsed number formats are cached by code.
-fn parsed(code: &str) -> NumberFormat {
+pub(crate) fn parsed(code: &str) -> NumberFormat {
     static CACHE: std::sync::LazyLock<Mutex<HashMap<String, NumberFormat>>> = std::sync::LazyLock::new(|| Mutex::new(HashMap::new()));
+    // A code of more bytes than 4 × the character limit can't be within it: it shows as General
+    // without being hashed or scanned again for every cell that shares it.
+    if code.len() > 4 * gridcraft_numfmt::MAX_FORMAT_CODE_CHARS {
+        return NumberFormat::parse("General");
+    }
     let lock = || CACHE.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
     if let Some(f) = lock().get(code) {
         return f.clone();
@@ -50,7 +55,12 @@ fn parsed(code: &str) -> NumberFormat {
     f
 }
 
+/// The parsed format of `code`; one longer than the character limit is a General format that keeps
+/// the code it was made from. The engine itself formats through `parsed`, which doesn't copy it.
 pub fn number_format(code: &str) -> NumberFormat {
+    if code.len() > 4 * gridcraft_numfmt::MAX_FORMAT_CODE_CHARS {
+        return NumberFormat::parse(code);
+    }
     parsed(code)
 }
 
@@ -60,7 +70,7 @@ pub fn format(v: &Value, code: &str, wb: &Workbook) -> Formatted {
 }
 
 /// Formats a value with a format code in `region`.
-pub fn format_in(v: &Value, code: &str, wb: &Workbook, region: Region) -> Formatted {
+pub fn format_in(v: &Value, code: &str, wb: &Workbook, region: &Region) -> Formatted {
     format_value_in(v, &parsed(code), wb.date_system, region)
 }
 
@@ -173,7 +183,7 @@ pub fn value_text_as(wb: &Workbook, v: &Value, code: &str) -> String {
 }
 
 /// [`value_text_as`] in `region` (delimited files are always written en-US).
-pub fn value_text_as_in(wb: &Workbook, v: &Value, code: &str, region: Region) -> String {
+pub fn value_text_as_in(wb: &Workbook, v: &Value, code: &str, region: &Region) -> String {
     let f = format_in(v, code, wb, region);
     match f.fill {
         Some((_, pos)) => {
@@ -274,4 +284,32 @@ pub fn stats(sheet: &Sheet, ranges: &[RangeRef]) -> Stats {
         s.max = 0.0;
     }
     s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A format code far past Excel's 255 characters shows its values as General, for every cell
+    /// that shares it, without being hashed into the cache each time.
+    #[test]
+    fn an_overlong_code_formats_as_general() {
+        let wb = Workbook::new();
+        let code = format!("0.00{}", "\"x\"".repeat(400_000));
+        for _ in 0..1_000 {
+            assert_eq!(format(&Value::Number(1.5), &code, &wb).text, "1.5");
+        }
+        assert_eq!(format(&Value::Number(1.5), "0.00", &wb).text, "1.50");
+    }
+
+    /// The public `number_format` keeps the code of an overlong format; it is General, but not the
+    /// same format as a real `General`.
+    #[test]
+    fn number_format_keeps_an_overlong_code() {
+        let code = format!("0.00{}", "\"x\"".repeat(2_000));
+        let f = number_format(&code);
+        assert!(f.is_general());
+        assert_eq!(f.code(), code);
+        assert_ne!(f, number_format("General"));
+    }
 }

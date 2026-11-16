@@ -208,6 +208,7 @@ pub(crate) const CZECH: &[(&str, &str)] = &[
     ("GCD", "GCD"),
     ("GEOMEAN", "GEOMEAN"),
     ("GESTEP", "GESTEP"),
+    ("GETPIVOTDATA", "ZÍSKATKONTDATA"),
     ("GROUPBY", "GROUPBY"),
     ("GROWTH", "LOGLINTREND"),
     ("HARMEAN", "HARMEAN"),

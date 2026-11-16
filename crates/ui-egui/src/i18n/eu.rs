@@ -1020,6 +1020,9 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Watch\nWindow" => "Behaketa-\nleihoa",
         "Workbook\nStatistics" => "Liburuaren\nestatistikak",
         "Options|Editing" => "Edizioa",
+        // GridCraft's Diagram (not the chart) and Decorative Text features.
+        "Diagram" => "Eskema",
+        "Decorative Text" => "Testu apaingarria",
         _ => return None,
     })
 }

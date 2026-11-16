@@ -207,6 +207,7 @@ pub(crate) const GERMAN: &[(&str, &str)] = &[
     ("GCD", "GGT"),
     ("GEOMEAN", "GEOMITTEL"),
     ("GESTEP", "GGANZZAHL"),
+    ("GETPIVOTDATA", "PIVOTDATENZUORDNEN"),
     ("GROUPBY", "GRUPPIERENNACH"),
     ("GROWTH", "VARIATION"),
     ("HARMEAN", "HARMITTEL"),

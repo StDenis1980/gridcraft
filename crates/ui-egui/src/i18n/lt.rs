@@ -1215,6 +1215,9 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "— VBA project (preserved, not run)" => "— VBA projektas (išsaugotas, nevykdomas)",
         "— {steps} steps" => "— žingsnių: {steps}",
         "€ Euro" => "€ Euras",
+        // GridCraft's Diagram (not the chart) and Decorative Text features.
+        "Diagram" => "Schema",
+        "Decorative Text" => "Dekoratyvusis tekstas",
         _ => return None,
     })
 }

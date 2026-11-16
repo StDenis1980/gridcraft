@@ -3,6 +3,8 @@
 /// Returns the Ukrainian translation for `text`, or `None` so callers fall back to English.
 pub(super) fn translate(text: &str) -> Option<&'static str> {
     Some(match text {
+        "Diagram" => "Схема",
+        "Decorative Text" => "Декоративний текст",
         "Paste" => "Вставити",
         "Paste Values" => "Вставити значення",
         "Paste Formulas" => "Вставити формули",
@@ -15,7 +17,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Insert Cut Cells" => "Вставити вирізані комірки",
         "Insert Paste" => "Вставка зі зсувом",
         "Format Painter (double-click to keep it on)" => "Формат за зразком (двічі клацніть, щоб закріпити)",
-        "Format Painter" => "Формат за зразком",
         "Double Underline" => "Подвійне підкреслення",
         "Strikethrough" => "Перекреслення",
         "Underline" => "Підкреслення",
@@ -360,6 +361,9 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Save" => "Зберегти",
         "Save As" => "Зберегти як",
         "Export" => "Експорт",
+        "Minimize" => "Згорнути",
+        "Maximize" => "Розгорнути",
+        "Restore Down" => "Відновити",
         "Close" => "Закрити",
         "Options" => "Параметри",
         "Blank workbook" => "Порожня книга",
@@ -380,13 +384,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Not saved yet" => "Ще не збережено",
         "Location" => "Розташування",
         "Sheets" => "Аркуші",
-        "Encrypt with Password" => "Зашифрувати паролем",
-        "Require a password to open this workbook." => "Вимагати пароль для відкриття цієї книги.",
-        "A password is required to open this workbook." => "Для відкриття цієї книги потрібен пароль.",
-        "Encrypt the contents of this file. If you lose or forget the password, it can't be recovered. Leave it empty to remove the password." => {
-            "Шифрує вміст цього файлу. Якщо ви втратите або забудете пароль, його не можна буде відновити. Залиште поле порожнім, щоб зняти пароль."
-        }
-        "Reenter password:" => "Введіть пароль ще раз:",
         "Protect Workbook" => "Захистити книгу",
         "Sheet structure is locked: sheets can't be added, moved, renamed or deleted." => {
             "Структура аркушів заблокована: аркуші не можна додавати, переміщувати, перейменовувати чи видаляти."
@@ -477,7 +474,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Edit Name" => "Редагування імені",
         "New Name" => "Нове ім'я",
         "Format Cells" => "Формат комірок",
-        "Formula Builder" => "Конструктор формул",
         "Find and Replace" => "Знайти й замінити",
         "Go To" => "Перейти",
         "Insert Calculated Field" => "Вставлення обчислюваного поля",
@@ -581,6 +577,9 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Bottom margin (in):" => "Нижнє поле (дюйми):",
         "Header (in):" => "Верхній колонтитул (дюйми):",
         "Footer (in):" => "Нижній колонтитул (дюйми):",
+        "Page order" => "Порядок сторінок",
+        "Down, then over" => "Вниз, потім праворуч",
+        "Over, then down" => "Праворуч, потім униз",
         "Tab" => "Табуляція",
         "Semicolon" => "Крапка з комою",
         "Comma" => "Кома",
@@ -1004,9 +1003,6 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Report Layout" => "Макет звіту",
         "Compact" => "Компактний",
         "Tabular" => "Табличний",
-        "Page order" => "Порядок сторінок",
-        "Down, then over" => "Вниз, потім праворуч",
-        "Over, then down" => "Праворуч, потім униз",
         "Record Macro" => "Записати макрос",
         "Stop Recording" => "Зупинити запис",
         "Use Relative References" => "Використовувати відносні посилання",
@@ -1017,6 +1013,13 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Показати",
         "Collapse dialog" => "Згорнути діалогове вікно",
         "Expand dialog" => "Розгорнути діалогове вікно",
+        // Tinta Office fork: labels of the fork's own features.
+        "Format Painter" => "Формат за зразком",
+        "Encrypt with Password" => "Зашифрувати паролем",
+        "Require a password to open this workbook." => "Вимагати пароль для відкриття цієї книги.",
+        "A password is required to open this workbook." => "Для відкриття цієї книги потрібен пароль.",
+        "Reenter password:" => "Введіть пароль ще раз:",
+        "Formula Builder" => "Конструктор формул",
         _ => return None,
     })
 }
