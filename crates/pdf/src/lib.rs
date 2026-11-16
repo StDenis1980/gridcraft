@@ -1058,6 +1058,19 @@ fn pdf_text_string(text: &str) -> String {
     s
 }
 
+/// The objects font slot `i` takes: the CID font also needs its descendant font and font
+/// descriptor; an embedded font (Tinta Office fork) its descendant, descriptor, font file,
+/// CIDToGIDMap and ToUnicode map.
+fn slot_objects(i: usize) -> u32 {
+    if i == CID_FONT {
+        3
+    } else if i >= EMBEDDED_FONT {
+        embed::OBJECTS_PER_FONT
+    } else {
+        1
+    }
+}
+
 /// Starts object `id` at the current end of `out` and records its offset for the xref table.
 fn begin_obj(out: &mut Vec<u8>, offsets: &mut Vec<usize>, id: u32) {
     let i = id as usize;
@@ -1152,6 +1165,26 @@ impl PdfDoc {
         self.pages.iter().any(|page| page.missing_arabic_font)
     }
 
+    /// Writes installed font `k` (Tinta Office fork: an embedded TrueType subset of the glyphs
+    /// every page drew with it) as objects `id`, `id + 1`… into `out`.
+    fn write_embedded_font(&self, k: usize, id: u32, out: &mut Vec<u8>, offsets: &mut Vec<usize>) {
+        let mut glyphs = std::collections::BTreeMap::new();
+        for page in &self.pages {
+            if let Some(map) = page.glyphs.get(k) {
+                for (g, c) in map {
+                    glyphs.entry(*g).or_insert(*c);
+                }
+            }
+        }
+        if let Some(Some(font)) = self.fonts.get(k) {
+            for (oid, body) in font.objects(id, &glyphs) {
+                begin_obj(out, offsets, oid);
+                out.extend_from_slice(&body);
+                out.extend_from_slice(b"\nendobj\n");
+            }
+        }
+    }
+
     /// Serializes the document. A document without pages gets one blank Letter page.
     ///
     /// Every object is written straight into the output buffer (nothing is staged in an
@@ -1186,15 +1219,7 @@ impl PdfDoc {
         for (i, u) in used.iter().enumerate() {
             if *u {
                 font_ids[i] = next;
-                // The CID font also needs its descendant font and font descriptor; an embedded
-                // font its descendant, descriptor, font file, CIDToGIDMap and ToUnicode map.
-                next += if i == CID_FONT {
-                    3
-                } else if i >= EMBEDDED_FONT {
-                    embed::OBJECTS_PER_FONT
-                } else {
-                    1
-                };
+                next += slot_objects(i);
             }
         }
         // Page contents are moved out so each one is freed as soon as it is in the output.
@@ -1212,21 +1237,7 @@ impl PdfDoc {
             if *id != 0 {
                 let _ = write!(font_dict, "/F{} {} 0 R ", i + 1, id);
                 if let Some(k) = i.checked_sub(EMBEDDED_FONT) {
-                    let mut glyphs = std::collections::BTreeMap::new();
-                    for page in &self.pages {
-                        if let Some(map) = page.glyphs.get(k) {
-                            for (g, c) in map {
-                                glyphs.entry(*g).or_insert(*c);
-                            }
-                        }
-                    }
-                    if let Some(Some(font)) = self.fonts.get(k) {
-                        for (oid, body) in font.objects(*id, &glyphs) {
-                            begin_obj(&mut out, &mut offsets, oid);
-                            out.extend_from_slice(&body);
-                            out.extend_from_slice(b"\nendobj\n");
-                        }
-                    }
+                    self.write_embedded_font(k, *id, &mut out, &mut offsets);
                     continue;
                 }
                 if i == CID_FONT {
