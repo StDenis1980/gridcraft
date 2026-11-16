@@ -688,7 +688,8 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
         .map(|n| {
             let code = gridcraft_engine::cmd::format::format_code_for(n);
             let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, &code, &d.wb).text).unwrap_or_default();
-            (*n, format!("{:<12}   {preview}", lang.tr(n)))
+            // Name, then the selected cell as that format shows it, drawn on the row's right.
+            (*n, format!("{}\t{preview}", lang.tr(n)))
         })
         .chain(std::iter::once(("__more", format!("{:>12}", lang.tr("More Number Formats…")))))
         .collect();

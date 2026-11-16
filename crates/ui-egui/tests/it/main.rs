@@ -76,6 +76,7 @@ mod merged_cells;
 mod more_colors;
 mod native_print;
 mod nowrap_line_breaks;
+mod number_format_list;
 mod number_stored_as_text;
 mod objects;
 mod open_encrypted;

@@ -454,6 +454,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Expand dialog" => "Mở rộng hộp thoại",
         // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
         "Edited" => "Đã chỉnh sửa",
+        "Type to filter…" => "Nhập để lọc…",
         _ => return None,
     })
 }

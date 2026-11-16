@@ -486,6 +486,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
         "default name|Book" => "工作簿",
         "Edited" => "已编辑",
+        "Type to filter…" => "键入以筛选…",
         _ => return None,
     })
 }

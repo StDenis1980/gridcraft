@@ -1066,6 +1066,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Book" => "Libro",
         "default name|Sheet" => "Hoja",
         "Edited" => "Editado",
+        "Type to filter…" => "Escriba para filtrar…",
         _ => return None,
     })
 }

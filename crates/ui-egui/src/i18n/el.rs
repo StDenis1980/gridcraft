@@ -1020,6 +1020,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Book" => "Βιβλίο",
         "default name|Sheet" => "Φύλλο",
         "Edited" => "Επεξεργάστηκε",
+        "Type to filter…" => "Πληκτρολογήστε για φιλτράρισμα…",
         _ => return None,
     })
 }

@@ -486,6 +486,7 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Book" => "Radna sveska",
         "default name|Sheet" => "List",
         "Edited" => "Izmenjeno",
+        "Type to filter…" => "Kucajte za filtriranje…",
         _ => return None,
     })
 }
