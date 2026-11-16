@@ -1016,6 +1016,9 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Watch\nWindow" => "Xanela\nde inspección",
         "Workbook\nStatistics" => "Estatísticas\ndo libro",
         "Options|Editing" => "Edición",
+        // GridCraft's Diagram (not the chart) and Decorative Text features.
+        "Diagram" => "Esquema",
+        "Decorative Text" => "Texto decorativo",
         _ => return None,
     })
 }

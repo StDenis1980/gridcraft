@@ -5,7 +5,7 @@
 //! (`10:30`, `10:30:15 PM`) and date-times. Locale: en-US.
 
 use crate::date::{DateSystem, MONTHS, serial_from_ymd, time_fraction};
-use crate::region::Region;
+use crate::region::{DateOrder, EN_US, Region};
 use crate::value::{CellError, Value};
 
 /// A parsed entry: its value and the number format Excel would apply automatically.
@@ -438,8 +438,8 @@ fn parse_datetime(t: &str, sys: DateSystem) -> Option<(f64, Option<&'static str>
 
 /// A constant number's input text (`1234.5`, as stored) with `region`'s decimal separator, for
 /// editing (`1234,5` in Spain). Anything else comes back unchanged.
-pub fn localize_number(raw: &str, region: Region) -> String {
-    let d = region.decimal();
+pub fn localize_number(raw: &str, region: &Region) -> String {
+    let d = region.decimal;
     if d == '.' || !raw.contains('.') {
         return raw.to_string();
     }
@@ -455,8 +455,8 @@ pub fn localize_number(raw: &str, region: Region) -> String {
 /// the same number or date: `1.234,50 €` becomes `1,234.50 €` and `5/11/2026` (5 November)
 /// becomes `11/5/2026` in Spain. `None` when the text needs no rewriting or is not a number or
 /// date in the region (it is then taken as typed). en-US input never needs it.
-pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
-    if region == Region::EnUs {
+pub fn delocalize_input(s: &str, region: &Region) -> Option<String> {
+    if *region == EN_US {
         return None;
     }
     let t = s.trim();
@@ -464,17 +464,20 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
         return None;
     }
     // Booleans as the Spanish, Ukrainian and Czech interfaces write them, in any case (`істина`).
-    let booleans = match region {
-        Region::EsEs => Some(("VERDADERO", "FALSO")),
-        Region::UkUa => Some(("ІСТИНА", "ХИБНІСТЬ")),
+    // By the region's language: Swiss German, French and Italian type them as in Germany, France
+    // and Italy.
+    let booleans = match region.tag.split('-').next().unwrap_or("") {
+        "es" => Some(("VERDADERO", "FALSO")),
+        "uk" => Some(("ІСТИНА", "ХИБНІСТЬ")),
         // Czech formulas write them PRAVDA and NEPRAVDA.
-        Region::CsCz => Some(("PRAVDA", "NEPRAVDA")),
-        Region::PlPl => Some(("PRAWDA", "FAŁSZ")),
-        Region::ItIt => Some(("VERO", "FALSO")),
-        Region::FrFr => Some(("VRAI", "FAUX")),
-        Region::DeDe => Some(("WAHR", "FALSCH")),
-        // Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE.
-        Region::EnUs | Region::RoRo | Region::LtLt => None,
+        "cs" => Some(("PRAVDA", "NEPRAVDA")),
+        "pl" => Some(("PRAWDA", "FAŁSZ")),
+        "it" => Some(("VERO", "FALSO")),
+        "fr" => Some(("VRAI", "FAUX")),
+        "de" => Some(("WAHR", "FALSCH")),
+        // Romanian and Lithuanian formulas keep the English names, so TRUE and FALSE; so do the
+        // regions whose formula language the fork doesn't translate.
+        _ => None,
     };
     if let Some((yes, no)) = booleans {
         let upper = t.to_uppercase();
@@ -493,8 +496,8 @@ pub fn delocalize_input(s: &str, region: Region) -> Option<String> {
 
 /// `[-+][currency] digits[group digits…][,decimals][E±n][%][ currency]` in the region's
 /// separators, as en-US text with the same signs, symbols and grouping.
-fn delocalize_number(t: &str, region: Region) -> Option<String> {
-    let (d, g) = (region.decimal(), region.group());
+fn delocalize_number(t: &str, region: &Region) -> Option<String> {
+    let (d, g) = (region.decimal, region.group);
     // Where the digits start and end: everything around them (signs, symbols, %, parentheses)
     // is kept as typed.
     let is_body = |c: char| c.is_ascii_digit() || c == d || c == g || (g == '\u{a0}' && c == ' ');
@@ -539,8 +542,10 @@ fn delocalize_number(t: &str, region: Region) -> Option<String> {
 }
 
 /// `d/m/y`, `d.m.y`, `d-m-y` and `d/m` (with a time after a space) as en-US `m/d/y`.
-fn delocalize_date(t: &str, region: Region) -> Option<String> {
-    if !region.day_first() {
+fn delocalize_date(t: &str, region: &Region) -> Option<String> {
+    // Typed dates are read day first everywhere but where the month comes first (en-US); a
+    // four-digit first part is always read year first.
+    if region.date_order == DateOrder::Mdy {
         return None;
     }
     let (date, time) = match t.split_once(' ') {

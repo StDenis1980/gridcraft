@@ -51,7 +51,7 @@ fn cyrillic_is_embedded_as_a_searchable_subset() {
     let page = doc.add_page(595.0, 842.0);
     page.text(72.0, 72.0, 12.0, Font::Helvetica, [0, 0, 0], UKRAINIAN);
     page.text(72.0, 100.0, 12.0, Font::HelveticaBold, [0, 0, 0], "Підсумок");
-    let pdf = doc.finish();
+    let pdf = doc.finish().unwrap();
     clear_fonts();
 
     for needle in [&b"/CIDFontType2"[..], b"/FontFile2", b"/Identity-H", b"/ToUnicode", b"/CIDToGIDMap"] {
@@ -73,7 +73,7 @@ fn without_a_font_cyrillic_uses_the_cid_font() {
     assert!(!has_font(Font::Helvetica));
     let mut doc = PdfDoc::new();
     doc.add_page(595.0, 842.0).text(72.0, 72.0, 12.0, Font::Helvetica, [0, 0, 0], UKRAINIAN);
-    let pdf = doc.finish();
+    let pdf = doc.finish().unwrap();
     assert!(find(&pdf, b"STSong") && !find(&pdf, b"/FontFile2"));
 }
 
@@ -88,7 +88,7 @@ fn characters_the_font_lacks_still_reach_the_cid_font() {
     install_font(Font::Helvetica, font);
     let mut doc = PdfDoc::new();
     doc.add_page(595.0, 842.0).text(72.0, 72.0, 12.0, Font::Helvetica, [0, 0, 0], "Київ 中文");
-    let pdf = doc.finish();
+    let pdf = doc.finish().unwrap();
     clear_fonts();
     assert!(find(&pdf, b"/FontFile2") && find(&pdf, b"STSong"));
 }

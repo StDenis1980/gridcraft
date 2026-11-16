@@ -207,6 +207,7 @@ pub(crate) const FRENCH: &[(&str, &str)] = &[
     ("GCD", "PGCD"),
     ("GEOMEAN", "MOYENNE.GEOMETRIQUE"),
     ("GESTEP", "SUP.SEUIL"),
+    ("GETPIVOTDATA", "LIREDONNEESTABCROISDYNAMIQUE"),
     ("GROUPBY", "GROUPER.PAR"),
     ("GROWTH", "CROISSANCE"),
     ("HARMEAN", "MOYENNE.HARMONIQUE"),

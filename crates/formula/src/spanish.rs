@@ -207,6 +207,7 @@ pub(crate) const SPANISH: &[(&str, &str)] = &[
     ("GCD", "M.C.D"),
     ("GEOMEAN", "MEDIA.GEOM"),
     ("GESTEP", "MAYOR.O.IGUAL"),
+    ("GETPIVOTDATA", "IMPORTARDATOSDINAMICOS"),
     ("GROUPBY", "AGRUPARPOR"),
     ("GROWTH", "CRECIMIENTO"),
     ("HARMEAN", "MEDIA.ARMO"),

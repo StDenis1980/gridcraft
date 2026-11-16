@@ -209,10 +209,18 @@ impl Language {
         }
     }
 
-    /// The regional formats values show and are typed in: Spain's for the languages of Spain,
-    /// Ukraine's for Ukrainian, Czechia's, Romania's and Lithuania's for theirs, en-US for the rest.
-    pub fn region(self) -> gridcraft_engine::core::Region {
-        gridcraft_engine::core::Region::from_tag(self.code()).unwrap_or_default()
+    /// The regional formats values show and are typed in (Tinta Office fork): Spain's for the
+    /// languages of Spain, Ukraine's for Ukrainian, and Czechia's, Romania's, Lithuania's,
+    /// Poland's, Italy's, France's and Germany's for theirs, from the region table; en-US for the
+    /// other languages, as upstream, whose region is chosen apart from the interface language.
+    pub fn region(self) -> &'static gridcraft_engine::core::Region {
+        use gridcraft_engine::core::region;
+        match self {
+            Self::Es | Self::Ca | Self::Gl | Self::Eu | Self::Uk | Self::Cs | Self::Ro | Self::Lt | Self::Pl | Self::It | Self::Fr | Self::De => {
+                region::lookup(self.code())
+            }
+            _ => region::default_region(),
+        }
     }
 
     /// Formula entry: Spanish names for Spanish and for the other languages of Spain (Catalan,
@@ -230,7 +238,7 @@ impl Language {
     pub fn formula_locale_with(self, english_names: bool) -> gridcraft_engine::formula::FormulaLocale {
         use gridcraft_engine::formula::FormulaLocale;
         if english_names {
-            return if self.region().decimal() == ',' { FormulaLocale::Semicolon } else { FormulaLocale::En };
+            return if self.region().decimal == ',' { FormulaLocale::Semicolon } else { FormulaLocale::En };
         }
         if matches!(self, Self::Es | Self::Ca | Self::Gl | Self::Eu) {
             FormulaLocale::Es
@@ -244,7 +252,7 @@ impl Language {
             FormulaLocale::Fr
         } else if self == Self::De {
             FormulaLocale::De
-        } else if self.region().decimal() == ',' {
+        } else if self.region().decimal == ',' {
             FormulaLocale::Semicolon
         } else {
             FormulaLocale::En
@@ -256,7 +264,12 @@ impl Language {
     /// A label that needs two translations (Home's text "Orientation" vs Page Layout's print
     /// "Orientation") is keyed `context|label`: English shows only the part after the `|`.
     pub fn tr(self, text: &str) -> &str {
-        let translated = match self {
+        branded(self.translated(text).unwrap_or_else(|| text.rsplit_once('|').map_or(text, |(_, label)| label)))
+    }
+
+    /// The catalog's own translation of `text`, or `None` when it falls back to English.
+    fn translated(self, text: &str) -> Option<&'static str> {
+        match self {
             Self::En => None,
             Self::Es => es::translate(text),
             Self::Ca => ca::translate(text),
@@ -280,8 +293,7 @@ impl Language {
             Self::Nl => nl::translate(text),
             Self::Ro => ro::translate(text),
             Self::Lt => lt::translate(text),
-        };
-        branded(translated.unwrap_or_else(|| text.rsplit_once('|').map_or(text, |(_, label)| label)))
+        }
     }
 
     pub(crate) fn tr_error(self, message: &str) -> String {
@@ -413,6 +425,32 @@ fn name_sort_key(name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Every shipped catalog names GridCraft's own Diagram and Decorative Text features, and
+    /// Diagram never repeats that catalog's chart word (both sit on the Insert tab).
+    #[test]
+    fn every_catalog_has_distinct_diagram_and_decorative_text() {
+        for language in Language::ALL.into_iter().filter(|l| *l != Language::En) {
+            let code = language.code();
+            let diagram = language.translated("Diagram");
+            assert!(diagram.is_some(), "{code}: Diagram");
+            assert!(language.translated("Decorative Text").is_some(), "{code}: Decorative Text");
+            for chart in ["Chart", "Charts"] {
+                if let Some(chart_text) = language.translated(chart) {
+                    assert_ne!(diagram, Some(chart_text), "{code}: Diagram equals {chart}");
+                }
+            }
+        }
+    }
+
+    /// Ukrainian Chart uses the shared craft-i18n term, which is not the Diagram word.
+    #[test]
+    fn ukrainian_chart_uses_the_shared_term() {
+        assert_eq!(Language::Uk.translated("Chart"), Some("Діаграма"));
+        // Tinta Office fork: dialog titles are nouns, as in Ukrainian Office ("Вставлення діаграми").
+        assert_eq!(Language::Uk.translated("Insert Chart"), Some("Вставлення діаграми"));
+        assert_eq!(Language::Uk.translated("Diagram"), Some("Схема"));
+    }
 
     /// Help tables are sorted and unique: lookups binary-search them.
     #[test]
@@ -560,14 +598,13 @@ mod tests {
 
     #[test]
     fn czech_romanian_and_lithuanian_use_their_regions_and_semicolons() {
-        use gridcraft_engine::core::Region;
         use gridcraft_engine::formula::FormulaLocale;
         for (lang, region, locale) in [
-            (Language::Cs, Region::CsCz, FormulaLocale::Cs),
-            (Language::Ro, Region::RoRo, FormulaLocale::Semicolon),
-            (Language::Lt, Region::LtLt, FormulaLocale::Semicolon),
+            (Language::Cs, "cs-CZ", FormulaLocale::Cs),
+            (Language::Ro, "ro-RO", FormulaLocale::Semicolon),
+            (Language::Lt, "lt-LT", FormulaLocale::Semicolon),
         ] {
-            assert_eq!(lang.region(), region);
+            assert_eq!(lang.region().tag, region);
             assert_eq!(lang.formula_locale(), locale);
             assert_eq!(locale.list_separator(), ';');
         }

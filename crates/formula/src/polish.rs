@@ -207,6 +207,7 @@ pub(crate) const POLISH: &[(&str, &str)] = &[
     ("GCD", "NAJW.WSP.DZIEL"),
     ("GEOMEAN", "ŚREDNIA.GEOMETRYCZNA"),
     ("GESTEP", "SPRAWDŹ.PRÓG"),
+    ("GETPIVOTDATA", "WEŹDANETABELI"),
     ("GROUPBY", "GROUPBY"),
     ("GROWTH", "REGEXPW"),
     ("HARMEAN", "ŚREDNIA.HARMONICZNA"),

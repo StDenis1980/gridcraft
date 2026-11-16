@@ -4,7 +4,7 @@
 //! opened again and recalculated after an edit.
 
 use gridcraft_engine::Session;
-use gridcraft_engine::core::{CellRef, Region, Value};
+use gridcraft_engine::core::{CellRef, Value};
 use gridcraft_engine::display::{cell_text, set_region};
 use serde_json::json;
 
@@ -228,11 +228,11 @@ fn self_employed_iva_and_irpf_survive_xlsx_and_recalculate() {
     assert!(number(&s, "Trimestres", "I6") > before, "the 130 payments grow with the income");
 
     // The region shows Spanish formats; the stored values stay the same.
-    set_region(Region::EsEs);
+    set_region(gridcraft_engine::core::region::lookup("es-ES"));
     assert_eq!(shown(&s, "Ingresos", "D2"), "2.000,00 €");
     assert_eq!(shown(&s, "Ingresos", "A2"), "20/01/2026");
     assert_eq!(shown(&s, "Ingresos", "E2"), "21%");
-    set_region(Region::EnUs);
+    set_region(gridcraft_engine::core::region::lookup("en-US"));
     assert_eq!(shown(&s, "Ingresos", "D2"), "2,000.00 €");
 }
 
@@ -320,9 +320,9 @@ fn ukrainian_family_budget_survives_xlsx_and_recalculates() {
     assert!(number(&s, "Бюджет", &format!("E{bal}")) < 0.0);
     assert_eq!(text(&s, "Бюджет", &format!("F{}", bal + 2)), "Перевитрата");
 
-    set_region(Region::UkUa);
+    set_region(gridcraft_engine::core::region::lookup("uk-UA"));
     assert_eq!(shown(&s, "Бюджет", "C2"), "42\u{a0}000,00 ₴");
     assert_eq!(shown(&s, "Бюджет", "C5"), "3\u{a0}850,40 ₴");
-    set_region(Region::EnUs);
+    set_region(gridcraft_engine::core::region::lookup("en-US"));
     assert_eq!(shown(&s, "Бюджет", "C5"), "3,850.40 ₴");
 }

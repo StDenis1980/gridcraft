@@ -4,16 +4,15 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 #![forbid(unsafe_code)]
 
-mod builtin;
+mod calendar;
 mod decimal;
 mod parse;
 mod render;
 
 use std::sync::Arc;
 
-use gridcraft_core::{CellError, DateSystem, Region, Value};
+use gridcraft_core::{CellError, DateSystem, Region, Value, region};
 
-pub use builtin::{builtin_format, builtin_id};
 pub use decimal::format_general_fit;
 pub use render::localize_general;
 
@@ -98,6 +97,9 @@ struct Inner {
     num_sections: usize,
     /// Index of the section that applies to text, if any.
     text_section: Option<usize>,
+    /// A code Excel rejects (a misplaced `B1`/`B2` calendar prefix): shown as General, and
+    /// `TEXT` returns `#VALUE!`, as for a code that is too long.
+    invalid: bool,
 }
 
 /// A parsed number format code. Cheap to clone.
@@ -132,7 +134,8 @@ fn too_long(code: &str) -> bool {
 
 impl NumberFormat {
     /// Parses a format code. Never fails: unknown or malformed parts degrade to literal text, and
-    /// a code longer than [`MAX_FORMAT_CODE_CHARS`] characters degrades to General.
+    /// a code longer than [`MAX_FORMAT_CODE_CHARS`] characters, or one Excel rejects for a
+    /// misplaced `B1`/`B2` calendar prefix, degrades to General.
     pub fn parse(code: &str) -> NumberFormat {
         Self::parse_inner(code, false)
     }
@@ -149,12 +152,16 @@ impl NumberFormat {
         let trimmed = code.trim();
         // `checkbox` marks a checkbox cell (Insert › Checkbox): TRUE/FALSE draw as a box, any other
         // value displays as General.
+        let general = |invalid: bool| NumberFormat {
+            inner: Arc::new(Inner { code: code.to_string(), general: true, sections: Vec::new(), num_sections: 0, text_section: None, invalid }),
+        };
         if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("general") || trimmed == "checkbox" || (!uncapped && too_long(code)) {
-            return NumberFormat {
-                inner: Arc::new(Inner { code: code.to_string(), general: true, sections: Vec::new(), num_sections: 0, text_section: None }),
-            };
+            return general(false);
         }
         let sections = parse::parse_sections(code);
+        if sections.iter().any(|s| s.invalid) {
+            return general(true);
+        }
         let len = sections.len();
         let last_is_text = sections.last().is_some_and(|s| s.kind == SecKind::Text);
         let text_section = if len >= 4 {
@@ -171,7 +178,7 @@ impl NumberFormat {
         } else {
             len
         };
-        NumberFormat { inner: Arc::new(Inner { code: code.to_string(), general: false, sections, num_sections, text_section }) }
+        NumberFormat { inner: Arc::new(Inner { code: code.to_string(), general: false, sections, num_sections, text_section, invalid: false }) }
     }
 
     pub fn general() -> NumberFormat {
@@ -288,7 +295,7 @@ impl NumberFormat {
     }
 
     /// Formats a number. The flag is true when the value cannot be shown (date out of range).
-    fn format_number(&self, n: f64, sys: DateSystem, region: Region) -> (Formatted, bool) {
+    fn format_number(&self, n: f64, sys: DateSystem, region: &Region) -> (Formatted, bool) {
         let general = |n: f64| Formatted {
             text: localize_general(format_general_fit(n, GENERAL_WIDTH).unwrap_or_else(|| OVERFLOW.into()), region),
             color: None,
@@ -388,42 +395,66 @@ impl NumberFormat {
             None => Formatted { text: t.to_string(), color: None, fill: None, numeric: false },
         }
     }
+
+    /// [`Self::format_text`]'s text, or `None` once it passes `max_units` UTF-16 code units.
+    fn format_text_within(&self, t: &str, max_units: usize) -> Option<String> {
+        match self.inner.text_section.and_then(|i| self.inner.sections.get(i)) {
+            Some(sec) => render::render_text_within(sec, t, max_units).map(|out| out.text),
+            None => (t.encode_utf16().count() <= max_units).then(|| t.to_string()),
+        }
+    }
 }
 
 /// Formats a cell value for display (en-US).
 pub fn format_value(v: &Value, fmt: &NumberFormat, sys: DateSystem) -> Formatted {
-    format_value_in(v, fmt, sys, Region::EnUs)
+    format_value_in(v, fmt, sys, &region::EN_US)
 }
 
 thread_local! {
     // The region display text is shown in (the interface sets it from its language). Files,
     // formulas, CSV and `TEXT()` stay en-US. Per thread: the interface thread sets it for itself,
     // and every other thread (tests, scripts, servers) stays en-US.
-    static DISPLAY_REGION: std::cell::Cell<Region> = const { std::cell::Cell::new(Region::EnUs) };
+    static DISPLAY_REGION: std::cell::Cell<&'static Region> = const { std::cell::Cell::new(&region::EN_US) };
 }
 
 /// Shows display text (cells, print, charts) in `region` from now on, on this thread.
-pub fn set_display_region(region: Region) {
+pub fn set_display_region(region: &'static Region) {
     let _ = DISPLAY_REGION.try_with(|r| r.set(region));
 }
 
 /// The region display text is shown in on this thread.
-pub fn display_region() -> Region {
-    DISPLAY_REGION.try_with(std::cell::Cell::get).unwrap_or_default()
+pub fn display_region() -> &'static Region {
+    DISPLAY_REGION.try_with(std::cell::Cell::get).unwrap_or(&region::EN_US)
+}
+
+/// Whether `code` is built-in format 14 (`m/d/yyyy`) or, with `with_time`, 22 (`m/d/yyyy h:mm`),
+/// ignoring case and backslash escapes, without allocating: the two short dates that follow the
+/// display region.
+fn is_short_date_code(code: &str, with_time: bool) -> bool {
+    let builtin = if with_time { "m/d/yyyy h:mm" } else { "m/d/yyyy" };
+    let mut want = builtin.chars();
+    let mut got = code.chars().filter(|&c| c != '\\').flat_map(char::to_lowercase);
+    loop {
+        match (want.next(), got.next()) {
+            (None, None) => return true,
+            (a, b) if a == b => {}
+            _ => return false,
+        }
+    }
 }
 
 /// Formats a cell value for display in `region`: its decimal and thousands separators, and its
 /// short date for the built-in short date formats (`m/d/yyyy`, `m/d/yyyy h:mm`).
-pub fn format_value_in(v: &Value, fmt: &NumberFormat, sys: DateSystem, region: Region) -> Formatted {
+pub fn format_value_in(v: &Value, fmt: &NumberFormat, sys: DateSystem, region: &Region) -> Formatted {
     match v {
         Value::Empty => Formatted::default(),
         Value::Number(n) if !n.is_finite() => Formatted { text: CellError::Num.as_str().into(), ..Formatted::default() },
-        Value::Number(n) if region != Region::EnUs && fmt.is_date() => {
+        Value::Number(n) if *region != region::EN_US && fmt.is_date() => {
             // Only the two built-in short dates follow the region; checked without allocating.
-            if builtin::is_builtin(fmt.code(), 14) {
-                NumberFormat::parse_cached(region.short_date()).format_number(*n, sys, region).0
-            } else if builtin::is_builtin(fmt.code(), 22) {
-                NumberFormat::parse_cached(region.short_date_time()).format_number(*n, sys, region).0
+            if is_short_date_code(fmt.code(), false) {
+                NumberFormat::parse_cached(region.short_date).format_number(*n, sys, region).0
+            } else if is_short_date_code(fmt.code(), true) {
+                NumberFormat::parse_cached(region.datetime).format_number(*n, sys, region).0
             } else {
                 fmt.format_number(*n, sys, region).0
             }
@@ -514,6 +545,10 @@ impl NumberFormat {
 /// The `TEXT()` worksheet function: formats a value with a format code. Numeric text is
 /// converted to a number first; other text and booleans (as `TRUE`/`FALSE`) go through the text
 /// section, or are returned as is.
+/// Longest text a cell holds, in UTF-16 code units (Excel's 32,767 characters, which XLSB also
+/// stores that way), and so the longest `TEXT` result.
+const MAX_CELL_TEXT_CHARS: usize = 32_767;
+
 pub fn text_function(v: &Value, code: &str, sys: DateSystem) -> Result<String, CellError> {
     if code.is_empty() {
         return Ok(String::new());
@@ -522,6 +557,9 @@ pub fn text_function(v: &Value, code: &str, sys: DateSystem) -> Result<String, C
         return Err(CellError::Value);
     }
     let fmt = NumberFormat::parse_cached(code);
+    if fmt.inner.invalid {
+        return Err(CellError::Value);
+    }
     let n = match v.scalar() {
         Value::Error(e) => return Err(e),
         Value::Empty => 0.0,
@@ -529,7 +567,9 @@ pub fn text_function(v: &Value, code: &str, sys: DateSystem) -> Result<String, C
         Value::Bool(b) => return Ok(fmt.format_text(if b { "TRUE" } else { "FALSE" }).text),
         Value::Text(t) => match gridcraft_core::parse::parse_number_text(&t) {
             Some(n) => n,
-            None => return Ok(fmt.format_text(&t).text),
+            // Every `@` repeats the text: a result past a cell's limit is `#VALUE!`, so nested
+            // TEXT calls can't multiply it further.
+            None => return fmt.format_text_within(&t, MAX_CELL_TEXT_CHARS).ok_or(CellError::Value),
         },
         Value::Array(_) => return Err(CellError::Value),
     };
@@ -537,7 +577,7 @@ pub fn text_function(v: &Value, code: &str, sys: DateSystem) -> Result<String, C
         return Err(CellError::Num);
     }
     // Formula results never depend on where the workbook is opened: TEXT stays en-US.
-    let (f, overflow) = fmt.format_number(n, sys, Region::EnUs);
+    let (f, overflow) = fmt.format_number(n, sys, &region::EN_US);
     if overflow { Err(CellError::Value) } else { Ok(f.text) }
 }
 

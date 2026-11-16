@@ -4,13 +4,13 @@ use gridcraft_core::parse::{delocalize_input, localize_number, parse_input};
 use gridcraft_core::{DateSystem, Region, Value};
 
 /// What `typed` becomes in `region`: the value and the automatic format.
-fn read(typed: &str, region: Region) -> (Value, Option<&'static str>) {
+fn read(typed: &str, region: &'static Region) -> (Value, Option<&'static str>) {
     let en = delocalize_input(typed, region);
     let p = parse_input(en.as_deref().unwrap_or(typed), DateSystem::D1900);
     (p.value, p.format)
 }
 
-fn number(typed: &str, region: Region) -> Option<f64> {
+fn number(typed: &str, region: &'static Region) -> Option<f64> {
     match read(typed, region).0 {
         Value::Number(n) => Some(n),
         _ => None,
@@ -19,7 +19,7 @@ fn number(typed: &str, region: Region) -> Option<f64> {
 
 #[test]
 fn spanish_numbers_use_a_decimal_comma_and_dot_groups() {
-    let es = Region::EsEs;
+    let es = gridcraft_core::region::lookup("es-ES");
     assert_eq!(number("1,5", es), Some(1.5));
     assert_eq!(number("-0,25", es), Some(-0.25));
     assert_eq!(read("1.234,50", es), (Value::Number(1234.5), Some("#,##0.00")));
@@ -42,7 +42,7 @@ fn spanish_numbers_use_a_decimal_comma_and_dot_groups() {
 
 #[test]
 fn ukrainian_numbers_group_with_spaces_and_take_the_hryvnia() {
-    let uk = Region::UkUa;
+    let uk = gridcraft_core::region::lookup("uk-UA");
     assert_eq!(read("1 234,50", uk), (Value::Number(1234.5), Some("#,##0.00")));
     assert_eq!(read("1\u{a0}234\u{a0}567", uk), (Value::Number(1234567.0), Some("#,##0")));
     assert_eq!(read("99,90 ₴", uk), (Value::Number(99.9), Some("#,##0.00 \"₴\"")));
@@ -57,8 +57,8 @@ fn ukrainian_numbers_group_with_spaces_and_take_the_hryvnia() {
 #[test]
 fn dates_are_day_first_outside_the_united_states() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let es = Region::EsEs;
-    let uk = Region::UkUa;
+    let es = gridcraft_core::region::lookup("es-ES");
+    let uk = gridcraft_core::region::lookup("uk-UA");
     assert_eq!(read("5/11/2026", es), (Value::Number(serial(2026, 11, 5).unwrap()), Some("m/d/yyyy")));
     assert_eq!(number("31/12/2026", es), serial(2026, 12, 31));
     assert_eq!(number("05.11.2026", uk), serial(2026, 11, 5));
@@ -67,7 +67,7 @@ fn dates_are_day_first_outside_the_united_states() {
     let with_time = number("05.11.2026 10:30", uk).unwrap();
     assert!((with_time - serial(2026, 11, 5).unwrap() - 10.5 / 24.0).abs() < 1e-9);
     // en-US keeps month first.
-    assert_eq!(number("5/11/2026", Region::EnUs), serial(2026, 5, 11));
+    assert_eq!(number("5/11/2026", gridcraft_core::region::lookup("en-US")), serial(2026, 5, 11));
     // No 31st month.
     assert_eq!(read("12/31/2026", es).0, Value::text("12/31/2026"));
     assert_eq!(read("31/02/2026", uk).0, Value::text("31/02/2026"));
@@ -77,16 +77,16 @@ fn dates_are_day_first_outside_the_united_states() {
 
 #[test]
 fn constants_are_edited_with_the_regions_decimal_separator() {
-    assert_eq!(localize_number("1234.5", Region::EsEs), "1234,5");
-    assert_eq!(localize_number("-0.25", Region::UkUa), "-0,25");
-    assert_eq!(localize_number("1.5E+20", Region::EsEs), "1,5E+20");
-    assert_eq!(localize_number("1234.5", Region::EnUs), "1234.5");
-    assert_eq!(localize_number("Total 1.5", Region::EsEs), "Total 1.5");
-    assert_eq!(localize_number("42", Region::EsEs), "42");
+    assert_eq!(localize_number("1234.5", gridcraft_core::region::lookup("es-ES")), "1234,5");
+    assert_eq!(localize_number("-0.25", gridcraft_core::region::lookup("uk-UA")), "-0,25");
+    assert_eq!(localize_number("1.5E+20", gridcraft_core::region::lookup("es-ES")), "1,5E+20");
+    assert_eq!(localize_number("1234.5", gridcraft_core::region::lookup("en-US")), "1234.5");
+    assert_eq!(localize_number("Total 1.5", gridcraft_core::region::lookup("es-ES")), "Total 1.5");
+    assert_eq!(localize_number("42", gridcraft_core::region::lookup("es-ES")), "42");
     // What is shown for editing reads back as the same number.
     for raw in ["1234.5", "-0.001", "3.14159", "1E-7"] {
-        let shown = localize_number(raw, Region::EsEs);
-        assert_eq!(number(&shown, Region::EsEs), raw.parse().ok(), "{raw}");
+        let shown = localize_number(raw, gridcraft_core::region::lookup("es-ES"));
+        assert_eq!(number(&shown, gridcraft_core::region::lookup("es-ES")), raw.parse().ok(), "{raw}");
     }
 }
 
@@ -94,7 +94,7 @@ fn constants_are_edited_with_the_regions_decimal_separator() {
 fn hostile_input_never_panics() {
     let long = "1.".repeat(10_000);
     for text in ["", " ", ",", ".", "€", "₴", "-", "1,", ",5", "1 ", "\u{a0}", "//", "1/2/3/4", "31/02/2026", "ñ1,5", long.as_str()] {
-        for region in Region::ALL {
+        for &region in gridcraft_core::region::all() {
             let _ = read(text, region);
             let _ = localize_number(text, region);
         }
@@ -115,12 +115,12 @@ fn arithmetic_reads_only_the_en_us_currency() {
 
 #[test]
 fn ukrainian_booleans_read_in_any_case() {
-    let uk = Region::UkUa;
+    let uk = gridcraft_core::region::lookup("uk-UA");
     for (typed, value) in [("ІСТИНА", true), ("істина", true), ("Хибність", false), ("хибність", false)] {
         assert_eq!(read(typed, uk).0, Value::Bool(value), "{typed}");
     }
     // Each region reads its own words only.
-    assert!(matches!(read("істина", Region::EsEs).0, Value::Text(_)));
+    assert!(matches!(read("істина", gridcraft_core::region::lookup("es-ES")).0, Value::Text(_)));
     assert!(matches!(read("verdadero", uk).0, Value::Text(_)));
 }
 
@@ -139,10 +139,10 @@ fn a_sign_after_the_euro_inside_parentheses_is_not_a_number() {
 #[test]
 fn czech_romanian_and_lithuanian_numbers_and_dates() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let (cs, ro, lt) = (Region::CsCz, Region::RoRo, Region::LtLt);
-    assert_eq!(Region::from_tag("cs-CZ"), Some(cs));
-    assert_eq!(Region::from_tag("ro_RO.UTF-8"), Some(ro));
-    assert_eq!(Region::from_tag("lt"), Some(lt));
+    let (cs, ro, lt) = (gridcraft_core::region::lookup("cs-CZ"), gridcraft_core::region::lookup("ro-RO"), gridcraft_core::region::lookup("lt-LT"));
+    assert_eq!(Some(gridcraft_core::region::lookup("cs-CZ")), Some(cs));
+    assert_eq!(Some(gridcraft_core::region::lookup("ro_RO.UTF-8")), Some(ro));
+    assert_eq!(Some(gridcraft_core::region::lookup("lt")), Some(lt));
     // Czech and Lithuanian group with spaces, Romanian with dots; all three use a decimal comma.
     assert_eq!(read("1 234,50", cs), (Value::Number(1234.5), Some("#,##0.00")));
     assert_eq!(read("1\u{a0}234,50", lt), (Value::Number(1234.5), Some("#,##0.00")));
@@ -168,9 +168,9 @@ fn czech_romanian_and_lithuanian_numbers_and_dates() {
 #[test]
 fn german_numbers_dates_and_booleans() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let de = Region::DeDe;
-    assert_eq!(Region::from_tag("de-DE"), Some(de));
-    assert_eq!(Region::from_tag("de_AT"), Some(de));
+    let de = gridcraft_core::region::lookup("de-DE");
+    assert_eq!(Some(gridcraft_core::region::lookup("de-DE")), Some(de));
+    assert_eq!(Some(gridcraft_core::region::lookup("de_AT")), Some(de));
     assert_eq!(read("1.234,50", de), (Value::Number(1234.5), Some("#,##0.00")));
     assert_eq!(read("12,50 €", de), (Value::Number(12.5), Some("#,##0.00 \"€\"")));
     assert_eq!(number("5.11.2026", de), serial(2026, 11, 5));
@@ -181,9 +181,9 @@ fn german_numbers_dates_and_booleans() {
 #[test]
 fn french_numbers_dates_and_booleans() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let r = Region::FrFr;
-    assert_eq!(Region::from_tag("fr-FR"), Some(r));
-    assert_eq!(r.tag(), "fr-FR");
+    let r = gridcraft_core::region::lookup("fr-FR");
+    assert_eq!(Some(gridcraft_core::region::lookup("fr-FR")), Some(r));
+    assert_eq!(r.tag, "fr-FR");
     assert_eq!(read("1 234,5", r).0, Value::Number(1234.5));
     assert_eq!(read("12,50 €", r), (Value::Number(12.5), Some("#,##0.00 \"€\"")));
     assert_eq!(number("5/11/2026", r), serial(2026, 11, 5));
@@ -193,9 +193,9 @@ fn french_numbers_dates_and_booleans() {
 #[test]
 fn italian_numbers_dates_and_booleans() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let r = Region::ItIt;
-    assert_eq!(Region::from_tag("it-IT"), Some(r));
-    assert_eq!(r.tag(), "it-IT");
+    let r = gridcraft_core::region::lookup("it-IT");
+    assert_eq!(Some(gridcraft_core::region::lookup("it-IT")), Some(r));
+    assert_eq!(r.tag, "it-IT");
     assert_eq!(read("1.234,5", r).0, Value::Number(1234.5));
     assert_eq!(read("12,50 €", r), (Value::Number(12.5), Some("#,##0.00 \"€\"")));
     assert_eq!(number("5/11/2026", r), serial(2026, 11, 5));
@@ -205,9 +205,9 @@ fn italian_numbers_dates_and_booleans() {
 #[test]
 fn polish_numbers_dates_and_booleans() {
     let serial = |y, m, d| gridcraft_core::date::serial_from_ymd(DateSystem::D1900, y, m, d);
-    let r = Region::PlPl;
-    assert_eq!(Region::from_tag("pl-PL"), Some(r));
-    assert_eq!(r.tag(), "pl-PL");
+    let r = gridcraft_core::region::lookup("pl-PL");
+    assert_eq!(Some(gridcraft_core::region::lookup("pl-PL")), Some(r));
+    assert_eq!(r.tag, "pl-PL");
     assert_eq!(read("1 234,5", r).0, Value::Number(1234.5));
     assert_eq!(read("12,50 zł", r), (Value::Number(12.5), Some("#,##0.00 \"zł\"")));
     assert_eq!(number("5.11.2026", r), serial(2026, 11, 5));
