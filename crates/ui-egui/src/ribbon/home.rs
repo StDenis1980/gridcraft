@@ -858,4 +858,18 @@ mod number_sample_tests {
         app.begin_edit(Some("=1+1".into()), false);
         assert_eq!(number_sample(&app), Value::Empty);
     }
+
+    #[test]
+    fn picking_a_number_format_while_typing_enters_the_number_in_that_format() {
+        let mut app = app();
+        app.run("selection.set", json!({"cell": "B2"})).unwrap();
+        app.begin_edit(Some("1234".into()), false);
+        app.run("home.numberFormat", json!({"format": "Percentage"})).unwrap();
+        assert!(app.editor.is_none(), "the entry was committed");
+        let d = app.session.active().unwrap();
+        let sh = d.wb.active().unwrap();
+        let b2 = gridcraft_engine::core::CellRef::parse("B2").unwrap();
+        assert_eq!(sh.value(b2), Value::number(1234.0));
+        assert_eq!(gridcraft_engine::display::format(&sh.value(b2), d.wb.styles.get(sh.style_id(b2)).num_fmt.as_str(), &d.wb).text, "123400.00%");
+    }
 }
