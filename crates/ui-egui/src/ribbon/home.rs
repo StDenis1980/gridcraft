@@ -695,7 +695,12 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
         .collect();
     if let ComboResult::Picked(value) = editable_combo(ui, &resp, "number", &current, &items, forced) {
         match value.as_str() {
-            "__more" => app.open_dialog("formatCells", json!({"tab": "Number"})),
+            // The entry being typed goes in first, so the dialog's sample shows it.
+            "__more" => {
+                if app.settle_drafts().is_ok() {
+                    app.open_dialog("formatCells", json!({"tab": "Number"}));
+                }
+            }
             n => act(app, "home.numberFormat", json!({"format": n})),
         }
     }
