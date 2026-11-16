@@ -686,8 +686,9 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let items: Vec<(&str, String)> = names
         .iter()
         .map(|n| {
-            let code = gridcraft_engine::cmd::format::format_code_for(n);
-            let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, code, &d.wb).text).unwrap_or_default();
+            let region = app.session.active().map_or(gridcraft_engine::core::region::default_region(), |d| d.wb.region);
+            let code = gridcraft_engine::cmd::format::format_code_for_region(n, region);
+            let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, &code, &d.wb).text).unwrap_or_default();
             (*n, format!("{:<12}   {preview}", lang.tr(n)))
         })
         .chain(std::iter::once(("__more", format!("{:>12}", lang.tr("More Number Formats…")))))

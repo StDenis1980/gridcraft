@@ -32,7 +32,8 @@ pub(super) fn format_cells(app: &mut SheetApp, ui: &mut egui::Ui, d: &mut Dialog
                 for name in
                     ["General", "Number", "Currency", "Accounting", "Short Date", "Long Date", "Time", "Percentage", "Fraction", "Scientific", "Text"]
                 {
-                    let c = gridcraft_engine::cmd::format::format_code_for(name).to_string();
+                    let region = app.session.active().map_or(gridcraft_engine::core::region::default_region(), |doc| doc.wb.region);
+                    let c = gridcraft_engine::cmd::format::format_code_for_region(name, region).into_owned();
                     if cols[0].selectable_label(code == c, lang.tr(name)).clicked() {
                         code = c;
                     }

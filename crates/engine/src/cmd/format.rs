@@ -217,8 +217,12 @@ const COMMA: &str = "_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)";
 
 /// Accounting Number Format with the currency symbol to use (Excel's own button takes the system
 /// currency; `symbol` is how the control channel picks another one, e.g. `"L"` for lempiras).
+/// Without `symbol`, the workbook region's currency, written where that region writes it.
 fn accounting(s: &mut Session, p: &Json) -> Result<Json> {
-    let symbol = str_param(p, "symbol").unwrap_or("$");
+    let Some(symbol) = str_param(p, "symbol") else {
+        let code = region_accounting(s.doc()?.wb.region);
+        return set_fmt(s, p, &code);
+    };
     // The symbol goes into a quoted literal: a quote or a backslash would end it, and a control
     // character would reach the format's text as-is.
     if symbol.contains(['"', '\\']) || symbol.chars().any(char::is_control) {
@@ -705,7 +709,32 @@ fn merge(s: &mut Session, p: &Json, how: &str) -> Result<Json> {
     ok()
 }
 
-/// Ribbon format names → codes.
+/// The Accounting format of `region`'s currency: en-US's is Excel's `$` one; a region that writes
+/// the symbol after the amount gets Excel's form for that (`_-* #,##0.00\ "€"_-;…`), one that writes
+/// it first the `$`-style form with its own symbol.
+pub fn region_accounting(region: &gridcraft_core::Region) -> String {
+    if *region == gridcraft_core::region::EN_US {
+        return ACCOUNTING.to_string();
+    }
+    let symbol = format!("\"{}\"", region.currency.replace(['"', '\\'], ""));
+    if region.currency_first() {
+        format!("_({symbol}* #,##0.00_);_({symbol}* \\(#,##0.00\\);_({symbol}* \"-\"??_);_(@_)")
+    } else {
+        format!("_-* #,##0.00\\ {symbol}_-;\\-* #,##0.00\\ {symbol}_-;_-* \"-\"??\\ {symbol}_-;_-@_-")
+    }
+}
+
+/// Ribbon format names → codes, with Currency and Accounting in `region`'s currency.
+pub fn format_code_for_region<'a>(name: &'a str, region: &gridcraft_core::Region) -> std::borrow::Cow<'a, str> {
+    use std::borrow::Cow;
+    match name {
+        "Currency" => Cow::Borrowed(region.currency_format),
+        "Accounting" => Cow::Owned(region_accounting(region)),
+        other => Cow::Borrowed(format_code_for(other)),
+    }
+}
+
+/// Ribbon format names → codes (en-US; see [`format_code_for_region`]).
 pub fn format_code_for(name: &str) -> &str {
     match name {
         "General" => "General",
@@ -727,7 +756,9 @@ pub fn format_code_for(name: &str) -> &str {
 fn number_format(s: &mut Session, p: &Json) -> Result<Json> {
     let code = str_param(p, "code")
         .map(str::to_string)
-        .or_else(|| str_param(p, "format").map(|f| format_code_for(f).to_string()))
+        .or_else(|| {
+            str_param(p, "format").map(|f| format_code_for_region(f, s.doc().map_or(&gridcraft_core::region::EN_US, |d| d.wb.region)).into_owned())
+        })
         .ok_or_else(|| bad("home.numberFormat", "missing `format` or `code`"))?;
     set_fmt(s, p, &code)
 }
@@ -842,6 +873,30 @@ mod tests {
     #[test]
     fn the_default_symbol_reproduces_the_accounting_format() {
         assert_eq!(accounting_format("$"), ACCOUNTING);
+    }
+
+    /// Currency and Accounting, from the ribbon, Format Cells and the Accounting button, use the
+    /// workbook region's currency where that region writes it; en-US keeps Excel's `$` codes.
+    #[test]
+    fn currency_formats_follow_the_workbook_region() {
+        use gridcraft_core::region::{EN_US, lookup};
+        let de = lookup("de-DE");
+        assert_eq!(format_code_for_region("Currency", de), de.currency_format);
+        assert!(format_code_for_region("Accounting", de).contains("\"€\""));
+        assert!(!format_code_for_region("Accounting", de).contains('$'));
+        assert_eq!(format_code_for_region("Currency", &EN_US), format_code_for("Currency"));
+        assert_eq!(format_code_for_region("Accounting", &EN_US), ACCOUNTING);
+        assert_eq!(format_code_for_region("Percentage", de), "0.00%");
+        let mut s = crate::Session::new();
+        s.new_workbook();
+        std::sync::Arc::make_mut(&mut s.doc_mut().unwrap().wb).region = de;
+        s.execute("cell.set", json!({"cell": "A1", "input": "1234.5"})).unwrap();
+        s.execute("home.accounting", json!({"range": "A1"})).unwrap();
+        let code = s.execute("cell.get", json!({"cell": "A1"})).unwrap()["style"]["num_fmt"].as_str().unwrap_or_default().to_string();
+        assert!(code.contains('€') && !code.contains('$'), "the Accounting button: {code}");
+        s.execute("home.numberFormat", json!({"range": "A2", "format": "Currency"})).unwrap();
+        let code = s.execute("cell.get", json!({"cell": "A2"})).unwrap()["style"]["num_fmt"].as_str().unwrap_or_default().to_string();
+        assert_eq!(code, de.currency_format);
     }
 
     #[test]
