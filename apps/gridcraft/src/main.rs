@@ -265,6 +265,8 @@ fn icon() -> Option<egui::IconData> {
 }
 
 fn main() -> eframe::Result<()> {
+    // Tinta Office: this app shows the Tinta look (tests and examples keep the classic one).
+    gridcraft_ui_egui::tinta_theme::allow();
     // A confined launcher run (`gridcraft_sandbox::launch_command`) comes before everything else:
     // it opens no window, writes no log, and becomes the program it confines.
     let raw: Vec<std::ffi::OsString> = std::env::args_os().skip(1).collect();

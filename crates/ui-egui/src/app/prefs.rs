@@ -12,6 +12,9 @@ impl SheetApp {
 
     /// Follows the desktop/system theme preference and records the effective theme.
     pub(super) fn sync_theme_preference(&mut self, ctx: &egui::Context) {
+        if crate::tinta_theme::set(self.ui.tinta_look) {
+            crate::theme::apply(ctx, self.ui.dark);
+        }
         let preference = match (
             self.ui.system_theme,
             ctx.system_theme().or_else(|| self.desktop_dark.map(|d| if d { egui::Theme::Dark } else { egui::Theme::Light })),

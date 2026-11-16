@@ -58,6 +58,7 @@ mod text_direction;
 pub mod theme;
 pub mod tinta_feedback;
 mod tinta_reports_ui;
+pub mod tinta_theme;
 #[cfg(not(target_arch = "wasm32"))]
 mod updates_ui;
 #[cfg(not(target_arch = "wasm32"))]
@@ -117,6 +118,8 @@ pub struct UiState {
     pub status_bar: bool,
     /// Motion in the UI: the selection outline glides to a new selection (View ▸ Animations).
     pub animations: bool,
+    /// Tinta Office: the Tinta look on or off ([`tinta_theme`]); on unless turned off.
+    pub tinta_look: bool,
     /// Enable AutoComplete for cell values (File ▸ Options ▸ Editing): typed text is completed
     /// from the one matching entry in the same column.
     pub autocomplete: bool,
@@ -177,6 +180,7 @@ impl Default for UiState {
             formula_bar_lines: formula_bar::MAX_LINES,
             status_bar: true,
             animations: true,
+            tinta_look: true,
             autocomplete: true,
             highlight_active_row: false,
             autosave: false,

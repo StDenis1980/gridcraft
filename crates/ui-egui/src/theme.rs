@@ -297,7 +297,7 @@ impl Tokens {
     }
 
     pub fn get(ctx: &egui::Context) -> Tokens {
-        if ctx.global_style().visuals.dark_mode { Tokens::dark() } else { Tokens::light() }
+        crate::tinta_theme::tokens(if ctx.global_style().visuals.dark_mode { Tokens::dark() } else { Tokens::light() })
     }
 
     /// One colour of the category palette.
@@ -332,7 +332,7 @@ pub fn apply(ctx: &egui::Context, dark: bool) {
     // Install both palettes before System can switch between the style slots.
     for theme in [egui::Theme::Light, egui::Theme::Dark] {
         let dark = theme == egui::Theme::Dark;
-        let t = if dark { Tokens::dark() } else { Tokens::light() };
+        let t = crate::tinta_theme::tokens(if dark { Tokens::dark() } else { Tokens::light() });
         let mut v = if dark { Visuals::dark() } else { Visuals::light() };
         v.panel_fill = t.window;
         v.window_fill = t.menu_bg;
@@ -355,6 +355,7 @@ pub fn apply(ctx: &egui::Context, dark: bool) {
         v.window_corner_radius = egui::CornerRadius::same(10);
         v.menu_corner_radius = egui::CornerRadius::same(8);
         v.popup_shadow = egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: t.shadow };
+        crate::tinta_theme::visuals(&mut v, &t);
         ctx.set_visuals_of(theme, v);
     }
     ctx.options_mut(|o| o.fallback_theme = egui::Theme::Light);
@@ -469,7 +470,9 @@ mod contrast_tests {
     #[test]
     fn token_pairs_meet_wcag_contrast_in_both_themes() {
         let mut failures = Vec::new();
-        for t in [Tokens::light(), Tokens::dark()] {
+        // Tinta Office: the Tinta look's palette keeps the same pairs.
+        let tinta = [crate::tinta_theme::skin(Tokens::light()), crate::tinta_theme::skin(Tokens::dark())];
+        for t in [Tokens::light(), Tokens::dark()].into_iter().chain(tinta) {
             for (name, fg, bg, min) in pairs(&t) {
                 let ratio = contrast(fg, bg);
                 if ratio < min {
