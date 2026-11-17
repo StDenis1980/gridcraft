@@ -491,6 +491,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "표시",
         "Collapse dialog" => "대화 상자 축소",
         "Expand dialog" => "대화 상자 확장",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "통합 문서",
+        "Edited" => "편집됨",
+        "Type to filter…" => "입력하여 필터링…",
         _ => return None,
     })
 }

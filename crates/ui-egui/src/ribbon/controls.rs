@@ -155,7 +155,8 @@ fn combo_head(ui: &mut Ui, text: Option<(&mut String, egui::Id)>, open_now: bool
     }
     let mut lower = String::new();
     if let Some((text, text_id)) = text {
-        let te = ui.add(egui::TextEdit::singleline(text).id(text_id).desired_width(220.0).hint_text("Type to filter…"));
+        let te =
+            ui.add(egui::TextEdit::singleline(text).id(text_id).desired_width(220.0).hint_text(crate::i18n::current(ui.ctx()).tr("Type to filter…")));
         if open_now && !te.has_focus() {
             ui.ctx().memory_mut(|m| m.request_focus(text_id));
             // Select all once focus lands so typing replaces the filter.
@@ -193,7 +194,15 @@ fn combo_rows(ui: &mut Ui, head: ComboHead, items: &[(&str, String)], row_w: f32
     }
     for (pos, i) in filtered.iter().enumerate() {
         let (value, disp) = &items[*i];
-        let row = ui.add(egui::Button::selectable(pos as i32 == sel, egui::RichText::new(disp)).min_size(vec2(row_w, 20.0)));
+        // `name\tsample`: the sample (the number list's preview of the selected cell) goes on the
+        // right of the row, dimmed, as Excel shows it.
+        let button = match disp.split_once('\t') {
+            Some((name, sample)) => {
+                egui::Button::selectable(pos as i32 == sel, egui::RichText::new(name)).right_text(egui::RichText::new(sample).weak())
+            }
+            None => egui::Button::selectable(pos as i32 == sel, egui::RichText::new(disp)),
+        };
+        let row = ui.add(button.min_size(vec2(row_w, 20.0)));
         if (down || up) && pos as i32 == sel && !ui.clip_rect().contains_rect(row.rect) {
             row.scroll_to_me(Some(if down { egui::Align::Max } else { egui::Align::Min }));
         }

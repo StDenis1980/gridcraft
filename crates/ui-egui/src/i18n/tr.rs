@@ -452,6 +452,11 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Göster",
         "Collapse dialog" => "İletişim kutusunu daralt",
         "Expand dialog" => "İletişim kutusunu genişlet",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Kitap",
+        "default name|Sheet" => "Sayfa",
+        "Edited" => "Düzenlendi",
+        "Type to filter…" => "Filtrelemek için yazın…",
         _ => return None,
     })
 }

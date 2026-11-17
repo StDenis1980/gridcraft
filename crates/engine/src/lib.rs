@@ -673,16 +673,21 @@ impl Session {
             }
         }
     }
-    /// A new blank workbook titled `BookN`.
+    /// A new blank workbook titled `BookN` (Tinta Office fork: in the interface's language,
+    /// `Книга1` with its sheets `Аркуш1`…, see [`display::set_default_names`]).
     pub fn new_workbook(&mut self) -> usize {
-        let n = (1..).find(|n| !self.docs.iter().any(|d| d.title == format!("Book{n}") && d.path.is_none())).unwrap_or(1);
+        let book = display::default_book_name();
+        let n = (1..).find(|n| !self.docs.iter().any(|d| d.title == format!("{book}{n}") && d.path.is_none())).unwrap_or(1);
         let mut wb = Workbook::new();
         wb.props.author = self.prefs.user_name.clone();
+        if let Some(first) = wb.sheets.first_mut() {
+            Arc::make_mut(first).name = display::next_sheet_name(&Workbook { sheets: vec![], ..Workbook::new() });
+        }
         for _ in 1..self.prefs.sheets_in_new_workbook.clamp(1, 255) {
-            let name = wb.next_sheet_name();
+            let name = display::next_sheet_name(&wb);
             wb.sheets.push(Arc::new(gridcraft_model::Sheet::new(name)));
         }
-        self.add_document(DocState::new(wb, None, format!("Book{n}"), Trust::Local))
+        self.add_document(DocState::new(wb, None, format!("{book}{n}"), Trust::Local))
     }
 
     /// Journals a command, then trims the oldest entries past either cap. A recording in progress

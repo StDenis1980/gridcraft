@@ -357,6 +357,8 @@ fn main() -> eframe::Result<()> {
     app.start_update_check();
     let control_port = control_port;
     load_prefs(&mut app);
+    // Tinta Office: the startup workbook is named in the interface's language ("Книга1").
+    app.apply_language_names();
     // Stamp the startup workbook's author from the persisted user name.
     if app.session.documents().is_empty() {
         app.session.new_workbook();

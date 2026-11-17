@@ -450,6 +450,8 @@ pub(super) const CORE: &[(&str, &str)] = &[
     ("Recording", "記録中"),
     ("New Macro", "新しいマクロ"),
     ("Show", "表示"),
+    // A new workbook's and sheet's names stay Book1 and Sheet1, as in Excel; the title bar's mark.
+    ("Edited", "編集済み"),
 ];
 
 /// English label → Japanese for the dialog, message, Backstage and menu strings beyond [`CORE`].

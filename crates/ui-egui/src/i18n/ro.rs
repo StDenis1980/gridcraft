@@ -1236,6 +1236,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Win/Loss" => "Câștig/pierdere",
         "Collapse dialog" => "Restrângere casetă de dialog",
         "Expand dialog" => "Extindere casetă de dialog",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Registru",
+        "default name|Sheet" => "Foaie",
+        "Edited" => "Editat",
         _ => return None,
     })
 }

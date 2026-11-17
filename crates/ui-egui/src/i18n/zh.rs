@@ -483,6 +483,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "显示",
         "Collapse dialog" => "折叠对话框",
         "Expand dialog" => "展开对话框",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "工作簿",
+        "Edited" => "已编辑",
+        "Type to filter…" => "键入以筛选…",
         _ => return None,
     })
 }

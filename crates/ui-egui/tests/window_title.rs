@@ -18,7 +18,7 @@ fn a_new_blank_workbook_titles_the_window_book1_and_the_product() {
     );
     h.run_steps(3);
     let title = h.state().grid.last_title.clone();
-    assert_eq!(title.as_deref(), Some(window_title("Book1", false).as_str()));
+    assert_eq!(title.as_deref(), Some(window_title("Book1", false, gridcraft_ui_egui::i18n::Language::En).as_str()));
     if !cfg!(target_os = "macos") {
         assert_eq!(title.as_deref(), Some(format!("Book1 - {}", gridcraft_engine::brand::NAME).as_str()));
     }

@@ -562,6 +562,11 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Weergeven",
         "Collapse dialog" => "Dialoogvenster samenvouwen",
         "Expand dialog" => "Dialoogvenster uitvouwen",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Map",
+        "default name|Sheet" => "Blad",
+        "Edited" => "Bewerkt",
+        "Type to filter…" => "Typ om te filteren…",
         _ => return None,
     })
 }

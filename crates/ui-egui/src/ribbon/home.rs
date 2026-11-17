@@ -678,7 +678,7 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
     let kind = gridcraft_engine::display::number_format(&code).kind();
     let current = format!("{kind:?}");
     let lang = app.ui.language;
-    let sample = app.session.active().and_then(|d| d.wb.active().map(|sh| sh.value(d.selection.active))).unwrap_or_default();
+    let sample = number_sample(app);
     let resp = ui.add_sized([150.0, 24.0], egui::Button::new(egui::RichText::new(lang.tr(&current)).font(theme::ui_font(12.5))));
     control_keytip(app, ui, &resp, "home.numberFormat");
     let forced = invoke(app, "home.numberFormat");
@@ -687,17 +687,39 @@ fn number_combo(app: &mut SheetApp, ui: &mut Ui, st: &Style) {
         .iter()
         .map(|n| {
             let code = gridcraft_engine::cmd::format::format_code_for(n);
-            let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, code, &d.wb).text).unwrap_or_default();
-            (*n, format!("{:<12}   {preview}", lang.tr(n)))
+            let preview = app.session.active().map(|d| gridcraft_engine::display::format(&sample, &code, &d.wb).text).unwrap_or_default();
+            // Name, then the selected cell as that format shows it, drawn on the row's right.
+            (*n, format!("{}\t{preview}", lang.tr(n)))
         })
         .chain(std::iter::once(("__more", format!("{:>12}", lang.tr("More Number Formats…")))))
         .collect();
     if let ComboResult::Picked(value) = editable_combo(ui, &resp, "number", &current, &items, forced) {
         match value.as_str() {
-            "__more" => app.open_dialog("formatCells", json!({"tab": "Number"})),
+            // The entry being typed goes in first, so the dialog's sample shows it.
+            "__more" => {
+                if app.settle_drafts().is_ok() {
+                    app.open_dialog("formatCells", json!({"tab": "Number"}));
+                }
+            }
             n => act(app, "home.numberFormat", json!({"format": n})),
         }
     }
+}
+
+/// The value the number format list previews: the active cell's, or what is being typed into it
+/// (read in the display region, `1234,5` in Ukraine), so the samples show before the entry is
+/// committed. A formula being typed has no value yet and previews nothing.
+fn number_sample(app: &SheetApp) -> gridcraft_engine::core::Value {
+    let Some(d) = app.session.active() else { return Default::default() };
+    if let Some(e) = app.editor.as_ref().filter(|e| e.doc == d.uid && e.cell == d.selection.active) {
+        let text = e.text.trim();
+        if text.starts_with('=') {
+            return Default::default();
+        }
+        let en = gridcraft_engine::core::parse::delocalize_input(text, gridcraft_engine::display::region()).unwrap_or_else(|| text.to_string());
+        return gridcraft_engine::core::parse::parse_input(&en, d.wb.date_system).value;
+    }
+    d.wb.active().map(|sh| sh.value(d.selection.active)).unwrap_or_default()
 }
 
 fn cf_menu(app: &mut SheetApp, ui: &mut Ui) {
@@ -812,5 +834,47 @@ mod accounting_symbol_tests {
             let symbol = tag.trim_start_matches("[$").split('-').next().unwrap_or_default();
             assert_eq!(out.fill.map(|(c, at)| (c, out.text[..at].trim_start())), Some((' ', symbol)), "{label}");
         }
+    }
+}
+
+#[cfg(test)]
+mod number_sample_tests {
+    use super::*;
+    use gridcraft_engine::Session;
+    use gridcraft_engine::core::Value;
+
+    fn app() -> SheetApp {
+        let mut s = Session::new();
+        s.new_workbook();
+        SheetApp::new(s, Default::default())
+    }
+
+    #[test]
+    fn the_number_format_list_previews_what_is_being_typed() {
+        let mut app = app();
+        app.run("cell.set", json!({"cell": "A1", "input": "7"})).unwrap();
+        app.run("selection.set", json!({"cell": "A1"})).unwrap();
+        assert_eq!(number_sample(&app), Value::number(7.0));
+        // Typing into the cell previews the typed number before Enter, when the list is opened.
+        app.begin_edit(Some("1234".into()), false);
+        assert_eq!(number_sample(&app), Value::number(1234.0));
+        // A formula has no value until it is committed.
+        app.cancel_edit();
+        app.begin_edit(Some("=1+1".into()), false);
+        assert_eq!(number_sample(&app), Value::Empty);
+    }
+
+    #[test]
+    fn picking_a_number_format_while_typing_enters_the_number_in_that_format() {
+        let mut app = app();
+        app.run("selection.set", json!({"cell": "B2"})).unwrap();
+        app.begin_edit(Some("1234".into()), false);
+        app.run("home.numberFormat", json!({"format": "Percentage"})).unwrap();
+        assert!(app.editor.is_none(), "the entry was committed");
+        let d = app.session.active().unwrap();
+        let sh = d.wb.active().unwrap();
+        let b2 = gridcraft_engine::core::CellRef::parse("B2").unwrap();
+        assert_eq!(sh.value(b2), Value::number(1234.0));
+        assert_eq!(gridcraft_engine::display::format(&sh.value(b2), d.wb.styles.get(sh.style_id(b2)).num_fmt.as_str(), &d.wb).text, "123400.00%");
     }
 }

@@ -1030,6 +1030,11 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "Show" => "Mostra",
         "Collapse dialog" => "Comprimi finestra di dialogo",
         "Expand dialog" => "Espandi finestra di dialogo",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Cartel",
+        "default name|Sheet" => "Foglio",
+        "Edited" => "Modificato",
+        "Type to filter…" => "Digita per filtrare…",
         _ => return None,
     })
 }

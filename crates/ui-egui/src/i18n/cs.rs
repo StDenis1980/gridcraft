@@ -1243,6 +1243,10 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "— {steps} steps" => "— kroků: {steps}",
         "Collapse dialog" => "Sbalit dialogové okno",
         "Expand dialog" => "Rozbalit dialogové okno",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Sešit",
+        "default name|Sheet" => "List",
+        "Edited" => "Upraveno",
         _ => return None,
     })
 }

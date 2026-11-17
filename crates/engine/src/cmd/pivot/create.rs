@@ -183,7 +183,7 @@ pub(super) fn insert_pivot(s: &mut Session, p: &Json) -> Result<Json> {
 /// Show Details sheet); returns its index.
 fn insert_sheet_before_active(cx: &mut Ctx) -> usize {
     let at = cx.wb.active_sheet().min(cx.wb.sheets.len());
-    let nm = cx.wb.next_sheet_name();
+    let nm = crate::display::next_sheet_name(&cx.wb);
     cx.wb.sheets.insert(at, Arc::new(Sheet::new(nm)));
     for n in cx.wb.names.iter_mut() {
         if let Some(sc) = n.scope.as_mut()

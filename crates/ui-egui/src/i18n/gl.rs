@@ -1019,6 +1019,11 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         // GridCraft's Diagram (not the chart) and Decorative Text features.
         "Diagram" => "Esquema",
         "Decorative Text" => "Texto decorativo",
+        // A new workbook's and sheet's names before their number (Excel's), and the title bar's mark.
+        "default name|Book" => "Libro",
+        "default name|Sheet" => "Folla",
+        "Edited" => "Editado",
+        "Type to filter…" => "Escriba para filtrar…",
         _ => return None,
     })
 }

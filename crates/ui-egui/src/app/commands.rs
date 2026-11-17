@@ -20,7 +20,12 @@ impl SheetApp {
         let switches_window = id.starts_with("window.")
             || matches!(id, "view.newWindow" | "view.hideWindow" | "view.unhideWindow")
             || (id == "view.switchWindows" && ["window", "doc"].iter().any(|k| params.get(*k).is_some_and(|d| !d.is_null())));
-        if id.starts_with("file.") || switches_window {
+        // A number format picked while a number is still being typed applies to that number: the
+        // entry goes in first, so the cell shows the new format at once (Denys's Preview 4 test,
+        // where the format appeared only after leaving the cell).
+        let formats_number =
+            matches!(id, "home.numberFormat" | "home.accounting" | "home.percent" | "home.comma" | "home.increaseDecimal" | "home.decreaseDecimal");
+        if id.starts_with("file.") || switches_window || formats_number {
             self.settle_drafts()?;
         }
         if matches!(id, "file.save" | "file.saveAs" | "file.saveBytes") {
@@ -165,6 +170,7 @@ impl SheetApp {
     fn set_language(&mut self, language: i18n::Language) -> Json {
         self.ui.language = language;
         gridcraft_engine::display::set_region(language.region());
+        self.apply_language_names();
         json!({"language": language})
     }
 
