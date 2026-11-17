@@ -84,6 +84,13 @@ fn general_options(app: &mut SheetApp, ui: &mut Ui, lang: Language) {
             .response
             .labelled_by(label.id);
         ui.end_row();
+        // Tinta Office: the Tinta look, under the theme it colours.
+        ui.label("");
+        let mut tinta = app.ui.tinta_look;
+        if ui.checkbox(&mut tinta, crate::tinta_theme::label(lang.code())).changed() {
+            app.run_or_alert("view.tintaLook", json!({"on": tinta}));
+        }
+        ui.end_row();
         let label = ui.label(lang.tr("Interface language"));
         craft_ui::ComboBox::from_id_salt("backstage_language")
             .width(160.0)
