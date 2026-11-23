@@ -1222,6 +1222,105 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Book" => "Knyga",
         "default name|Sheet" => "Lapas",
         "Edited" => "Redaguota",
+        // Upstream sync 2026-11-23 (AI-assisted, native review pending): equations, Sort dialog.
+        "Undefined control sequence: {name}" => "Neapibrėžta valdymo seka: {name}",
+        "Expected '{expected}', got '{got}'" => "Tikėtasi '{expected}', bet rasta '{got}'",
+        "Expected group after '{symbol}'" => "Po '{symbol}' tikėtasi grupės",
+        "Expected delimiter as argument to '{function}'" => "Kaip '{function}' argumento tikėtasi skirtuko",
+        "Expected group as argument to '{function}'" => "Kaip '{function}' argumento tikėtasi grupės",
+        "Got function '{function}' with no arguments as superscript" => "Funkcija '{function}' be argumentų rasta kaip viršutinis indeksas",
+        "Got function '{function}' with no arguments as subscript" => "Funkcija '{function}' be argumentų rasta kaip apatinis indeksas",
+        "Got function '{function}' with no arguments as argument to '{parent}'" => {
+            "Funkcija '{function}' be argumentų rasta kaip '{parent}' argumentas"
+        }
+        "Got function '{function}' with no arguments as \\tag" => "Funkcija '{function}' be argumentų rasta kaip \\tag",
+        "Can't use function '{function}' in text mode" => "Funkcijos '{function}' negalima naudoti teksto režimu",
+        "Can't use function '{function}' in math mode" => "Funkcijos '{function}' negalima naudoti matematikos režimu",
+        "Invalid color: '{color}'" => "Netinkama spalva: '{color}'",
+        "Invalid size: '{size}'" => "Netinkamas dydis: '{size}'",
+        "Invalid unit: '{unit}'" => "Netinkamas vienetas: '{unit}'",
+        "Invalid delimiter '{delimiter}' after '{function}'" => "Netinkamas skirtukas '{delimiter}' po '{function}'",
+        "Invalid delimiter type '{type}' after '{function}'" => "Netinkamas skirtuko tipas '{type}' po '{function}'",
+        "Invalid delimiter type '{type}'" => "Netinkamas skirtuko tipas '{type}'",
+        "No such environment: {name}" => "Tokios aplinkos nėra: {name}",
+        "Expected argument to \\begin{{name}}" => "Komandai \\begin{{name}} tikėtasi argumento",
+        "Mismatch: \\begin{{begin}} matched by \\end{{end}}" => "Neatitikimas: \\begin{{begin}} uždaryta su \\end{{end}}",
+        "{command} valid only within array environment" => "{command} galioja tik array aplinkoje",
+        "Mismatched {command}" => "{command} be poros",
+        "Expected & or \\\\ or \\cr or \\end, got '{got}'" => "Tikėtasi &, \\\\, \\cr arba \\end, bet rasta '{got}'",
+        "Unknown column alignment: {alignment}" => "Nežinomas stulpelio lygiavimas: {alignment}",
+        "Too many math in a row: expected {expected}, but got {got}" => "Per daug matematikos elementų eilutėje: tikėtasi {expected}, bet yra {got}",
+        "Unknown CD directive: @{directive}" => "Nežinoma CD direktyva: @{directive}",
+        "Expected argument for {command}" => "Komandai {command} tikėtasi argumento",
+        "{command} needs {count} premise(s), but only {available} available" => "{command} reikia {count} prielaidų, bet yra tik {available}",
+        "{command} valid only as a supported bussproofs command within prooftree" => {
+            "{command} galioja tik kaip palaikoma bussproofs komanda prooftree viduje"
+        }
+        "prooftree ended with {count} proof stack item(s), expected 1" => "prooftree baigėsi su {count} įrodymo dėklo elementais; tikėtasi 1",
+        "\\@char has non-numeric argument {argument}" => "\\@char argumentas ne skaitinis: {argument}",
+        "\\@char with invalid code point {code}" => "\\@char su netinkamu kodo tašku {code}",
+        "Invalid environment name character: {character}" => "Netinkamas simbolis aplinkos pavadinime: {character}",
+        "Double superscript" => "Dvigubas viršutinis indeksas",
+        "Double subscript" => "Dvigubas apatinis indeksas",
+        "Extra }" => "Perteklinis }",
+        "Unexpected end of input in a macro argument" => "Netikėta įvesties pabaiga makrokomandos argumente",
+        "Expected \\right after \\left" => "Po \\left tikėtasi \\right",
+        "\\middle must be within \\left and \\right" => "\\middle turi būti tarp \\left ir \\right",
+        "Invalid environment name" => "Netinkamas aplinkos pavadinimas",
+        "Expected \\end after environment body" => "Po aplinkos turinio tikėtasi \\end",
+        "Expected URL" => "Tikėtasi URL",
+        "\\tag requires an argument" => "\\tag reikia argumento",
+        "only one infix operator per group" => "tik vienas infiksinis operatorius grupėje",
+        "Expected color token" => "Tikėtasi spalvos žymės",
+        "Expected size for \\raisebox" => "Komandai \\raisebox tikėtasi dydžio",
+        "Expected size for \\rule width" => "\\rule pločiui tikėtasi dydžio",
+        "Expected size for \\rule height" => "\\rule aukščiui tikėtasi dydžio",
+        "Cannot use both \\tag and \\nonumber in the same row" => "Toje pačioje eilutėje negalima naudoti ir \\tag, ir \\nonumber",
+        "Multiple \\tag in a row" => "Keli \\tag vienoje eilutėje",
+        "\\tag must appear at the end of the row after the equation body" => "\\tag turi būti eilutės pabaigoje, po lygties turinio",
+        "Multiple \\nonumber in a row" => "Keli \\nonumber vienoje eilutėje",
+        "\\nonumber must appear at the end of the row" => "\\nonumber turi būti eilutės pabaigoje",
+        "Too many tab characters: &" => "Per daug tabuliavimo simbolių: &",
+        "Invalid column alignment for array" => "Netinkamas array stulpelio lygiavimas",
+        "Expected column alignment character" => "Tikėtasi stulpelio lygiavimo simbolio",
+        "Expected l or c or r" => "Tikėtasi l, c arba r",
+        "Expected ]" => "Tikėtasi ]",
+        "Unexpected end of CD row after @" => "Netikėta CD eilutės pabaiga po @",
+        "Invalid column alignment for subarray" => "Netinkamas subarray stulpelio lygiavimas",
+        "{subarray} can contain only one column" => "{subarray} gali turėti tik vieną stulpelį",
+        "prooftree has a \\LeftLabel or \\RightLabel without a following inference command" => {
+            "prooftree turi \\LeftLabel arba \\RightLabel be po jo einančios išvedimo komandos"
+        }
+        "Recursion limit exceeded" => "Viršyta rekursijos riba",
+        "Too many expansions: infinite loop or need to increase maxExpand setting" => {
+            "Per daug išplėtimų: begalinis ciklas arba reikia padidinti maxExpand nustatymą"
+        }
+        "Expected raw style for \\htmlStyle" => "Komandai \\htmlStyle tikėtasi neapdoroto stiliaus",
+        "\\verb assertion failed" => "\\verb tikrinimas nepavyko",
+        "Macro definitions are not supported in equations." => "Makrokomandų apibrėžimai lygtyse nepalaikomi.",
+        "A % can't be combined with a link in an equation." => "Lygtyje % negalima derinti su saitu.",
+        "This equation is too large to draw." => "Ši lygtis per didelė, kad būtų nupiešta.",
+        "This equation could not be laid out." => "Šios lygties nepavyko išdėstyti.",
+        "Add Level" => "Pridėti lygį",
+        "Delete Level" => "Naikinti lygį",
+        "Copy Level" => "Kopijuoti lygį",
+        "Move Up" => "Perkelti aukštyn",
+        "Move Down" => "Perkelti žemyn",
+        "Order" => "Tvarka",
+        "Sort On" => "Rikiuoti pagal",
+        "Sort|Column" => "Stulpelis",
+        "Column {letters}" => "Stulpelis {letters}",
+        "Smallest to Largest" => "Nuo mažiausio iki didžiausio",
+        "Largest to Smallest" => "Nuo didžiausio iki mažiausio",
+        "Close the Sort dialog before switching or changing worksheets." => {
+            "Prieš perjungdami ar keisdami darbalapius uždarykite dialogo langą Rikiuoti."
+        }
+        "Return to the original worksheet to sort, or cancel." => "Grįžkite į pradinį darbalapį, kad rikiuotumėte, arba atšaukite.",
+        "Equations can nest at most 32 levels deep." => "Lygtys gali būti įdėtos ne daugiau kaip 32 lygiais.",
+        "An equation can be at most 4096 bytes long." => "Lygtis gali būti ne ilgesnė nei 4096 baitai.",
+        "An equation can have at most 2500 matrix cells (rows times the widest row)." => {
+            "Lygtyje gali būti ne daugiau kaip 2500 matricos langelių (eilutės, padaugintos iš plačiausios eilutės)."
+        }
         _ => return None,
     })
 }

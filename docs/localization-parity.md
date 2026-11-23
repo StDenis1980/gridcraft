@@ -13,6 +13,14 @@ Cell text now uses shared Unicode bidi layout while retaining logical source ind
 
 ## Where we are (measured from source on `main`, after the 2026-10-10 merges)
 
+- **Current state (2026-11-08).** The counts, labels and per-language rows in this section and in
+  the Languages table are a snapshot from the dates given there; every language since added a
+  catalog of its own (`crates/ui-egui/src/i18n/<code>.rs`, 18 languages besides English), and
+  `cargo xtask i18n-report` lists what each one still lacks. The status bar statistics, resize
+  tips, sheet notes, Goal Seek and macro toasts and the equation editor's error messages, its own
+  and those of the RaTeX equation parser, now follow the interface language (a parser message of
+  a shape GridCraft does not know stays English).
+  Where an older bullet below says status messages are English literals, this one supersedes it.
 - **A first catalog exists, for the ribbon only.** `crates/ui-egui/src/i18n.rs` (merged 10-10 in
   #31, #104, #82; German added 10-11) adds an interface-language preference that defaults to the
   system language (closes #20) and a View-tab switcher, with English-keyed lookup tables:
@@ -88,7 +96,9 @@ Cell text now uses shared Unicode bidi layout while retaining logical source ind
 
 ## Languages
 
-UI strings translated are measured counts against the ~2,200 estimate. Estimates to `full`
+UI strings translated are measured counts against the ~2,200 estimate, as a snapshot from when
+each row was last measured (Spanish, French and Vietnamese have had catalogs since; see the current
+state above and `cargo xtask i18n-report`). Estimates to `full`
 include the rest of the catalog work below (10–20 h, counted once), localized function names,
 separators, number/date formats, machine translation with agent review, and script work.
 
@@ -137,10 +147,12 @@ language (none so far) and of localized function names.
 | Date | Change | Summary |
 |---|---|---|
 | 2026-11-16 | minor | Tinta Office fork, upstream sync: regional formats (separators, short dates, currency, typed booleans) read upstream's CLDR region table instead of the fork's own enum; the fork adds uk-UA, pl-PL, ro-RO and lt-LT to it, and Catalan, Galician and Basque resolve to es-ES. Times in the regional short date and time are now two-digit hours where CLDR has them (`hh:mm`) |
+| 2026-11-15 | minor | The RaTeX equation parser's messages follow the interface language: its 33 fixed messages are catalog keys, and its 33 messages that carry a piece of the source (a command, token, environment name or count) are read back into templates (`i18n::unfill`) whose translation is filled with the same pieces. A message of another shape, such as RaTeX's internal ones or the chemistry parser's, stays English. 66 new keys in every catalog (#4261) |
 | 2026-11-10 | minor | Ukrainian Chart is `Діаграма`, matching [craft-i18n#211](https://github.com/storytold/craft-i18n/pull/211) and distinct from Diagram (`Схема`) |
 | 2026-11-10 | minor | Diagram and Decorative Text labels in all 18 non-English catalogs; Diagram never repeats the catalog's chart word (German `Schema`, Ukrainian `Схема`, Romanian `Schemă`), see [feature-names.md](feature-names.md) |
 | 2026-11-09 | minor | Arabic PDF export no longer fails on a character the Arabic face lacks (it falls back like other text) or when no Arabic font is available (Arabic is set in the CID font, which has no Arabic glyphs, and a message says so) |
 | 2026-10-31 | minor | System and embedded CJK text fallbacks share the Latin baseline in cells, editors and window titles; other scripts, symbols and emoji keep their alignment |
+| 2026-11-08 | minor | Strings built with `format!` in English now translate their template first and fill it in once (`Language::tr_fill`): status bar statistics and the circular-reference note, the column width / row height drag tip, the formula bar text for a picture in a cell, the Move or Copy and Unhide notes, the Format Control title, the equation editor's error prefix and its own check messages (macro definitions, `%` with a link, nesting, length, matrix-cell and size limits; RaTeX parser errors stay English), and the Goal Seek and macro recorder/runner toasts (#3600, #3602, #3603, #3605, #3607–#3611). 24 new keys in every catalog; Average, Count, Sum and the three existing templates added to the 11 catalogs that lacked them, and Ukrainian's English placeholders for those six replaced. Numbers in these strings keep the `.` decimal point |
 | 2026-11-03 | minor | Tinta Office fork: Polish formula entry (`FormulaLocale::Pl`, every built-in in `crates/formula/src/polish.rs`) and the pl-PL region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against Polish Excel |
 | 2026-11-03 | minor | Tinta Office fork: Italian formula entry (`FormulaLocale::It`, every built-in in `crates/formula/src/italian.rs`) and the it-IT region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against Italian Excel |
 | 2026-11-03 | minor | Tinta Office fork: French formula entry (`FormulaLocale::Fr`, every built-in in `crates/formula/src/french.rs`) and the fr-FR region for numbers, dates, currency and typed booleans. AI-assisted, not yet checked against French Excel |

@@ -25,6 +25,7 @@ chart.move	changes_document,reads_document
 chart.quickLayout	changes_document,reads_document
 chart.selectData	changes_document,reads_document
 chart.set	changes_document,reads_document
+chart.setValuesRange	changes_document,reads_document
 chart.shapeFill	changes_document,reads_document
 chart.shapeOutline	changes_document,reads_document
 chart.switchRowColumn	changes_document,reads_document

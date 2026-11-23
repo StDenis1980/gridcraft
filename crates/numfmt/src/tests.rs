@@ -668,7 +668,7 @@ fn text_uncached(v: &Value, code: &str, sys: DateSystem) -> Result<String, CellE
     if !n.is_finite() {
         return Err(CellError::Num);
     }
-    let (f, overflow) = fmt.format_number(n, sys, &gridcraft_core::region::EN_US);
+    let (f, overflow) = fmt.format_number(n, sys, &gridcraft_core::region::EN_US, false);
     if overflow { Err(CellError::Value) } else { Ok(f.text) }
 }
 

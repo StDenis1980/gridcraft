@@ -166,7 +166,7 @@ impl EmbeddedFont {
     /// The PDF objects for this font as used on the pages: `glyphs` maps each used glyph to the
     /// character it was drawn for. Returns `(id, body)` pairs numbered from `first` (the Type0
     /// font itself, which pages reference), always [`OBJECTS_PER_FONT`] of them.
-    pub(crate) fn objects(&self, first: u32, glyphs: &BTreeMap<u16, char>) -> Vec<(u32, Vec<u8>)> {
+    pub(crate) fn objects(&self, first: u32, glyphs: &BTreeMap<u16, char>) -> Vec<(u32, Obj)> {
         let [font_id, cid_id, desc_id, file_id, map_id, unicode_id] = [first, first + 1, first + 2, first + 3, first + 4, first + 5];
         // The content streams use the original glyph ids as CIDs; the subset renumbers glyphs,
         // so a CIDToGIDMap translates. If subsetting fails, the whole font is embedded instead.
@@ -208,30 +208,29 @@ impl EmbeddedFont {
         vec![
             (
                 font_id,
-                format!("<< /Type /Font /Subtype /Type0 /BaseFont /{base} /Encoding /Identity-H /DescendantFonts [{cid_id} 0 R] /ToUnicode {unicode_id} 0 R >>")
-                    .into_bytes(),
+                Obj::Dict(format!(
+                    "<< /Type /Font /Subtype /Type0 /BaseFont /{base} /Encoding /Identity-H /DescendantFonts [{cid_id} 0 R] /ToUnicode {unicode_id} 0 R >>"
+                )),
             ),
             (
                 cid_id,
-                format!(
+                Obj::Dict(format!(
                     "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{base} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor {desc_id} 0 R /DW 1000 /W [{widths}] /CIDToGIDMap {map_ref} >>"
-                )
-                .into_bytes(),
+                )),
             ),
             (
                 desc_id,
-                format!(
+                Obj::Dict(format!(
                     "<< /Type /FontDescriptor /FontName /{base} /Flags {flags} /FontBBox [{x0} {y0} {x1} {y1}] /ItalicAngle {} /Ascent {} /Descent {} /CapHeight {} /StemV 80 /FontFile2 {file_id} 0 R >>",
                     crate::n(self.italic_angle),
                     self.ascent,
                     self.descent,
                     self.cap_height
-                )
-                .into_bytes(),
+                )),
             ),
-            (file_id, stream(&format!("/Length1 {}", file.len()), &file)),
-            (map_id, stream("", cid_to_gid.as_deref().unwrap_or_default())),
-            (unicode_id, stream("", to_unicode(glyphs).as_bytes())),
+            (file_id, Obj::Stream(format!("/Length1 {}", file.len()), file)),
+            (map_id, Obj::Stream(String::new(), cid_to_gid.unwrap_or_default())),
+            (unicode_id, Obj::Stream(String::new(), to_unicode(glyphs).into_bytes())),
         ]
     }
 }
@@ -239,11 +238,11 @@ impl EmbeddedFont {
 /// Objects each embedded font takes (see [`EmbeddedFont::objects`]).
 pub(crate) const OBJECTS_PER_FONT: u32 = 6;
 
-fn stream(extra: &str, data: &[u8]) -> Vec<u8> {
-    let mut o = format!("<< /Length {}{}{extra} >>\nstream\n", data.len(), if extra.is_empty() { "" } else { " " }).into_bytes();
-    o.extend_from_slice(data);
-    o.extend_from_slice(b"\nendstream");
-    o
+/// One object of an embedded font: a dictionary, or a stream (its dictionary entries without
+/// `/Length`, which the writer adds, and its bytes).
+pub(crate) enum Obj {
+    Dict(String),
+    Stream(String, Vec<u8>),
 }
 
 /// Six capital letters naming the subset, derived from the glyphs it holds (ISO 32000 9.6.4).

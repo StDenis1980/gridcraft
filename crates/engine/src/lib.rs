@@ -10,6 +10,7 @@ pub use gridcraft_brand as brand;
 pub mod automation;
 pub mod catalog;
 pub mod cf;
+pub mod chart_data;
 mod chart_svg;
 mod clip_html;
 pub mod cmd;

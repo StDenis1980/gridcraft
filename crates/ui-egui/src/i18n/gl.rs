@@ -1024,6 +1024,107 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Sheet" => "Folla",
         "Edited" => "Editado",
         "Type to filter…" => "Escriba para filtrar…",
+        // Upstream sync 2026-11-23 (AI-assisted, native review pending): equations, Sort dialog.
+        "Undefined control sequence: {name}" => "Secuencia de control non definida: {name}",
+        "Expected '{expected}', got '{got}'" => "Esperábase '{expected}', pero atopouse '{got}'",
+        "Expected group after '{symbol}'" => "Esperábase un grupo despois de '{symbol}'",
+        "Expected delimiter as argument to '{function}'" => "Esperábase un delimitador como argumento de '{function}'",
+        "Expected group as argument to '{function}'" => "Esperábase un grupo como argumento de '{function}'",
+        "Got function '{function}' with no arguments as superscript" => "A función '{function}' sen argumentos apareceu como superíndice",
+        "Got function '{function}' with no arguments as subscript" => "A función '{function}' sen argumentos apareceu como subíndice",
+        "Got function '{function}' with no arguments as argument to '{parent}'" => {
+            "A función '{function}' sen argumentos apareceu como argumento de '{parent}'"
+        }
+        "Got function '{function}' with no arguments as \\tag" => "A función '{function}' sen argumentos apareceu como \\tag",
+        "Can't use function '{function}' in text mode" => "Non se pode usar a función '{function}' no modo texto",
+        "Can't use function '{function}' in math mode" => "Non se pode usar a función '{function}' no modo matemático",
+        "Invalid color: '{color}'" => "Cor non válida: '{color}'",
+        "Invalid size: '{size}'" => "Tamaño non válido: '{size}'",
+        "Invalid unit: '{unit}'" => "Unidade non válida: '{unit}'",
+        "Invalid delimiter '{delimiter}' after '{function}'" => "Delimitador non válido '{delimiter}' despois de '{function}'",
+        "Invalid delimiter type '{type}' after '{function}'" => "Tipo de delimitador non válido '{type}' despois de '{function}'",
+        "Invalid delimiter type '{type}'" => "Tipo de delimitador non válido '{type}'",
+        "No such environment: {name}" => "Non existe o contorno: {name}",
+        "Expected argument to \\begin{{name}}" => "Esperábase un argumento para \\begin{{name}}",
+        "Mismatch: \\begin{{begin}} matched by \\end{{end}}" => "Non coinciden: \\begin{{begin}} pechado por \\end{{end}}",
+        "{command} valid only within array environment" => "{command} só é válido dentro dun contorno array",
+        "Mismatched {command}" => "{command} sen parella",
+        "Expected & or \\\\ or \\cr or \\end, got '{got}'" => "Esperábase & ou \\\\ ou \\cr ou \\end, pero atopouse '{got}'",
+        "Unknown column alignment: {alignment}" => "Aliñamento de columna descoñecido: {alignment}",
+        "Too many math in a row: expected {expected}, but got {got}" => {
+            "Demasiados elementos matemáticos nunha fila: esperábanse {expected}, pero hai {got}"
+        }
+        "Unknown CD directive: @{directive}" => "Directiva CD descoñecida: @{directive}",
+        "Expected argument for {command}" => "Esperábase un argumento para {command}",
+        "{command} needs {count} premise(s), but only {available} available" => "{command} precisa {count} premisas, pero só hai {available}",
+        "{command} valid only as a supported bussproofs command within prooftree" => {
+            "{command} só é válido como orde bussproofs admitida dentro de prooftree"
+        }
+        "prooftree ended with {count} proof stack item(s), expected 1" => "prooftree rematou con {count} elementos na pila de proba; esperábase 1",
+        "\\@char has non-numeric argument {argument}" => "\\@char ten un argumento non numérico {argument}",
+        "\\@char with invalid code point {code}" => "\\@char cun punto de código non válido {code}",
+        "Invalid environment name character: {character}" => "Carácter non válido no nome do contorno: {character}",
+        "Double superscript" => "Superíndice dobre",
+        "Double subscript" => "Subíndice dobre",
+        "Extra }" => "} sobrante",
+        "Unexpected end of input in a macro argument" => "Fin inesperado da entrada nun argumento de macro",
+        "Expected \\right after \\left" => "Esperábase \\right despois de \\left",
+        "\\middle must be within \\left and \\right" => "\\middle debe estar entre \\left e \\right",
+        "Invalid environment name" => "Nome de contorno non válido",
+        "Expected \\end after environment body" => "Esperábase \\end despois do corpo do contorno",
+        "Expected URL" => "Esperábase un URL",
+        "\\tag requires an argument" => "\\tag precisa un argumento",
+        "only one infix operator per group" => "só un operador infixo por grupo",
+        "Expected color token" => "Esperábase un token de cor",
+        "Expected size for \\raisebox" => "Esperábase un tamaño para \\raisebox",
+        "Expected size for \\rule width" => "Esperábase un tamaño para a largura de \\rule",
+        "Expected size for \\rule height" => "Esperábase un tamaño para a altura de \\rule",
+        "Cannot use both \\tag and \\nonumber in the same row" => "Non se poden usar \\tag e \\nonumber na mesma fila",
+        "Multiple \\tag in a row" => "Varios \\tag nunha fila",
+        "\\tag must appear at the end of the row after the equation body" => "\\tag debe aparecer ao final da fila, despois do corpo da ecuación",
+        "Multiple \\nonumber in a row" => "Varios \\nonumber nunha fila",
+        "\\nonumber must appear at the end of the row" => "\\nonumber debe aparecer ao final da fila",
+        "Too many tab characters: &" => "Demasiados caracteres de tabulación: &",
+        "Invalid column alignment for array" => "Aliñamento de columna non válido para array",
+        "Expected column alignment character" => "Esperábase un carácter de aliñamento de columna",
+        "Expected l or c or r" => "Esperábase l, c ou r",
+        "Expected ]" => "Esperábase ]",
+        "Unexpected end of CD row after @" => "Fin inesperado da fila CD despois de @",
+        "Invalid column alignment for subarray" => "Aliñamento de columna non válido para subarray",
+        "{subarray} can contain only one column" => "{subarray} só pode conter unha columna",
+        "prooftree has a \\LeftLabel or \\RightLabel without a following inference command" => {
+            "prooftree ten un \\LeftLabel ou \\RightLabel sen ningunha orde de inferencia despois"
+        }
+        "Recursion limit exceeded" => "Superouse o límite de recursión",
+        "Too many expansions: infinite loop or need to increase maxExpand setting" => {
+            "Demasiadas expansións: bucle infinito ou hai que aumentar a opción maxExpand"
+        }
+        "Expected raw style for \\htmlStyle" => "Esperábase un estilo literal para \\htmlStyle",
+        "\\verb assertion failed" => "Fallou a aserción de \\verb",
+        "Macro definitions are not supported in equations." => "As definicións de macros non se admiten nas ecuacións.",
+        "A % can't be combined with a link in an equation." => "Un % non se pode combinar cunha ligazón nunha ecuación.",
+        "This equation is too large to draw." => "Esta ecuación é demasiado grande para debuxala.",
+        "This equation could not be laid out." => "Non se puido compoñer esta ecuación.",
+        "Add Level" => "Engadir nivel",
+        "Delete Level" => "Eliminar nivel",
+        "Copy Level" => "Copiar nivel",
+        "Move Up" => "Subir",
+        "Move Down" => "Baixar",
+        "Order" => "Orde",
+        "Sort On" => "Ordenar por",
+        "Sort|Column" => "Columna",
+        "Column {letters}" => "Columna {letters}",
+        "Smallest to Largest" => "De menor a maior",
+        "Largest to Smallest" => "De maior a menor",
+        "Close the Sort dialog before switching or changing worksheets." => {
+            "Peche o diálogo Ordenar antes de cambiar de folla de cálculo ou modificala."
+        }
+        "Return to the original worksheet to sort, or cancel." => "Volva á folla de cálculo orixinal para ordenar, ou cancele.",
+        "Equations can nest at most 32 levels deep." => "As ecuacións poden aniñarse como máximo 32 niveis.",
+        "An equation can be at most 4096 bytes long." => "Unha ecuación pode ter como máximo 4096 bytes.",
+        "An equation can have at most 2500 matrix cells (rows times the widest row)." => {
+            "Unha ecuación pode ter como máximo 2500 celas de matriz (filas pola fila máis ancha)."
+        }
         _ => return None,
     })
 }

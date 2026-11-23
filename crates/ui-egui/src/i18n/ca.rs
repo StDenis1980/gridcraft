@@ -1025,6 +1025,111 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Sheet" => "Full",
         "Edited" => "Editat",
         "Type to filter…" => "Escriviu per filtrar…",
+        // Upstream sync 2026-11-23 (AI-assisted, native review pending): equations, Sort dialog.
+        "Undefined control sequence: {name}" => "Seqüència de control no definida: {name}",
+        "Expected '{expected}', got '{got}'" => "S'esperava '{expected}', però s'ha trobat '{got}'",
+        "Expected group after '{symbol}'" => "S'esperava un grup després de '{symbol}'",
+        "Expected delimiter as argument to '{function}'" => "S'esperava un delimitador com a argument de '{function}'",
+        "Expected group as argument to '{function}'" => "S'esperava un grup com a argument de '{function}'",
+        "Got function '{function}' with no arguments as superscript" => "La funció '{function}' sense arguments s'ha trobat com a superíndex",
+        "Got function '{function}' with no arguments as subscript" => "La funció '{function}' sense arguments s'ha trobat com a subíndex",
+        "Got function '{function}' with no arguments as argument to '{parent}'" => {
+            "La funció '{function}' sense arguments s'ha trobat com a argument de '{parent}'"
+        }
+        "Got function '{function}' with no arguments as \\tag" => "La funció '{function}' sense arguments s'ha trobat com a \\tag",
+        "Can't use function '{function}' in text mode" => "No es pot fer servir la funció '{function}' en mode text",
+        "Can't use function '{function}' in math mode" => "No es pot fer servir la funció '{function}' en mode matemàtic",
+        "Invalid color: '{color}'" => "Color no vàlid: '{color}'",
+        "Invalid size: '{size}'" => "Mida no vàlida: '{size}'",
+        "Invalid unit: '{unit}'" => "Unitat no vàlida: '{unit}'",
+        "Invalid delimiter '{delimiter}' after '{function}'" => "Delimitador no vàlid '{delimiter}' després de '{function}'",
+        "Invalid delimiter type '{type}' after '{function}'" => "Tipus de delimitador no vàlid '{type}' després de '{function}'",
+        "Invalid delimiter type '{type}'" => "Tipus de delimitador no vàlid '{type}'",
+        "No such environment: {name}" => "No existeix l'entorn: {name}",
+        "Expected argument to \\begin{{name}}" => "S'esperava un argument per a \\begin{{name}}",
+        "Mismatch: \\begin{{begin}} matched by \\end{{end}}" => "No coincideix: \\begin{{begin}} tancat per \\end{{end}}",
+        "{command} valid only within array environment" => "{command} només és vàlid dins d'un entorn array",
+        "Mismatched {command}" => "{command} no aparellat",
+        "Expected & or \\\\ or \\cr or \\end, got '{got}'" => "S'esperava & o \\\\ o \\cr o \\end, però s'ha trobat '{got}'",
+        "Unknown column alignment: {alignment}" => "Alineació de columna desconeguda: {alignment}",
+        "Too many math in a row: expected {expected}, but got {got}" => {
+            "Massa elements matemàtics en una fila: se n'esperaven {expected}, però n'hi ha {got}"
+        }
+        "Unknown CD directive: @{directive}" => "Directiva CD desconeguda: @{directive}",
+        "Expected argument for {command}" => "S'esperava un argument per a {command}",
+        "{command} needs {count} premise(s), but only {available} available" => {
+            "{command} necessita {count} premisses, però només n'hi ha {available}"
+        }
+        "{command} valid only as a supported bussproofs command within prooftree" => {
+            "{command} només és vàlid com a ordre bussproofs admesa dins de prooftree"
+        }
+        "prooftree ended with {count} proof stack item(s), expected 1" => {
+            "prooftree ha acabat amb {count} elements a la pila de prova; se n'esperava 1"
+        }
+        "\\@char has non-numeric argument {argument}" => "\\@char té un argument no numèric {argument}",
+        "\\@char with invalid code point {code}" => "\\@char amb un punt de codi no vàlid {code}",
+        "Invalid environment name character: {character}" => "Caràcter no vàlid en el nom de l'entorn: {character}",
+        "Double superscript" => "Superíndex doble",
+        "Double subscript" => "Subíndex doble",
+        "Extra }" => "} sobrant",
+        "Unexpected end of input in a macro argument" => "Final inesperat de l'entrada en un argument de macro",
+        "Expected \\right after \\left" => "S'esperava \\right després de \\left",
+        "\\middle must be within \\left and \\right" => "\\middle ha d'estar entre \\left i \\right",
+        "Invalid environment name" => "Nom d'entorn no vàlid",
+        "Expected \\end after environment body" => "S'esperava \\end després del cos de l'entorn",
+        "Expected URL" => "S'esperava un URL",
+        "\\tag requires an argument" => "\\tag necessita un argument",
+        "only one infix operator per group" => "només un operador infix per grup",
+        "Expected color token" => "S'esperava un testimoni de color",
+        "Expected size for \\raisebox" => "S'esperava una mida per a \\raisebox",
+        "Expected size for \\rule width" => "S'esperava una mida per a l'amplada de \\rule",
+        "Expected size for \\rule height" => "S'esperava una mida per a l'alçada de \\rule",
+        "Cannot use both \\tag and \\nonumber in the same row" => "No es poden fer servir \\tag i \\nonumber a la mateixa fila",
+        "Multiple \\tag in a row" => "Diversos \\tag en una fila",
+        "\\tag must appear at the end of the row after the equation body" => "\\tag ha d'aparèixer al final de la fila, després del cos de l'equació",
+        "Multiple \\nonumber in a row" => "Diversos \\nonumber en una fila",
+        "\\nonumber must appear at the end of the row" => "\\nonumber ha d'aparèixer al final de la fila",
+        "Too many tab characters: &" => "Massa caràcters de tabulació: &",
+        "Invalid column alignment for array" => "Alineació de columna no vàlida per a array",
+        "Expected column alignment character" => "S'esperava un caràcter d'alineació de columna",
+        "Expected l or c or r" => "S'esperava l, c o r",
+        "Expected ]" => "S'esperava ]",
+        "Unexpected end of CD row after @" => "Final inesperat de la fila CD després de @",
+        "Invalid column alignment for subarray" => "Alineació de columna no vàlida per a subarray",
+        "{subarray} can contain only one column" => "{subarray} només pot contenir una columna",
+        "prooftree has a \\LeftLabel or \\RightLabel without a following inference command" => {
+            "prooftree té un \\LeftLabel o \\RightLabel sense cap ordre d'inferència a continuació"
+        }
+        "Recursion limit exceeded" => "S'ha superat el límit de recursió",
+        "Too many expansions: infinite loop or need to increase maxExpand setting" => {
+            "Massa expansions: bucle infinit o cal augmentar el paràmetre maxExpand"
+        }
+        "Expected raw style for \\htmlStyle" => "S'esperava un estil literal per a \\htmlStyle",
+        "\\verb assertion failed" => "Ha fallat l'asserció de \\verb",
+        "Macro definitions are not supported in equations." => "Les definicions de macros no s'admeten a les equacions.",
+        "A % can't be combined with a link in an equation." => "Un % no es pot combinar amb un enllaç en una equació.",
+        "This equation is too large to draw." => "Aquesta equació és massa gran per dibuixar-la.",
+        "This equation could not be laid out." => "No s'ha pogut compondre aquesta equació.",
+        "Add Level" => "Afegeix un nivell",
+        "Delete Level" => "Suprimeix el nivell",
+        "Copy Level" => "Copia el nivell",
+        "Move Up" => "Mou amunt",
+        "Move Down" => "Mou avall",
+        "Order" => "Ordre",
+        "Sort On" => "Ordena per",
+        "Sort|Column" => "Columna",
+        "Column {letters}" => "Columna {letters}",
+        "Smallest to Largest" => "De més petit a més gran",
+        "Largest to Smallest" => "De més gran a més petit",
+        "Close the Sort dialog before switching or changing worksheets." => {
+            "Tanqueu el diàleg Ordena abans de canviar de full de càlcul o modificar-lo."
+        }
+        "Return to the original worksheet to sort, or cancel." => "Torneu al full de càlcul original per ordenar, o cancel·leu.",
+        "Equations can nest at most 32 levels deep." => "Les equacions es poden niar com a màxim 32 nivells.",
+        "An equation can be at most 4096 bytes long." => "Una equació pot tenir com a màxim 4096 bytes.",
+        "An equation can have at most 2500 matrix cells (rows times the widest row)." => {
+            "Una equació pot tenir com a màxim 2500 cel·les de matriu (files per la fila més ampla)."
+        }
         _ => return None,
     })
 }
