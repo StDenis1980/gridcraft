@@ -1028,6 +1028,111 @@ pub(super) fn translate(text: &str) -> Option<&'static str> {
         "default name|Sheet" => "Orria",
         "Edited" => "Editatuta",
         "Type to filter…" => "Idatzi iragazteko…",
+        // Upstream sync 2026-11-23 (AI-assisted, native review pending): equations, Sort dialog.
+        "Undefined control sequence: {name}" => "Kontrol-sekuentzia definitu gabea: {name}",
+        "Expected '{expected}', got '{got}'" => "'{expected}' espero zen, baina '{got}' aurkitu da",
+        "Expected group after '{symbol}'" => "Talde bat espero zen '{symbol}' ondoren",
+        "Expected delimiter as argument to '{function}'" => "Mugatzaile bat espero zen '{function}' funtzioaren argumentu gisa",
+        "Expected group as argument to '{function}'" => "Talde bat espero zen '{function}' funtzioaren argumentu gisa",
+        "Got function '{function}' with no arguments as superscript" => "Argumenturik gabeko '{function}' funtzioa goi-indize gisa aurkitu da",
+        "Got function '{function}' with no arguments as subscript" => "Argumenturik gabeko '{function}' funtzioa azpi-indize gisa aurkitu da",
+        "Got function '{function}' with no arguments as argument to '{parent}'" => {
+            "Argumenturik gabeko '{function}' funtzioa '{parent}' funtzioaren argumentu gisa aurkitu da"
+        }
+        "Got function '{function}' with no arguments as \\tag" => "Argumenturik gabeko '{function}' funtzioa \\tag gisa aurkitu da",
+        "Can't use function '{function}' in text mode" => "Ezin da '{function}' funtzioa erabili testu moduan",
+        "Can't use function '{function}' in math mode" => "Ezin da '{function}' funtzioa erabili matematika moduan",
+        "Invalid color: '{color}'" => "Kolore baliogabea: '{color}'",
+        "Invalid size: '{size}'" => "Tamaina baliogabea: '{size}'",
+        "Invalid unit: '{unit}'" => "Unitate baliogabea: '{unit}'",
+        "Invalid delimiter '{delimiter}' after '{function}'" => "'{delimiter}' mugatzaile baliogabea '{function}' ondoren",
+        "Invalid delimiter type '{type}' after '{function}'" => "'{type}' mugatzaile-mota baliogabea '{function}' ondoren",
+        "Invalid delimiter type '{type}'" => "'{type}' mugatzaile-mota baliogabea",
+        "No such environment: {name}" => "Ez dago ingurune hori: {name}",
+        "Expected argument to \\begin{{name}}" => "Argumentu bat espero zen \\begin{{name}} komandorako",
+        "Mismatch: \\begin{{begin}} matched by \\end{{end}}" => "Ez datoz bat: \\begin{{begin}} \\end{{end}} komandoak itxi du",
+        "{command} valid only within array environment" => "{command} array ingurune baten barruan bakarrik da baliozkoa",
+        "Mismatched {command}" => "{command} bikotea gabe",
+        "Expected & or \\\\ or \\cr or \\end, got '{got}'" => "&, \\\\, \\cr edo \\end espero zen, baina '{got}' aurkitu da",
+        "Unknown column alignment: {alignment}" => "Zutabe-lerrokatze ezezaguna: {alignment}",
+        "Too many math in a row: expected {expected}, but got {got}" => {
+            "Matematika gehiegi errenkada batean: {expected} espero ziren, baina {got} daude"
+        }
+        "Unknown CD directive: @{directive}" => "CD direktiba ezezaguna: @{directive}",
+        "Expected argument for {command}" => "Argumentu bat espero zen {command} komandorako",
+        "{command} needs {count} premise(s), but only {available} available" => {
+            "{command} komandoak {count} premisa behar ditu, baina {available} baino ez daude"
+        }
+        "{command} valid only as a supported bussproofs command within prooftree" => {
+            "{command} prooftree barruko bussproofs komando onartu gisa bakarrik da baliozkoa"
+        }
+        "prooftree ended with {count} proof stack item(s), expected 1" => "prooftree {count} elementurekin amaitu da froga-pilan; 1 espero zen",
+        "\\@char has non-numeric argument {argument}" => "\\@char komandoak zenbakizkoa ez den argumentua du: {argument}",
+        "\\@char with invalid code point {code}" => "\\@char kode-puntu baliogabearekin: {code}",
+        "Invalid environment name character: {character}" => "Karaktere baliogabea ingurunearen izenean: {character}",
+        "Double superscript" => "Goi-indize bikoitza",
+        "Double subscript" => "Azpi-indize bikoitza",
+        "Extra }" => "Soberako }",
+        "Unexpected end of input in a macro argument" => "Sarreraren ustekabeko amaiera makro-argumentu batean",
+        "Expected \\right after \\left" => "\\right espero zen \\left ondoren",
+        "\\middle must be within \\left and \\right" => "\\middle komandoak \\left eta \\right artean egon behar du",
+        "Invalid environment name" => "Ingurune-izen baliogabea",
+        "Expected \\end after environment body" => "\\end espero zen ingurunearen gorputzaren ondoren",
+        "Expected URL" => "URL bat espero zen",
+        "\\tag requires an argument" => "\\tag komandoak argumentu bat behar du",
+        "only one infix operator per group" => "infijo-eragile bakarra talde bakoitzeko",
+        "Expected color token" => "Kolore-token bat espero zen",
+        "Expected size for \\raisebox" => "Tamaina bat espero zen \\raisebox komandorako",
+        "Expected size for \\rule width" => "Tamaina bat espero zen \\rule komandoaren zabalerarako",
+        "Expected size for \\rule height" => "Tamaina bat espero zen \\rule komandoaren altuerarako",
+        "Cannot use both \\tag and \\nonumber in the same row" => "Ezin dira \\tag eta \\nonumber errenkada berean erabili",
+        "Multiple \\tag in a row" => "\\tag bat baino gehiago errenkada batean",
+        "\\tag must appear at the end of the row after the equation body" => {
+            "\\tag errenkadaren amaieran agertu behar da, ekuazioaren gorputzaren ondoren"
+        }
+        "Multiple \\nonumber in a row" => "\\nonumber bat baino gehiago errenkada batean",
+        "\\nonumber must appear at the end of the row" => "\\nonumber errenkadaren amaieran agertu behar da",
+        "Too many tab characters: &" => "Tabulazio-karaktere gehiegi: &",
+        "Invalid column alignment for array" => "Zutabe-lerrokatze baliogabea array-rako",
+        "Expected column alignment character" => "Zutabe-lerrokatzeko karaktere bat espero zen",
+        "Expected l or c or r" => "l, c edo r espero zen",
+        "Expected ]" => "] espero zen",
+        "Unexpected end of CD row after @" => "CD errenkadaren ustekabeko amaiera @ ondoren",
+        "Invalid column alignment for subarray" => "Zutabe-lerrokatze baliogabea subarray-rako",
+        "{subarray} can contain only one column" => "{subarray} ingurunean zutabe bakarra egon daiteke",
+        "prooftree has a \\LeftLabel or \\RightLabel without a following inference command" => {
+            "prooftree-k \\LeftLabel edo \\RightLabel bat du, ondoren inferentzia-komandorik gabe"
+        }
+        "Recursion limit exceeded" => "Errekurtsio-muga gainditu da",
+        "Too many expansions: infinite loop or need to increase maxExpand setting" => {
+            "Hedapen gehiegi: begizta infinitua, edo maxExpand ezarpena handitu behar da"
+        }
+        "Expected raw style for \\htmlStyle" => "Estilo literal bat espero zen \\htmlStyle komandorako",
+        "\\verb assertion failed" => "\\verb baieztapenak huts egin du",
+        "Macro definitions are not supported in equations." => "Makro-definizioak ez dira onartzen ekuazioetan.",
+        "A % can't be combined with a link in an equation." => "Ekuazio batean ezin da % bat esteka batekin konbinatu.",
+        "This equation is too large to draw." => "Ekuazio hau handiegia da marrazteko.",
+        "This equation could not be laid out." => "Ezin izan da ekuazio hau antolatu.",
+        "Add Level" => "Gehitu maila",
+        "Delete Level" => "Ezabatu maila",
+        "Copy Level" => "Kopiatu maila",
+        "Move Up" => "Igo",
+        "Move Down" => "Jaitsi",
+        "Order" => "Ordena",
+        "Sort On" => "Ordenatzeko irizpidea",
+        "Sort|Column" => "Zutabea",
+        "Column {letters}" => "{letters} zutabea",
+        "Smallest to Largest" => "Txikienetik handienera",
+        "Largest to Smallest" => "Handienetik txikienera",
+        "Close the Sort dialog before switching or changing worksheets." => {
+            "Itxi Ordenatu elkarrizketa-koadroa lan-orria aldatu edo aldatu aurretik."
+        }
+        "Return to the original worksheet to sort, or cancel." => "Itzuli jatorrizko lan-orrira ordenatzeko, edo utzi.",
+        "Equations can nest at most 32 levels deep." => "Ekuazioek gehienez 32 maila habiaratu ditzakete.",
+        "An equation can be at most 4096 bytes long." => "Ekuazio batek gehienez 4096 byte izan ditzake.",
+        "An equation can have at most 2500 matrix cells (rows times the widest row)." => {
+            "Ekuazio batek gehienez 2500 matrize-gelaxka izan ditzake (errenkadak bider errenkada zabalena)."
+        }
         _ => return None,
     })
 }
