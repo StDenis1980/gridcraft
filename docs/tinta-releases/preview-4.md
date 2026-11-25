@@ -2,7 +2,7 @@
 
 > **Status:** 2026-11-17 · draft for the Preview 4 release (10 December 2026), version 0.19.1, with
 > the 16 November upstream sync · **Revision history:** 2026-11-16 created (changes from Preview 3,
-> 12 November, to #52); 2026-11-17 added the Tinta Office look (#55); regional currency, Книга1/Аркуш1 and Edited, format samples (#54). Updated at each weekly sync until the freeze on 7 December.
+> 12 November, to #52); 2026-11-17 added the Tinta Office look (#55); regional currency, Книга1/Аркуш1 and Edited, format samples (#54); 2026-11-25 autónomo templates (#57). Updated at each weekly sync until the freeze on 7 December.
 
 Release notes for the GitHub release and the site, in Spanish, Ukrainian and English. Changes since
 Preview 3 (v0.16.0, 12 November 2026). Before publishing: build the Windows installers with
@@ -36,6 +36,8 @@ Novedades:
   barra de título dice «Editado».
 - **Formatos de número con vista previa:** en la lista, junto a cada formato se ve cómo quedará la
   celda, también mientras escribe; un formato elegido mientras escribe se aplica al instante.
+- **Plantillas para autónomos** en Archivo › Nuevo: factura, libro registro de ingresos y gastos (con
+  amortizaciones) e IVA trimestral, que suma las casillas del modelo 303 del trimestre que elija.
 - Del proyecto original (GridCraft): muchas correcciones de cálculo, rendimiento y seguridad.
 
 Limitaciones conocidas: sin tablas dinámicas avanzadas ni libros muy grandes todavía; los nombres de
@@ -69,6 +71,8 @@ funciones en checo, polaco, italiano, francés y alemán son una primera versió
   вікна написано «Змінено».
 - **Числові формати зі зразками:** у списку біля кожного формату видно, як виглядатиме комірка, навіть
   поки ви ще вводите число; формат, вибраний під час введення, застосовується одразу.
+- **Шаблони для autónomo** у «Файл › Створити»: factura (рахунок), libro registro (книга доходів і
+  витрат з амортизацією) та IVA trimestral, що підсумовує поля декларації modelo 303 за вибраний квартал.
 - З основного проєкту (GridCraft): багато виправлень обчислень, швидкодії й безпеки.
 
 Відомі обмеження: ще немає розширених зведених таблиць і дуже великих книг; назви функцій
@@ -102,6 +106,9 @@ What's new:
   Книга1/Аркуш1), and the title bar says Edited in your language.
 - **Number formats with samples:** the list shows how the cell will look in each format, also while
   you are still typing; a format picked while typing applies at once.
+- **Templates for the self-employed** in File › New: an invoice (factura), the income and expense
+  books with depreciation (libro registro), and quarterly IVA, which adds up the modelo 303 boxes
+  for the quarter you pick.
 - From the original project (GridCraft): many calculation, performance and security fixes.
 
 Known limits: no advanced PivotTables or very large workbooks yet; the Czech, Polish, Italian,
