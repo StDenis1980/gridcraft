@@ -858,6 +858,22 @@ fn account(app: &mut SheetApp, ui: &mut Ui) {
             });
         });
     }
+    if crate::tinta_whats_new::available() {
+        // Tinta Office: this release's highlights, the window that opened after the update.
+        let title = crate::tinta_whats_new::tr(lang.code(), crate::tinta_whats_new::MENU);
+        ui.add_space(12.0);
+        ui.horizontal(|ui| {
+            if square_button(ui, Icon::Info, title).clicked() {
+                let _ = crate::tinta_whats_new::request();
+            }
+            ui.add_space(12.0);
+            ui.vertical(|ui| {
+                ui.add_space(14.0);
+                ui.label(RichText::new(title).font(theme::ui_bold(13.5)).color(t.text));
+                dim(ui, crate::tinta_whats_new::tr(lang.code(), crate::tinta_whats_new::TITLE));
+            });
+        });
+    }
 }
 
 #[cfg(test)]

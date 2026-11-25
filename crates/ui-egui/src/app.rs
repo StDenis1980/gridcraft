@@ -237,6 +237,7 @@ impl SheetApp {
         updates_ui::show(self, &ctx);
         tinta_reports_ui::first_start(self, &ctx);
         self.tinta_feedback.show(&ctx, self.ui.language.code());
+        crate::tinta_whats_new::show(&ctx, self.ui.language.code());
         let t = theme::Tokens::get(&ctx);
         // A host can turn the File tab off while Backstage is already open: close it.
         if !self.chrome.file_tab {
