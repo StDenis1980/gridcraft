@@ -61,6 +61,7 @@ pub mod tinta_feedback;
 mod tinta_reports_ui;
 pub mod tinta_share;
 pub mod tinta_theme;
+pub mod tinta_whats_new;
 #[cfg(not(target_arch = "wasm32"))]
 mod updates_ui;
 #[cfg(not(target_arch = "wasm32"))]

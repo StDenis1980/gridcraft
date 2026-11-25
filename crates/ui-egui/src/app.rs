@@ -241,6 +241,7 @@ impl SheetApp {
         if let Some(said) = self.tinta_share.take(&ctx, self.ui.language.code()) {
             self.toast = Some((said.to_owned(), now_ms()));
         }
+        crate::tinta_whats_new::show(&ctx, self.ui.language.code());
         let t = theme::Tokens::get(&ctx);
         // A host can turn the File tab off while Backstage is already open: close it.
         if !self.chrome.file_tab {

@@ -313,6 +313,13 @@ impl SheetApp {
                 self.tinta_share.request();
                 Ok(json!({"url": crate::tinta_share::URL}))
             }
+            "ui.whatsNew" => {
+                // Tinta Office: the What's new window (it opens on the next frame).
+                if !crate::tinta_whats_new::request() {
+                    return Some(Err("What's new is only in the Tinta Office desktop app".into()));
+                }
+                Ok(json!({"open": true}))
+            }
             "ui.dialog" => {
                 let name = p.get("name").and_then(Json::as_str).unwrap_or("");
                 self.open_dialog(name, p.clone());

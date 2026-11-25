@@ -268,6 +268,8 @@ fn icon() -> Option<egui::IconData> {
 fn main() -> eframe::Result<()> {
     // Tinta Office: this app shows the Tinta look (tests and examples keep the classic one).
     gridcraft_ui_egui::tinta_theme::allow();
+    // Tinta Office: the What's new window opens once after an update (it remembers in the settings).
+    gridcraft_ui_egui::tinta_whats_new::enable(config_dir().filter(|_| prefs_enabled()));
     // A confined launcher run (`gridcraft_sandbox::launch_command`) comes before everything else:
     // it opens no window, writes no log, and becomes the program it confines.
     let raw: Vec<std::ffi::OsString> = std::env::args_os().skip(1).collect();
