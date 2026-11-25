@@ -270,6 +270,10 @@ impl Language {
 
     /// The catalog's own translation of `text`, or `None` when it falls back to English.
     fn translated(self, text: &str) -> Option<&'static str> {
+        // Tinta Office: translated in its own module, not in the catalogues.
+        if text == crate::tinta_share::MENU {
+            return Some(crate::tinta_share::tr(self.code(), crate::tinta_share::MENU)).filter(|t| *t != text);
+        }
         match self {
             Self::En => None,
             Self::Es => es::translate(text),

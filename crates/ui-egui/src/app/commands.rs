@@ -308,6 +308,11 @@ impl SheetApp {
                 self.tinta_feedback.request();
                 Ok(json!({"available": self.tinta_feedback.available}))
             }
+            "ui.shareTinta" => {
+                // Tinta Office: Share Tinta Office (the link is copied on the next frame).
+                self.tinta_share.request();
+                Ok(json!({"url": crate::tinta_share::URL}))
+            }
             "ui.whatsNew" => {
                 // Tinta Office: the What's new window (it opens on the next frame).
                 if !crate::tinta_whats_new::request() {

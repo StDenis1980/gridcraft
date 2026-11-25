@@ -154,6 +154,10 @@ const EN: List = List {
     intro: "A test version: work on copies of your spreadsheets.",
     items: &[
         (
+            "Templates for the self-employed",
+            "File › New has an invoice (factura), the income and expense books with depreciation (libro registro) and quarterly IVA, which adds up the modelo 303 boxes for the quarter you pick.",
+        ),
+        (
             "Fuller regional formats",
             "Numbers, dates, times and money are typed and shown the way your country writes them, now with month and weekday names too.",
         ),
@@ -177,6 +181,10 @@ const EN: List = List {
 const ES: List = List {
     intro: "Versión de prueba: úsela con copias de sus hojas de cálculo.",
     items: &[
+        (
+            "Plantillas para autónomos",
+            "En Archivo › Nuevo: factura, libro registro de ingresos y gastos (con amortizaciones) e IVA trimestral, que suma las casillas del modelo 303 del trimestre que elija.",
+        ),
         (
             "Formatos regionales más completos",
             "Números, fechas, horas y moneda se escriben y se muestran como en su país, ahora también con los nombres de los meses y de los días.",
@@ -207,6 +215,10 @@ const ES: List = List {
 const UK: List = List {
     intro: "Тестова версія: працюйте з копіями таблиць.",
     items: &[
+        (
+            "Шаблони для autónomo",
+            "У «Файл › Створити»: factura (рахунок), libro registro (книга доходів і витрат з амортизацією) та IVA trimestral, що підсумовує поля декларації modelo 303 за вибраний квартал.",
+        ),
         (
             "Повніші регіональні формати",
             "Числа, дати, час і гроші вводяться й показуються так, як прийнято у вашій країні, тепер і з назвами місяців та днів тижня.",

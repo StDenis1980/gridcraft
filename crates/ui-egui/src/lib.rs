@@ -59,6 +59,7 @@ mod text_direction;
 pub mod theme;
 pub mod tinta_feedback;
 mod tinta_reports_ui;
+pub mod tinta_share;
 pub mod tinta_theme;
 pub mod tinta_whats_new;
 #[cfg(not(target_arch = "wasm32"))]
@@ -268,6 +269,8 @@ pub struct SheetApp {
     pub dialog: Option<dialogs::Dialog>,
     /// Tinta Office: the Send feedback dialog ([`tinta_feedback`]); the desktop app sends.
     pub tinta_feedback: tinta_feedback::Feedback,
+    /// Tinta Office: File › Share Tinta Office copies the website's link ([`tinta_share`]).
+    pub tinta_share: tinta_share::Share,
     /// The File tab's Backstage view, when open (UI-only; replaces the ribbon, grid and tabs).
     pub backstage: Option<backstage::Backstage>,
     pub message: Option<(String, String)>,
