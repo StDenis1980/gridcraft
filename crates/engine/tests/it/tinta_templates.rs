@@ -50,16 +50,20 @@ fn every_template_builds_without_errors_and_has_a_chart() {
         no_errors(&s, id);
         let d = s.doc().unwrap();
         assert_eq!(d.title, *title);
-        assert!(d.wb.sheets.iter().any(|sh| !sh.charts.is_empty()), "{id} has a chart");
+        // A single invoice is a printed page; every other template charts its figures.
+        if *id != "factura" {
+            assert!(d.wb.sheets.iter().any(|sh| !sh.charts.is_empty()), "{id} has a chart");
+        }
     }
 }
 
 #[test]
 fn templates_are_offered_in_their_languages() {
     let ids = |code| for_language(code).map(|(id, _)| id).collect::<Vec<_>>();
-    assert_eq!(ids("es"), ["autonomo", "presupuesto-familiar"]);
-    assert_eq!(ids("uk"), ["autonomo", "simeinyi-biudzhet"]);
-    assert_eq!(ids("en"), ["autonomo", "presupuesto-familiar"]);
+    let self_employed = ["autonomo", "factura", "libro-registro", "iva-trimestral"];
+    assert_eq!(ids("es"), [&self_employed[..], &["presupuesto-familiar"]].concat());
+    assert_eq!(ids("uk"), [&self_employed[..], &["simeinyi-biudzhet"]].concat());
+    assert_eq!(ids("en"), [&self_employed[..], &["presupuesto-familiar"]].concat());
     assert!(Session::new().execute("file.new", json!({"sample": "no-such-template"})).is_err());
 }
 
@@ -111,4 +115,84 @@ fn family_budgets_add_up_in_both_languages() {
         assert!(number(&s, sheet, "F19") < 0.0);
         assert_ne!(value(&s, sheet, "P21"), Value::text(status));
     }
+}
+
+#[test]
+fn invoice_totals_follow_its_lines_and_withholding() {
+    let mut s = open("factura");
+    // Example lines: 600 € and 8 × 45 € at 21 %, 15 % withholding.
+    close(number(&s, "Factura", "G33"), 960.0, "base imponible");
+    close(number(&s, "Factura", "G34"), 201.6, "IVA 21 %");
+    close(number(&s, "Factura", "G38"), 960.0 + 201.6 - 144.0, "total");
+    assert_eq!(value(&s, "Factura", "F24"), Value::text(""), "empty lines stay blank");
+
+    // A reduced-rate line and a private client (no withholding).
+    s.execute("range.setValues", json!({"range": "B24", "values": [["Taller", 2, 50, 0.1]]})).unwrap();
+    s.execute("cell.set", json!({"cell": "E37", "input": "0"})).unwrap();
+    close(number(&s, "Factura", "G35"), 10.0, "IVA 10 %");
+    close(number(&s, "Factura", "G38"), 1060.0 + 211.6, "total for a private client");
+
+    round_trip(&mut s, "factura.xlsx");
+    no_errors(&s, "factura after reopening");
+    close(number(&s, "Factura", "G38"), 1060.0 + 211.6, "total after reopening");
+}
+
+#[test]
+fn books_sum_by_quarter_and_kind() {
+    let mut s = open("libro-registro");
+    // Example data: Q1 income 1,200 + 450 €; Q1 expenses 87.61 + 45.45 + 189 €.
+    close(number(&s, "Resumen", "C6"), 1650.0, "1T ingresos");
+    close(number(&s, "Resumen", "D6"), 87.61 + 45.45 + 189.0, "1T gastos");
+    let before = number(&s, "Resumen", "E12");
+    close(before, number(&s, "Resumen", "E10") - number(&s, "Amortizaciones", "G6"), "rendimiento neto");
+    assert!(number(&s, "Amortizaciones", "G6") < 999.0 * 0.26, "a laptop bought in March is depreciated for part of the year");
+
+    // IVA that can't be deducted becomes part of the expense.
+    s.execute("sheet.activate", json!({"sheet": "Gastos"})).unwrap();
+    let deductible = number(&s, "Gastos", "L8");
+    s.execute("cell.set", json!({"cell": "K8", "input": "No"})).unwrap();
+    assert!(number(&s, "Gastos", "L8") > deductible);
+    close(number(&s, "Resumen", "C22"), number(&s, "Gastos", "L8"), "material de oficina by kind");
+
+    round_trip(&mut s, "libro.xlsx");
+    no_errors(&s, "libro after reopening");
+    // A new invoice typed in the first empty row reaches its quarter with no formula to copy.
+    s.execute("sheet.activate", json!({"sheet": "Ingresos"})).unwrap();
+    let q4 = number(&s, "Resumen", "C9");
+    s.execute("cell.set", json!({"cell": "B11", "input": "11/20/2026"})).unwrap();
+    s.execute("range.setValues", json!({"range": "H11", "values": [[1000, 0.21]]})).unwrap();
+    close(number(&s, "Ingresos", "M11"), 1210.0, "total with no withholding");
+    close(number(&s, "Resumen", "C9"), q4 + 1000.0, "4T ingresos");
+}
+
+#[test]
+fn quarterly_vat_follows_the_chosen_quarter() {
+    let mut s = open("iva-trimestral");
+    let sheet = "Modelo 303";
+    // Q1: 1,650 € at 21 % and 300 € at 10 % issued; 45.45 + 189 € at 21 % received.
+    close(number(&s, sheet, "D9"), 1650.0, "base general 1T");
+    close(number(&s, sheet, "F8"), 30.0, "cuota reducida 1T");
+    close(number(&s, sheet, "F10"), 346.5 + 30.0, "casilla 27");
+    close(number(&s, sheet, "F15"), 9.54 + 39.69, "casilla 45");
+    close(number(&s, sheet, "F17"), 376.5 - 49.23, "casilla 46");
+    assert_eq!(value(&s, sheet, "B20"), Value::text("A ingresar"));
+
+    // The second quarter has an investment good, so more is deducted than charged.
+    s.execute("sheet.activate", json!({"sheet": sheet})).unwrap();
+    s.execute("cell.set", json!({"cell": "C4", "input": "2"})).unwrap();
+    close(number(&s, sheet, "F14"), 735.0, "casilla 31");
+    assert!(number(&s, sheet, "F19") < 0.0);
+    assert_ne!(value(&s, sheet, "B20"), Value::text("A ingresar"));
+    close(number(&s, sheet, "E25"), number(&s, sheet, "F17"), "the quarter table agrees with the return");
+
+    // Credit carried over from earlier quarters lowers what is paid, never below zero.
+    s.execute("cell.set", json!({"cell": "C4", "input": "3"})).unwrap();
+    let due = number(&s, sheet, "F19");
+    assert!(due > 0.0);
+    s.execute("cell.set", json!({"cell": "F18", "input": "100000"})).unwrap();
+    close(number(&s, sheet, "F19"), 0.0, "fully compensated");
+
+    round_trip(&mut s, "iva.xlsx");
+    no_errors(&s, "iva after reopening");
+    close(number(&s, sheet, "F17"), due, "casilla 46 after reopening");
 }

@@ -1,5 +1,6 @@
 //! Tinta Office templates for File › New: a self-employed worker's invoices, expenses, IVA and
-//! IRPF (Spain), and a family budget in Spanish and Ukrainian. Original text, figures and colours,
+//! IRPF (Spain) as one workbook, and as three separate ones (an invoice, the income and expense
+//! books, the quarterly IVA return worksheet), and a family budget in Spanish and Ukrainian. Original text, figures and colours,
 //! built by replaying commands like the samples. The tax figures are a guide, not advice.
 
 use gridcraft_model::Workbook;
@@ -7,9 +8,15 @@ use serde_json::{Value as Json, json};
 
 use crate::{DocState, Session};
 
+mod self_employed;
+use self_employed::{books, invoice, quarterly_vat};
+
 /// (id, title, interface languages it is offered in; empty = all).
 pub const TEMPLATES: &[(&str, &str, &[&str])] = &[
     ("autonomo", "Autónomo: ingresos, IVA e IRPF", &[]),
+    ("factura", "Factura de autónomo", &[]),
+    ("libro-registro", "Libro registro de ingresos y gastos", &[]),
+    ("iva-trimestral", "IVA trimestral: modelo 303", &[]),
     ("presupuesto-familiar", "Presupuesto familiar", &["en", "es", "ca", "gl", "eu"]),
     ("simeinyi-biudzhet", "Сімейний бюджет", &["uk"]),
 ];
@@ -27,6 +34,9 @@ pub fn title(id: &str) -> Option<&'static str> {
 pub fn build(id: &str) -> Option<Workbook> {
     let first_sheet = match id {
         "autonomo" => "Ingresos",
+        "factura" => "Factura",
+        "libro-registro" => "Ingresos",
+        "iva-trimestral" => "Emitidas",
         "presupuesto-familiar" => "Presupuesto",
         "simeinyi-biudzhet" => "Бюджет",
         _ => return None,
@@ -39,6 +49,9 @@ pub fn build(id: &str) -> Option<Workbook> {
     s.add_document(DocState::new(wb, None, title(id)?.to_string(), crate::Trust::Local));
     let ok = match id {
         "autonomo" => autonomo(&mut s),
+        "factura" => invoice(&mut s),
+        "libro-registro" => books(&mut s),
+        "iva-trimestral" => quarterly_vat(&mut s),
         "presupuesto-familiar" => family(&mut s, &SPANISH_BUDGET),
         _ => family(&mut s, &UKRAINIAN_BUDGET),
     };
