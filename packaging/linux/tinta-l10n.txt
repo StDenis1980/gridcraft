@@ -1,0 +1,87 @@
+# Tinta Office: translations of the desktop entry and AppStream metadata (packaging/linux/tinta-l10n.py).
+# language<TAB>release's English, exactly as in the files<TAB>translation. AI-made (Claude), not reviewed by native speakers.
+
+uk	Spreadsheet	Електронні таблиці
+es	Spreadsheet	Hoja de cálculo
+pl	Spreadsheet	Arkusz kalkulacyjny
+de	Spreadsheet	Tabellenkalkulation
+fr	Spreadsheet	Tableur
+it	Spreadsheet	Foglio di calcolo
+ro	Spreadsheet	Foaie de calcul
+cs	Spreadsheet	Tabulkový procesor
+lt	Spreadsheet	Skaičiuoklė
+ca	Spreadsheet	Full de càlcul
+ca@valencia	Spreadsheet	Full de càlcul
+gl	Spreadsheet	Folla de cálculo
+eu	Spreadsheet	Kalkulu-orria
+pt	Spreadsheet	Folha de cálculo
+uk	Calculate, analyse and chart data in workbooks	Обчислюйте, аналізуйте дані й будуйте діаграми в робочих книгах
+es	Calculate, analyse and chart data in workbooks	Calcula, analiza y representa en gráficos los datos de tus libros
+pl	Calculate, analyse and chart data in workbooks	Obliczaj, analizuj i przedstawiaj dane na wykresach w skoroszytach
+de	Calculate, analyse and chart data in workbooks	Daten in Arbeitsmappen berechnen, analysieren und in Diagrammen darstellen
+fr	Calculate, analyse and chart data in workbooks	Calculer, analyser et représenter en graphiques les données de classeurs
+it	Calculate, analyse and chart data in workbooks	Calcola, analizza e rappresenta in grafici i dati delle cartelle di lavoro
+ro	Calculate, analyse and chart data in workbooks	Calculați, analizați și reprezentați grafic datele din registre de lucru
+cs	Calculate, analyse and chart data in workbooks	Počítejte, analyzujte a zobrazujte data v sešitech v grafech
+lt	Calculate, analyse and chart data in workbooks	Skaičiuokite, analizuokite ir vaizduokite duomenis diagramomis darbaknygėse
+ca	Calculate, analyse and chart data in workbooks	Calculeu, analitzeu i representeu en gràfics les dades dels llibres de càlcul
+ca@valencia	Calculate, analyse and chart data in workbooks	Calculeu, analitzeu i representeu en gràfics les dades dels llibres de càlcul
+gl	Calculate, analyse and chart data in workbooks	Calcula, analiza e representa en gráficos os datos dos libros
+eu	Calculate, analyse and chart data in workbooks	Kalkulatu, aztertu eta irudikatu diagrametan liburuetako datuak
+pt	Calculate, analyse and chart data in workbooks	Calcule, analise e represente em gráficos os dados dos livros
+uk	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	таблиця;електронна таблиця;робоча книга;аркуш;формула;діаграма;зведена таблиця;xlsx;xlsb;ods;csv;tsv;excel;
+es	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	hoja de cálculo;libro;hoja;tabla;fórmula;gráfico;tabla dinámica;xlsx;xlsb;ods;csv;tsv;excel;
+pl	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	arkusz kalkulacyjny;skoroszyt;arkusz;tabela;formuła;wykres;tabela przestawna;xlsx;xlsb;ods;csv;tsv;excel;
+de	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	tabellenkalkulation;arbeitsmappe;tabelle;blatt;formel;diagramm;pivot;xlsx;xlsb;ods;csv;tsv;excel;
+fr	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	tableur;classeur;feuille;tableau;formule;graphique;tableau croisé dynamique;xlsx;xlsb;ods;csv;tsv;excel;
+it	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	foglio di calcolo;cartella di lavoro;foglio;tabella;formula;grafico;tabella pivot;xlsx;xlsb;ods;csv;tsv;excel;
+ro	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	foaie de calcul;registru de lucru;foaie;tabel;formulă;diagramă;tabel pivot;xlsx;xlsb;ods;csv;tsv;excel;
+cs	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	tabulka;sešit;list;tabulkový procesor;vzorec;graf;kontingenční tabulka;xlsx;xlsb;ods;csv;tsv;excel;
+lt	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	skaičiuoklė;darbaknygė;lapas;lentelė;formulė;diagrama;suvestinė;xlsx;xlsb;ods;csv;tsv;excel;
+ca	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	full de càlcul;llibre;full;taula;fórmula;gràfic;taula dinàmica;xlsx;xlsb;ods;csv;tsv;excel;
+ca@valencia	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	full de càlcul;llibre;full;taula;fórmula;gràfic;taula dinàmica;xlsx;xlsb;ods;csv;tsv;excel;
+gl	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	folla de cálculo;libro;folla;táboa;fórmula;gráfico;táboa dinámica;xlsx;xlsb;ods;csv;tsv;excel;
+eu	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	kalkulu-orria;liburua;orria;taula;formula;diagrama;taula dinamikoa;xlsx;xlsb;ods;csv;tsv;excel;
+pt	spreadsheet;workbook;sheet;table;formula;chart;pivot;xlsx;xlsb;ods;csv;tsv;excel;	folha de cálculo;livro;folha;tabela;fórmula;gráfico;tabela dinâmica;xlsx;xlsb;ods;csv;tsv;excel;
+uk	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo — відкрита нативна програма електронних таблиць. Вона відкриває й зберігає робочі книги .xlsx і файли CSV/TSV, обчислює сотні функцій аркуша, а також форматує, сортує, фільтрує ваші дані й будує за ними діаграми.
+es	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo es una hoja de cálculo nativa y de código abierto. Abre y guarda libros .xlsx y archivos CSV/TSV, calcula cientos de funciones de hoja de cálculo y da formato, ordena, filtra y representa en gráficos tus datos.
+pl	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo to otwarty, natywny arkusz kalkulacyjny. Otwiera i zapisuje skoroszyty .xlsx oraz pliki CSV/TSV, oblicza setki funkcji arkusza, a także formatuje, sortuje, filtruje i przedstawia Twoje dane na wykresach.
+de	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo ist eine quelloffene, native Tabellenkalkulation. Sie öffnet und speichert .xlsx-Arbeitsmappen sowie CSV/TSV-Dateien, berechnet Hunderte von Tabellenfunktionen und formatiert, sortiert, filtert Ihre Daten und stellt sie in Diagrammen dar.
+fr	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo est un tableur natif et libre. Il ouvre et enregistre les classeurs .xlsx et les fichiers CSV/TSV, calcule des centaines de fonctions de feuille de calcul, et met en forme, trie, filtre et représente vos données en graphiques.
+it	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo è un foglio di calcolo nativo e open source. Apre e salva cartelle di lavoro .xlsx e file CSV/TSV, calcola centinaia di funzioni del foglio di lavoro e formatta, ordina, filtra e rappresenta in grafici i tuoi dati.
+ro	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo este o foaie de calcul nativă, open source. Deschide și salvează registre de lucru .xlsx și fișiere CSV/TSV, calculează sute de funcții de foaie de lucru și formatează, sortează, filtrează și reprezintă grafic datele dvs.
+cs	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo je otevřený nativní tabulkový procesor. Otevírá a ukládá sešity .xlsx a soubory CSV/TSV, počítá stovky funkcí listu a vaše data formátuje, řadí, filtruje a zobrazuje v grafech.
+lt	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo – atvirojo kodo savoji skaičiuoklė. Ji atveria ir įrašo .xlsx darbaknyges bei CSV/TSV failus, apskaičiuoja šimtus lapo funkcijų, formatuoja, rikiuoja, filtruoja jūsų duomenis ir vaizduoja juos diagramomis.
+ca	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo és un full de càlcul natiu i de codi obert. Obre i desa llibres .xlsx i fitxers CSV/TSV, calcula centenars de funcions de full de càlcul i dona format, ordena, filtra i representa en gràfics les vostres dades.
+ca@valencia	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo és un full de càlcul natiu i de codi obert. Obri i guarda llibres .xlsx i fitxers CSV/TSV, calcula centenars de funcions de full de càlcul i dona format, ordena, filtra i representa en gràfics les vostres dades.
+gl	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo é unha folla de cálculo nativa e de código aberto. Abre e garda libros .xlsx e ficheiros CSV/TSV, calcula centos de funcións de folla de cálculo e dá formato, ordena, filtra e representa en gráficos os teus datos.
+eu	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	Tinta Calculo kode irekiko kalkulu-orri natiboa da. .xlsx liburuak eta CSV/TSV fitxategiak ireki eta gordetzen ditu, ehunka orri-funtzio kalkulatzen ditu, eta zure datuei formatua ematen die, ordenatu, iragazi eta diagrametan irudikatzen ditu.
+pt	GridCraft is an open-source, native spreadsheet. It opens and saves .xlsx workbooks and CSV/TSV files, evaluates hundreds of worksheet functions, and formats, sorts, filters and charts your data.	O Tinta Calculo é uma folha de cálculo nativa e de código aberto. Abre e guarda livros .xlsx e ficheiros CSV/TSV, calcula centenas de funções de folha de cálculo e formata, ordena, filtra e representa em gráficos os seus dados.
+uk	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Кожна дія — це команда, яку також можуть виконати вбудований інструмент gridcraft-cli і ШІ-агенти (через MCP), тож робочі книги можна створювати й перевіряти, не відкриваючи вікна.
+es	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Cada acción es un comando que también pueden ejecutar la herramienta incluida gridcraft-cli y los agentes de IA (mediante MCP), así que los libros se pueden crear y comprobar sin abrir ninguna ventana.
+pl	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Każda czynność jest poleceniem, które może też wykonać dołączone narzędzie gridcraft-cli i agenci AI (przez MCP), więc skoroszyty można tworzyć i sprawdzać bez otwierania okna.
+de	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Jede Aktion ist ein Befehl, den auch das mitgelieferte Werkzeug gridcraft-cli und KI-Agenten (über MCP) ausführen können. So lassen sich Arbeitsmappen erstellen und prüfen, ohne ein Fenster zu öffnen.
+fr	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Chaque action est une commande que l’outil inclus gridcraft-cli et les agents d’IA (via MCP) peuvent aussi exécuter : les classeurs peuvent être créés et vérifiés sans ouvrir de fenêtre.
+it	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Ogni azione è un comando che possono eseguire anche lo strumento incluso gridcraft-cli e gli agenti di IA (tramite MCP), così le cartelle di lavoro si possono creare e verificare senza aprire una finestra.
+ro	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Fiecare acțiune este o comandă pe care o pot executa și instrumentul inclus gridcraft-cli și agenții AI (prin MCP), astfel încât registrele de lucru pot fi create și verificate fără a deschide o fereastră.
+cs	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Každá akce je příkaz, který může spustit i přiložený nástroj gridcraft-cli a agenti AI (přes MCP), takže sešity lze vytvářet a kontrolovat bez otevření okna.
+lt	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Kiekvienas veiksmas yra komanda, kurią gali vykdyti ir pridedamas įrankis gridcraft-cli bei DI agentai (per MCP), todėl darbaknyges galima kurti ir tikrinti neatveriant lango.
+ca	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Cada acció és una ordre que també poden executar l’eina inclosa gridcraft-cli i els agents d’IA (per mitjà de MCP), de manera que els llibres es poden crear i comprovar sense obrir cap finestra.
+ca@valencia	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Cada acció és una ordre que també poden executar la ferramenta inclosa gridcraft-cli i els agents d’IA (per mitjà de MCP), de manera que els llibres es poden crear i comprovar sense obrir cap finestra.
+gl	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Cada acción é unha orde que tamén poden executar a ferramenta incluída gridcraft-cli e os axentes de IA (mediante MCP), así que os libros pódense crear e comprobar sen abrir ningunha xanela.
+eu	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Ekintza bakoitza komando bat da, barnean dagoen gridcraft-cli tresnak eta AA agenteek (MCP bidez) ere exekuta dezaketena; beraz, liburuak sortu eta egiaztatu daitezke leihorik ireki gabe.
+pt	Every action is a command that the included gridcraft-cli tool and AI agents (over MCP) can run too, so workbooks can be built and checked without opening a window.	Cada ação é um comando que a ferramenta incluída gridcraft-cli e os agentes de IA (através do MCP) também podem executar, por isso os livros podem ser criados e verificados sem abrir nenhuma janela.
+uk	spreadsheet;workbook;formula;xlsx;csv;	електронна таблиця;робоча книга;формула;xlsx;csv;
+es	spreadsheet;workbook;formula;xlsx;csv;	hoja de cálculo;libro;fórmula;xlsx;csv;
+pl	spreadsheet;workbook;formula;xlsx;csv;	arkusz kalkulacyjny;skoroszyt;formuła;xlsx;csv;
+de	spreadsheet;workbook;formula;xlsx;csv;	tabellenkalkulation;arbeitsmappe;formel;xlsx;csv;
+fr	spreadsheet;workbook;formula;xlsx;csv;	tableur;classeur;formule;xlsx;csv;
+it	spreadsheet;workbook;formula;xlsx;csv;	foglio di calcolo;cartella di lavoro;formula;xlsx;csv;
+ro	spreadsheet;workbook;formula;xlsx;csv;	foaie de calcul;registru de lucru;formulă;xlsx;csv;
+cs	spreadsheet;workbook;formula;xlsx;csv;	tabulkový procesor;sešit;vzorec;xlsx;csv;
+lt	spreadsheet;workbook;formula;xlsx;csv;	skaičiuoklė;darbaknygė;formulė;xlsx;csv;
+ca	spreadsheet;workbook;formula;xlsx;csv;	full de càlcul;llibre;fórmula;xlsx;csv;
+ca@valencia	spreadsheet;workbook;formula;xlsx;csv;	full de càlcul;llibre;fórmula;xlsx;csv;
+gl	spreadsheet;workbook;formula;xlsx;csv;	folla de cálculo;libro;fórmula;xlsx;csv;
+eu	spreadsheet;workbook;formula;xlsx;csv;	kalkulu-orria;liburua;formula;xlsx;csv;
+pt	spreadsheet;workbook;formula;xlsx;csv;	folha de cálculo;livro;fórmula;xlsx;csv;
