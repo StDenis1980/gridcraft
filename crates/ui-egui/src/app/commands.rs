@@ -308,6 +308,11 @@ impl SheetApp {
                 self.tinta_feedback.request();
                 Ok(json!({"available": self.tinta_feedback.available}))
             }
+            "ui.shareTinta" => {
+                // Tinta Office: Share Tinta Office (the link is copied on the next frame).
+                self.tinta_share.request();
+                Ok(json!({"url": crate::tinta_share::URL}))
+            }
             "ui.dialog" => {
                 let name = p.get("name").and_then(Json::as_str).unwrap_or("");
                 self.open_dialog(name, p.clone());

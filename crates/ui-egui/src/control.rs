@@ -283,6 +283,7 @@ pub fn handle(app: &mut SheetApp, ctx: &egui::Context, method: &str, p: &Json) -
                 ("ui.window.beginResize", "Resize Window", "{direction: north|south|east|west|northeast|northwest|southeast|southwest}"),
                 ("ui.dialog", "Open Dialog", ""),
                 ("ui.feedback", "Send Feedback", "{} → {available}; opens the Tinta Office feedback dialog when this build can send"),
+                ("ui.shareTinta", "Share Tinta Office", "{} → {url}; copies the Tinta Office website's link to the clipboard on the next frame"),
                 ("ui.backstage", "File (Backstage view)", "{page?: home|new|open|info|saveAs|print|export|options|account|close}"),
                 (
                     "ui.printSettings",
