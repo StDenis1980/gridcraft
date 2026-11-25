@@ -44,6 +44,7 @@ impl SheetApp {
             printing: Default::default(),
             print_feedback_seen: None,
             tinta_feedback: Default::default(),
+            tinta_share: Default::default(),
             synthetic: Default::default(),
             synthetic_pending: false,
             synthetic_injected_at_pass: None,
@@ -237,6 +238,9 @@ impl SheetApp {
         updates_ui::show(self, &ctx);
         tinta_reports_ui::first_start(self, &ctx);
         self.tinta_feedback.show(&ctx, self.ui.language.code());
+        if let Some(said) = self.tinta_share.take(&ctx, self.ui.language.code()) {
+            self.toast = Some((said.to_owned(), now_ms()));
+        }
         let t = theme::Tokens::get(&ctx);
         // A host can turn the File tab off while Backstage is already open: close it.
         if !self.chrome.file_tab {
